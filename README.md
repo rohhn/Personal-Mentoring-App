@@ -2,13 +2,14 @@
 Final project code for CS 546, Stevens Institute of Technology
 
 
-## Roommate Finder
+## Personal Mentoring Web App
 
 ### Proposed features 
 
 - ⁠User sign up/ login
 - ⁠User management
-- List all available accomodations
-- ⁠Filter by categories (distance/preferences)
-- roommate applications (accept/deny roommate request)
-- ⁠user verification (email/phone)
+- Features for Mentors
+- Functionalities for Mentees
+- Ratings and Review Mechanism
+- Subject Specific Forums
+- Digital Acheivement Badges
