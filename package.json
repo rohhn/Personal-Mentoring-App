@@ -1,0 +1,27 @@
+{
+  "name": "cs546_teamproject",
+  "version": "1.0.0",
+  "description": "Project For CS 546",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rohhn/CS546_TeamProject.git"
+  },
+  "author": "CS-546-Team-Project",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rohhn/CS546_TeamProject/issues"
+  },
+  "homepage": "https://github.com/rohhn/CS546_TeamProject#readme",
+  "dependencies": {
+    "axios": "^1.7.7",
+    "express": "^4.21.1",
+    "express-handlebars": "^8.0.1",
+    "mongodb": "^6.10.0"
+  }
+}
