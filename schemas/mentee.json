@@ -9,6 +9,9 @@
     "parent_email": "test_parent@test.com | null",
     "profile_image": "https://url.png",
     "summary": "MSCS in student at Stevens institute of technology, interested in XYZ",
+    "skills": [
+        "skill 1"
+    ],
     "reviews": [
         {
             "session_id": "session_id_ref",
