@@ -16,4 +16,6 @@ const getCollectionFn = (collection) => {
 
 export const mentors = getCollectionFn('mentors');
 export const mentees = getCollectionFn('mentees');
+export const forums= getCollectionFn('forums');
+
 
