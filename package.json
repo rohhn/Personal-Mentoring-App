@@ -1,0 +1,11 @@
+{
+  "name": "cs546_teamproject",
+  "version": "1.0.0",
+  "description": "Final Project for CS546",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Michael Buzzetta 10468107, Shuhul Nehru 20021483, Rohan Deshmukh 20021217, Rahul Sohandani 20022124",
+  "license": "ISC"
+}
