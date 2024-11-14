@@ -1,19 +1,7 @@
 import { ObjectId } from "mongodb";
 import { mentees } from "../config/mongoCollections.js";
+import { checkBoolean, checkStringParams, checkArrayOfStrings, checkDate } from "../helpers.js";
 
-
-const checkStringParams = (param) => {
-    if(!param){
-      throw `The input is an empty paramter.`;
-    }
-    if(typeof param !== 'string'){
-      throw `The input is not a string.`;
-    }
-    
-    if(param.trim() === ''){
-      throw `The input is an empty string.`;
-    }
-  }
 
 export const createMentee = async (
   first_name,
@@ -29,13 +17,14 @@ export const createMentee = async (
 ) =>{
     checkStringParams(first_name);
     checkStringParams(last_name);
-    checkStringParams(dob);
+    checkDate(dob);
     checkStringParams(email);
     checkStringParams(pwd_hash);
     checkStringParams(parent_email);
     checkStringParams(profile_image);
-    checkStringParams(created_at);
+    checkDate(created_at);
     checkStringParams(summary);
+    skills = checkArrayOfStrings(skills);
 
     first_name = first_name.trim();
     last_name = last_name.trim();
@@ -164,13 +153,14 @@ export const updateMentee = async (
 
   checkStringParams(first_name);
   checkStringParams(last_name);
-  checkStringParams(dob);
+  checkDate(dob);
   checkStringParams(email);
   checkStringParams(pwd_hash);
   checkStringParams(parent_email);
   checkStringParams(profile_image);
-  checkStringParams(created_at);
+  checkDate(created_at);
   checkStringParams(summary);
+  skills = checkArrayOfStrings(skills);
 
   name = name.trim();
   email = email.trim();

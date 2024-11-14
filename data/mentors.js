@@ -1,36 +1,7 @@
 import { ObjectId } from "mongodb";
 import { mentors } from "../config/mongoCollections.js";
+import { checkStringParams, checkBoolean, checkEducation, checkExperience, checkArrayOfStrings, checkAvailability, checkDate } from "../helpers.js";
 
-
-const checkStringParams = (param) => {
-    if(!param){
-      throw `The input is an empty paramter.`;
-    }
-    if(typeof param !== 'string'){
-      console.log(param);
-      throw `The input is not a string: ${param}.`;
-    }
-    
-    if(param.trim() === ''){
-      throw `The input is an empty string: ${param}.`;
-    }
-  }
-
-const checkObject = (param) => {
-    if(Array.isArray(param) || param === null || param === undefined){
-        throw `The input should be an object.`;
-        }
-
-        if(typeof param !== 'object'){
-        throw `The input should be an object.`;
-        }
-}
-
-const checkBoolean = (param) => {
-    if(typeof param !== 'boolean'){
-        throw 'The input should be a boolean.'
-    }
-} 
 export const createMentor = async (
   first_name,
   last_name,
@@ -48,13 +19,17 @@ export const createMentor = async (
 ) =>{
     checkStringParams(first_name);
     checkStringParams(last_name);
-    checkStringParams(dob);
+    checkDate(dob);
     checkStringParams(email);
     checkStringParams(pwd_hash);
     checkStringParams(profile_image);
-    checkStringParams(created_at);
+    checkDate(created_at);
     checkStringParams(summary);
-    checkBoolean(approved)
+    checkBoolean(approved);
+    education = checkEducation(education);
+    experience = checkExperience(experience);
+    subject_areas = checkArrayOfStrings(subject_areas);
+    availability = checkAvailability(availability);
 
     first_name = first_name.trim();
     last_name = last_name.trim();
@@ -64,6 +39,8 @@ export const createMentor = async (
     profile_image = profile_image.trim();
     created_at = created_at.trim();
     summary = summary.trim();
+
+
 
     let newMentor = {
       first_name: first_name,
@@ -186,12 +163,17 @@ export const updateMentor = async (
 
   checkStringParams(first_name);
   checkStringParams(last_name);
-  checkStringParams(dob);
+  checkDate(dob);
   checkStringParams(email);
   checkStringParams(pwd_hash);
   checkStringParams(profile_image);
-  checkStringParams(created_at);
+  checkDate(created_at);
   checkBoolean(approved);
+  education = checkEducation(education);
+  experience = checkExperience(experience);
+  subject_areas = checkArrayOfStrings(subject_areas);
+  availability = checkAvailability(availability);
+
 
   first_name = first_name.trim();
   last_name = last_name.trim();

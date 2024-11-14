@@ -11,10 +11,11 @@ router
     .get(
         async (req, res) => {
             try{
+              
               let mentors = await mentorData.getAllMentors();
               return res.status(200).json(mentors);
             }catch(e){
-                console.log(e);
+                // console.log(e);
               return res.status(500).json({e});
             }
         }
@@ -63,7 +64,7 @@ router
             return res.status(200).json({_id: mentorId, deleted: "true"});
 
         }catch(e){
-            console.log(e);
+            // console.log(e);
             return res
             .status(404)
             .json({error: e});
