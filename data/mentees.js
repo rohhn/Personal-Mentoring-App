@@ -151,6 +151,7 @@ export const updateMentee = async (
     throw 'Invalid object ID.';
   }
 
+
   checkStringParams(first_name);
   checkStringParams(last_name);
   checkDate(dob);
@@ -162,7 +163,9 @@ export const updateMentee = async (
   checkStringParams(summary);
   skills = checkArrayOfStrings(skills);
 
-  name = name.trim();
+  first_name = first_name.trim();
+  last_name = last_name.trim();
+  dob = dob.trim();
   email = email.trim();
   pwd_hash = pwd_hash.trim();
   parent_email = parent_email.trim();

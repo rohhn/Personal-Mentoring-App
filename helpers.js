@@ -22,7 +22,7 @@ export const checkStringParams = (param) => {
 
 export const checkBoolean = (param) => {
     if(typeof param !== 'boolean'){
-        throw 'The input should be a boolean.'
+        throw `The input should be a boolean. : ${param}`;
     }
 } 
 
@@ -45,7 +45,7 @@ export const checkDate = (inputDate) => {
   let dateRegex = /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/\d{4}$/;
 
   if(!dateRegex.test(inputDate)){
-    throw `The Input Date is not in mm/dd/yyyy format.`;
+    throw `The Input Date is not in mm/dd/yyyy format. : ${inputDate}`;
   }
 
   let [month, day, year] = inputDate.split('/').map(Number);
