@@ -1,12 +1,15 @@
-// This file will import both route files and export the constructor method as shown in the lecture code
+import { badgesRoutes } from './badges.js';
+import { parentEmailRoutes } from './parent.js';
 import { ratingsRoutes } from './rating.js';
 
 const constructorMethod = (app) => {
     app.use('/ratings', ratingsRoutes);
-    // app.use('/games', gamesRoutes);
+    app.use('/badges', badgesRoutes);
+    app.use('/sessions', parentEmailRoutes);
+
     app.use('*', (req, res) => {
-      res.status(404).json({ error: 'Not found' });
+        res.status(404).json({ error: 'Not found' });
     });
-  };
-  
-  export default constructorMethod;
+};
+
+export default constructorMethod;
