@@ -1,0 +1,14 @@
+{
+   "_id": "12345",
+   "subject_id": "subject_id_ref",
+   "title": "Data Science Discussions",
+   "created_at": "2024-11-04T00:00:00Z",
+   "posts": [
+      {
+         "_id": "12345",
+         "author": "author_id_ref",
+         "content": "this is a forum comment",
+         "created_at": "2024-11-04T00:00:00Z"
+      }
+   ]
+}
