@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { mentees } from "../config/mongoCollections.js";
-import { checkArrayOfStrings, checkDate, checkStringParams } from "../helpers.js";
+import { checkBoolean, checkStringParams, checkArrayOfStrings, checkDate } from "../helpers.js";
+
 
 
 export const createMentee = async (

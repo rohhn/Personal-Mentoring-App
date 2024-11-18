@@ -5,4 +5,3 @@ import * as parentsData from './parent.js';
 import * as ratingData from "./ratings.js";
 
 export { badgesData, menteeData, mentorData, parentsData, ratingData };
-

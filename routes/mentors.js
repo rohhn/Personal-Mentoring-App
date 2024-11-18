@@ -1,8 +1,11 @@
 import express from 'express';
+
 import { ObjectId } from 'mongodb';
 import { mentors } from '../config/mongoCollections.js';
-import { mentorData } from '../data/index.js';
+import { mentees } from '../config/mongoCollections.js';
 import { checkArrayOfStrings, checkAvailability, checkBoolean, checkDate, checkEducation, checkExperience, checkStringParams } from "../helpers.js";
+import { mentorData } from '../data/index.js';
+import {dbConnection, closeConnection} from '../config/mongoConnection.js';
 
 const router = express.Router();
 
@@ -197,5 +200,6 @@ router
     }
     );
 
-    export { router as mentorRoutes };
+
+export { router as mentorRoutes };
     

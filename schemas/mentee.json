@@ -1,0 +1,30 @@
+{
+    "_id": "12345",
+    "first_name": "Test",
+    "last_name": "Test",
+    "email": "test@test.com",
+    "dob": "1998-11-05",
+    "pwd_hash": "pwd",
+    "created_at": "2024-11-05T14:00:00Z",
+    "parent_email": "test_parent@test.com | null",
+    "profile_image": "https://url.png",
+    "summary": "MSCS in student at Stevens institute of technology, interested in XYZ",
+    "skills": [
+        "skill 1"
+    ],
+    "reviews": [
+        {
+            "session_id": "session_id_ref",
+            "rating": 5,
+            "feedback": "this is a review",
+            "author": "Mentor ID",
+            "created_at": "2024-11-05T14:00:00Z"
+        }
+    ],
+    "badges": [
+        {
+            "badge_id": "badge_ref",
+            "created_at": "2024-11-05T14:00:00Z"
+        }
+    ]
+}
