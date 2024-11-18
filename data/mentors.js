@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { mentors } from "../config/mongoCollections.js";
-import { checkStringParams, checkBoolean, checkEducation, checkExperience, checkArrayOfStrings, checkAvailability, checkDate } from "../helpers.js";
+
+import { checkArrayOfStrings, checkAvailability, checkBoolean, checkDate, checkEducation, checkExperience, checkStringParams } from "../helpers.js";
 
 export const createMentor = async (
   first_name,

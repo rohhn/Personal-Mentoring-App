@@ -1,9 +1,10 @@
 import express from 'express';
+
+import { ObjectId } from 'mongodb';
+import { mentees } from '../config/mongoCollections.js';
+import { checkArrayOfStrings, checkDate, checkStringParams } from "../helpers.js";
 import { menteeData, mentorData } from '../data/index.js';
 import {dbConnection, closeConnection} from '../config/mongoConnection.js';
-import { ObjectId }  from 'mongodb';
-import { mentees } from '../config/mongoCollections.js';
-import { checkBoolean, checkStringParams, checkArrayOfStrings, checkDate } from "../helpers.js";
 
 const router = express.Router();
 
@@ -183,5 +184,5 @@ router
     }
     );
 
-export {router as menteeRoutes};
+export { router as menteeRoutes };
     
