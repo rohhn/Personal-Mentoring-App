@@ -1,0 +1,30 @@
+{
+  "name": "cs546_backend",
+  "version": "1.0.0",
+  "description": "Backend code for our team project in CS546",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js",
+    "seed": "node seed.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rohhn/CS546_TeamProject.git"
+  },
+  "author": "Michael Buzzetta 10468107, Shuhul Nehru 20021483, Rohan Deshmukh 20021217, Rahul Sohandani 20022124",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rohhn/CS546_TeamProject/issues"
+  },
+  "homepage": "https://github.com/rohhn/CS546_TeamProject#readme",
+  "dependencies": {
+    "axios": "^1.7.7",
+    "express": "^4.21.1",
+    "express-handlebars": "^8.0.1",
+    "mongo": "^0.1.0",
+    "mongodb": "^6.10.0",
+    "nodemailer": "^6.9.16"
+  }
+}
