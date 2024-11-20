@@ -2,7 +2,7 @@ import express from 'express';
 
 import { ObjectId } from 'mongodb';
 import { mentees } from '../config/mongoCollections.js';
-import { checkArrayOfStrings, checkDate, checkStringParams } from "../helpers.js";
+import { checkArrayOfStrings, checkDate, checkStringParams, checkEmail } from "../helpers.js";
 import { menteeData, mentorData } from '../data/index.js';
 import {dbConnection, closeConnection} from '../config/mongoConnection.js';
 
@@ -27,7 +27,7 @@ router
             checkStringParams(newMentee.first_name);
             checkStringParams(newMentee.last_name);
             checkDate(newMentee.dob);
-            checkStringParams(newMentee.email);
+            await checkEmail(newMentee.email, "mentee");
             checkStringParams(newMentee.pwd_hash);
             checkStringParams(newMentee.parent_email);
             checkStringParams(newMentee.profile_image);
@@ -161,7 +161,7 @@ router
             checkStringParams(updatedMentee.first_name);
             checkStringParams(updatedMentee.last_name);
             checkDate(updatedMentee.dob);
-            checkStringParams(updatedMentee.email);
+            // await checkEmail(updatedMentee.email, "mentee");
             checkStringParams(updatedMentee.pwd_hash);
             checkStringParams(updatedMentee.parent_email);
             checkStringParams(updatedMentee.profile_image);
@@ -174,11 +174,11 @@ router
         
         
         try{
-            const mentee = await menteeData.updateMentee(menteeId, updatedMentee.first_name, updatedMentee.last_name, updatedMentee.dob, updatedMentee.email, updatedMentee.pwd_hash, updatedMentee.parent_email, updatedMentee.profile_image, updatedMentee.created_at, updatedMentee.summary, updatedMentee.skills);
+            const mentee = await menteeData.updateMentee(menteeId, updatedMentee.first_name, updatedMentee.last_name, updatedMentee.dob, updatedMentee.pwd_hash, updatedMentee.parent_email, updatedMentee.profile_image, updatedMentee.created_at, updatedMentee.summary, updatedMentee.skills);
 
             return res.status(200).json(mentee);
         }catch(e){
-            // console.log(e);
+            console.log(e);
             return res.status(500).json({error: e});
         }
     }

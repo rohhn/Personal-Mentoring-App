@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { mentees } from "../config/mongoCollections.js";
-import { checkBoolean, checkStringParams, checkArrayOfStrings, checkDate } from "../helpers.js";
+import { checkBoolean, checkStringParams, checkArrayOfStrings, checkDate, checkEmail } from "../helpers.js";
 
 
 
@@ -19,11 +19,11 @@ export const createMentee = async (
     checkStringParams(first_name);
     checkStringParams(last_name);
     checkDate(dob);
-    checkStringParams(email);
+    await checkEmail(email, "mentee"); //TODO Email Validation has to change
     checkStringParams(pwd_hash);
     checkStringParams(parent_email);
     checkStringParams(profile_image);
-    checkDate(created_at);
+    checkDate(created_at); //TODO Timestamp will be done from server side
     checkStringParams(summary);
     skills = checkArrayOfStrings(skills);
 
@@ -136,7 +136,6 @@ export const updateMentee = async (
   first_name,
   last_name,
   dob,
-  email,
   pwd_hash,
   parent_email,
   profile_image,
@@ -156,7 +155,7 @@ export const updateMentee = async (
   checkStringParams(first_name);
   checkStringParams(last_name);
   checkDate(dob);
-  checkStringParams(email);
+  // await checkEmail(email, "mentee");
   checkStringParams(pwd_hash);
   checkStringParams(parent_email);
   checkStringParams(profile_image);
@@ -167,7 +166,6 @@ export const updateMentee = async (
   first_name = first_name.trim();
   last_name = last_name.trim();
   dob = dob.trim();
-  email = email.trim();
   pwd_hash = pwd_hash.trim();
   parent_email = parent_email.trim();
   profile_image = profile_image.trim();
@@ -178,7 +176,6 @@ export const updateMentee = async (
     first_name: first_name,
     last_name: last_name,
     dob: dob,
-    email: email,
     pwd_hash: pwd_hash,
     parent_email: parent_email,
     profile_image: profile_image,

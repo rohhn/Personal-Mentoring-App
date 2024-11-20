@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 import { mentors } from "../config/mongoCollections.js";
 
-import { checkArrayOfStrings, checkAvailability, checkBoolean, checkDate, checkEducation, checkExperience, checkStringParams } from "../helpers.js";
+import { checkArrayOfStrings, checkAvailability, checkBoolean, checkDate, checkEducation, checkExperience, checkStringParams, checkEmail } from "../helpers.js";
 
 export const createMentor = async (
   first_name,
@@ -21,10 +21,10 @@ export const createMentor = async (
     checkStringParams(first_name);
     checkStringParams(last_name);
     checkDate(dob);
-    checkStringParams(email);
+    await checkEmail(email, "mentor"); //TODO Email Validation has to change
     checkStringParams(pwd_hash);
     checkStringParams(profile_image);
-    checkDate(created_at);
+    checkDate(created_at); //TODO Timestamp will be done from server side
     checkStringParams(summary);
     checkBoolean(approved);
     education = checkEducation(education);
@@ -144,7 +144,6 @@ export const updateMentor = async (
   first_name,
   last_name,
   dob,
-  email,
   pwd_hash,
   profile_image,
   created_at,
@@ -166,7 +165,7 @@ export const updateMentor = async (
   checkStringParams(first_name);
   checkStringParams(last_name);
   checkDate(dob);
-  checkStringParams(email);
+  // await checkEmail(email, "mentor");
   checkStringParams(pwd_hash);
   checkStringParams(profile_image);
   checkDate(created_at);
@@ -181,7 +180,6 @@ export const updateMentor = async (
   first_name = first_name.trim();
   last_name = last_name.trim();
   dob = dob.trim();
-  email = email.trim();
   pwd_hash = pwd_hash.trim();
   profile_image = profile_image.trim();
   created_at = created_at.trim();
@@ -191,7 +189,6 @@ export const updateMentor = async (
     first_name: first_name,
     last_name: last_name,
     dob: dob,
-    email: email,
     pwd_hash: pwd_hash,
     profile_image: profile_image,
     created_at: created_at,

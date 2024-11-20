@@ -3,7 +3,7 @@ import express from 'express';
 import { ObjectId } from 'mongodb';
 import { mentors } from '../config/mongoCollections.js';
 import { mentees } from '../config/mongoCollections.js';
-import { checkArrayOfStrings, checkAvailability, checkBoolean, checkDate, checkEducation, checkExperience, checkStringParams } from "../helpers.js";
+import { checkArrayOfStrings, checkAvailability, checkBoolean, checkDate, checkEducation, checkExperience, checkStringParams, checkEmail } from "../helpers.js";
 import { mentorData } from '../data/index.js';
 import {dbConnection, closeConnection} from '../config/mongoConnection.js';
 
@@ -29,7 +29,7 @@ router
             checkStringParams(newMentor.first_name);
             checkStringParams(newMentor.last_name);
             checkDate(newMentor.dob);
-            checkStringParams(newMentor.email);
+            await checkEmail(newMentor.email, "mentor"); 
             checkStringParams(newMentor.pwd_hash);
             checkStringParams(newMentor.profile_image);
             checkDate(newMentor.created_at);
@@ -175,7 +175,7 @@ router
             checkStringParams(updatedMentor.first_name);
             checkStringParams(updatedMentor.last_name);
             checkDate(updatedMentor.dob);
-            checkStringParams(updatedMentor.email);
+            // await checkEmail(updatedMentor.email, "mentor"); 
             checkStringParams(updatedMentor.pwd_hash);
             checkStringParams(updatedMentor.profile_image);
             checkDate(updatedMentor.created_at);
@@ -191,10 +191,11 @@ router
         }
         
         try{
-            let mentorCreate = await mentorData.updateMentor(mentorId, updatedMentor.first_name, updatedMentor.last_name, updatedMentor.dob, updatedMentor.email, updatedMentor.pwd_hash, updatedMentor.profile_image, updatedMentor.created_at, updatedMentor.summary, updatedMentor.education, updatedMentor.experience, updatedMentor.availability, updatedMentor.approved, updatedMentor.subject_areas);
+            let mentorCreate = await mentorData.updateMentor(mentorId, updatedMentor.first_name, updatedMentor.last_name, updatedMentor.dob, updatedMentor.pwd_hash, updatedMentor.profile_image, updatedMentor.created_at, updatedMentor.summary, updatedMentor.education, updatedMentor.experience, updatedMentor.availability, updatedMentor.approved, updatedMentor.subject_areas);
 
             return res.status(200).json(mentorCreate);
         }catch(e){
+            console.log(e);
             return res.status(500).json({error: e});
         }
     }

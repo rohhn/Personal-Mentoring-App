@@ -1,5 +1,5 @@
 // You can add and export any helper functions you want here - if you aren't using any, then you can just leave this file as is
-
+import { mentors, mentees } from "./config/mongoCollections.js";
 
 export const postVerify=async (content)=>
 {
@@ -194,4 +194,29 @@ export const checkAvailability = (availability) => {
   }
 
   return availability;
+}
+
+
+export const checkEmail = async (email, user) => {
+  checkStringParams(email);
+
+  let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if(!emailRegex.test(email)){
+    throw `Please Enter a Valid Email Id.`;
+  }
+
+  let collection = undefined;
+
+  if(user === "mentee"){
+    collection = await mentees();
+  }else if(user === "mentor"){
+    collection = await mentors();
+  }
+
+  const emailId = await collection.findOne({email: email});
+
+  if(emailId){
+    throw `This email already Exists. Please Provide another email.`;
+  }
 }
