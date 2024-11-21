@@ -32,7 +32,6 @@ router
             await checkEmail(newMentor.email, "mentor"); 
             checkStringParams(newMentor.pwd_hash);
             checkStringParams(newMentor.profile_image);
-            checkDate(newMentor.created_at);
             checkStringParams(newMentor.summary);
             checkBoolean(newMentor.approved);
             newMentor.education = checkEducation(newMentor.education);
@@ -48,7 +47,7 @@ router
               
         
         try{
-            let mentorCreate = await mentorData.createMentor(newMentor.first_name, newMentor.last_name, newMentor.dob, newMentor.email, newMentor.pwd_hash, newMentor.profile_image, newMentor.created_at, newMentor.summary, newMentor.education, newMentor.experience, newMentor.availability, newMentor.approved, newMentor.subject_areas);
+            let mentorCreate = await mentorData.createMentor(newMentor.first_name, newMentor.last_name, newMentor.dob, newMentor.email, newMentor.pwd_hash, newMentor.profile_image, newMentor.summary, newMentor.education, newMentor.experience, newMentor.availability, newMentor.approved, newMentor.subject_areas);
 
             return res.status(200).json(mentorCreate);
         }catch(e){
@@ -178,7 +177,6 @@ router
             // await checkEmail(updatedMentor.email, "mentor"); 
             checkStringParams(updatedMentor.pwd_hash);
             checkStringParams(updatedMentor.profile_image);
-            checkDate(updatedMentor.created_at);
             checkStringParams(updatedMentor.summary);
             checkBoolean(updatedMentor.approved);
             updatedMentor.education = checkEducation(updatedMentor.education);
@@ -191,7 +189,7 @@ router
         }
         
         try{
-            let mentorCreate = await mentorData.updateMentor(mentorId, updatedMentor.first_name, updatedMentor.last_name, updatedMentor.dob, updatedMentor.pwd_hash, updatedMentor.profile_image, updatedMentor.created_at, updatedMentor.summary, updatedMentor.education, updatedMentor.experience, updatedMentor.availability, updatedMentor.approved, updatedMentor.subject_areas);
+            let mentorCreate = await mentorData.updateMentor(mentorId, updatedMentor.first_name, updatedMentor.last_name, updatedMentor.dob, updatedMentor.pwd_hash, updatedMentor.profile_image, updatedMentor.summary, updatedMentor.education, updatedMentor.experience, updatedMentor.availability, updatedMentor.approved, updatedMentor.subject_areas);
 
             return res.status(200).json(mentorCreate);
         }catch(e){

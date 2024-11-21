@@ -10,7 +10,6 @@ export const createMentor = async (
   email,
   pwd_hash,
   profile_image,
-  created_at,
   summary,
   education,
   experience,
@@ -21,10 +20,9 @@ export const createMentor = async (
     checkStringParams(first_name);
     checkStringParams(last_name);
     checkDate(dob);
-    await checkEmail(email, "mentor"); //TODO Email Validation has to change
+    await checkEmail(email, "mentor"); 
     checkStringParams(pwd_hash);
     checkStringParams(profile_image);
-    checkDate(created_at); //TODO Timestamp will be done from server side
     checkStringParams(summary);
     checkBoolean(approved);
     education = checkEducation(education);
@@ -38,7 +36,6 @@ export const createMentor = async (
     email = email.trim();
     pwd_hash = pwd_hash.trim();
     profile_image = profile_image.trim();
-    created_at = created_at.trim();
     summary = summary.trim();
 
 
@@ -50,7 +47,7 @@ export const createMentor = async (
       email: email,
       pwd_hash: pwd_hash,
       profile_image: profile_image,
-      created_at: created_at,
+      created_at: new Date().toISOString(),
       education: education,
       availability: availability,
       approved: approved,
@@ -146,7 +143,6 @@ export const updateMentor = async (
   dob,
   pwd_hash,
   profile_image,
-  created_at,
   summary,
   education,
   experience,
@@ -168,7 +164,6 @@ export const updateMentor = async (
   // await checkEmail(email, "mentor");
   checkStringParams(pwd_hash);
   checkStringParams(profile_image);
-  checkDate(created_at);
   checkStringParams(summary);
   checkBoolean(approved);
   education = checkEducation(education);
@@ -182,7 +177,6 @@ export const updateMentor = async (
   dob = dob.trim();
   pwd_hash = pwd_hash.trim();
   profile_image = profile_image.trim();
-  created_at = created_at.trim();
   summary = summary.trim();
 
   let mentorUpdate = {
@@ -191,7 +185,6 @@ export const updateMentor = async (
     dob: dob,
     pwd_hash: pwd_hash,
     profile_image: profile_image,
-    created_at: created_at,
     summary: summary,
     education: education,
     experience: experience,

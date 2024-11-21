@@ -12,18 +12,16 @@ export const createMentee = async (
   pwd_hash,
   parent_email,
   profile_image,
-  created_at,
   summary,
   skills
 ) =>{
     checkStringParams(first_name);
     checkStringParams(last_name);
     checkDate(dob);
-    await checkEmail(email, "mentee"); //TODO Email Validation has to change
+    await checkEmail(email, "mentee"); 
     checkStringParams(pwd_hash);
     checkStringParams(parent_email);
     checkStringParams(profile_image);
-    checkDate(created_at); //TODO Timestamp will be done from server side
     checkStringParams(summary);
     skills = checkArrayOfStrings(skills);
 
@@ -34,7 +32,6 @@ export const createMentee = async (
     pwd_hash = pwd_hash.trim();
     parent_email = parent_email.trim();
     profile_image = profile_image.trim();
-    created_at = created_at.trim();
     summary = summary.trim();
 
     let newMentee = {
@@ -45,7 +42,7 @@ export const createMentee = async (
       pwd_hash: pwd_hash,
       parent_email: parent_email,
       profile_image: profile_image,
-      created_at: created_at,
+      created_at: new Date().toISOString(),
       summary: summary,
       skills: skills,
       reviews: [],
@@ -139,7 +136,6 @@ export const updateMentee = async (
   pwd_hash,
   parent_email,
   profile_image,
-  created_at,
   summary,
   skills
 ) => {
@@ -159,7 +155,6 @@ export const updateMentee = async (
   checkStringParams(pwd_hash);
   checkStringParams(parent_email);
   checkStringParams(profile_image);
-  checkDate(created_at);
   checkStringParams(summary);
   skills = checkArrayOfStrings(skills);
 
@@ -169,7 +164,6 @@ export const updateMentee = async (
   pwd_hash = pwd_hash.trim();
   parent_email = parent_email.trim();
   profile_image = profile_image.trim();
-  created_at = created_at.trim();
   summary = summary.trim();
 
   let menteeUpdate = {
@@ -179,7 +173,6 @@ export const updateMentee = async (
     pwd_hash: pwd_hash,
     parent_email: parent_email,
     profile_image: profile_image,
-    created_at: created_at,
     summary: summary,
     skills: skills
   }

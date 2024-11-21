@@ -31,7 +31,6 @@ router
             checkStringParams(newMentee.pwd_hash);
             checkStringParams(newMentee.parent_email);
             checkStringParams(newMentee.profile_image);
-            checkDate(newMentee.created_at);
             checkStringParams(newMentee.summary);
             newMentee.skills = checkArrayOfStrings(newMentee.skills);
         }catch(e){
@@ -39,7 +38,7 @@ router
         }
 
         try{
-            let menteeCreate = await menteeData.createMentee(newMentee.first_name, newMentee.last_name, newMentee.dob, newMentee.email, newMentee.pwd_hash, newMentee.parent_email, newMentee.profile_image, newMentee.created_at, newMentee.summary, newMentee.skills);
+            let menteeCreate = await menteeData.createMentee(newMentee.first_name, newMentee.last_name, newMentee.dob, newMentee.email, newMentee.pwd_hash, newMentee.parent_email, newMentee.profile_image, newMentee.summary, newMentee.skills);
 
             return res.status(200).json(menteeCreate);
         }catch(e){
@@ -165,7 +164,6 @@ router
             checkStringParams(updatedMentee.pwd_hash);
             checkStringParams(updatedMentee.parent_email);
             checkStringParams(updatedMentee.profile_image);
-            checkDate(updatedMentee.created_at);
             checkStringParams(updatedMentee.summary);
             updatedMentee.skills = checkArrayOfStrings(updatedMentee.skills);
         }catch(e){
@@ -174,7 +172,7 @@ router
         
         
         try{
-            const mentee = await menteeData.updateMentee(menteeId, updatedMentee.first_name, updatedMentee.last_name, updatedMentee.dob, updatedMentee.pwd_hash, updatedMentee.parent_email, updatedMentee.profile_image, updatedMentee.created_at, updatedMentee.summary, updatedMentee.skills);
+            const mentee = await menteeData.updateMentee(menteeId, updatedMentee.first_name, updatedMentee.last_name, updatedMentee.dob, updatedMentee.pwd_hash, updatedMentee.parent_email, updatedMentee.profile_image, updatedMentee.summary, updatedMentee.skills);
 
             return res.status(200).json(mentee);
         }catch(e){
