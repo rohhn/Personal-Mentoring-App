@@ -51,7 +51,13 @@ export const checkBoolean = (param) => {
     if(typeof param !== 'boolean'){
         throw `The input should be a boolean. : ${param}`;
     }
-} 
+}
+
+export const checkNumber = (number) => {
+  if(typeof number !== 'number' || Number.isNaN(number)){
+    throw `Invalid Input, Expected Number.`;
+  }
+}
 
 export const checkObject = (param) => {
   if(Array.isArray(param) || param === null || param === undefined){
