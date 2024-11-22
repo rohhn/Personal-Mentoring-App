@@ -184,3 +184,109 @@ export const rescheduleSession = async (id, time, duration, status) => {
     return result;
 
 }
+
+export const deleteSession = async (id) => {
+    checkStringParams(id);
+    id = id.trim();
+
+    if(!ObjectId.isValid(id)){
+        throw `${id} is not a valid ObjectID.`;
+    }
+
+    const sessionCollection = await sessions();
+
+    const session = await sessionCollection.findOne({_id: new ObjectId(id)});
+
+    if (!session) {
+        throw `Session with the id ${id} does not exist.`;
+    }
+
+    let result = await sessionCollection.deleteOne({_id: new ObjectId(id)});
+    if(!result === 0){
+        throw `Session with the id ${id} does not exist, Hence could not delete.`;
+    }
+
+    return `${session} has been successfully deleted!`;
+    }
+
+export const getSessionById = async (id) => {
+    checkStringParams(id);
+
+    id = id.trim();
+
+    if (!ObjectId.isValid(id)) {
+        throw 'Invalid object ID.';
+    }
+
+    const sessionCollection = await sessions();
+
+    const session = await sessionCollection.findOne({_id: new ObjectId(id)});
+
+    if (!session) {
+        throw `Session with the id ${id} does not exist.`;
+    }
+
+    session._id = session._id.toString();
+    return session;
+}
+
+export const getSessionsByMentee = async (menteeId) => {
+    checkStringParams(menteeId);
+
+    menteeId = menteeId.trim();
+
+    if (!ObjectId.isValid(menteeId)) {
+        throw 'Invalid object ID.';
+    }
+
+    const menteeCollection = await mentees();
+
+    const mentee = await menteeCollection.findOne({_id: new ObjectId(menteeId)});
+
+    if (!mentee) {
+        throw `Mentee with the id ${menteeId} does not exist.`;
+    }
+
+
+    const sessionCollection = await sessions();
+
+    const sessionsByMentee = await sessionCollection.find({mentee_id: menteeId}).toArray();
+
+
+    if(!sessionsByMentee){
+        throw `No Sessions scheduled.`;
+    }
+
+    return sessionsByMentee;
+}
+
+
+export const getSessionsByMentor = async (mentorId) => {
+    checkStringParams(mentorId);
+
+    mentorId = mentorId.trim();
+
+    if (!ObjectId.isValid(mentorId)) {
+        throw 'Invalid object ID.';
+    }
+
+    const mentorCollection = await mentors();
+
+    const mentor = await mentorCollection.findOne({_id: new ObjectId(mentorId)});
+
+    if (!mentor) {
+        throw `Mentor with the id ${mentorId} does not exist.`;
+    }
+
+
+    const sessionCollection = await sessions();
+
+    const sessionsByMentor = await sessionCollection.find({mentor_id: mentorId}).toArray();
+
+
+    if(!sessionsByMentor){
+        throw `No Sessions scheduled.`;
+    }
+
+    return sessionsByMentor;
+}
