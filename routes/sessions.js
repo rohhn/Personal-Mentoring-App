@@ -27,6 +27,26 @@ router
        
         
     }
-)
+);
+
+router
+.route('/:sessionId')
+.put(
+    async(req, res) => {
+        let sessionId = req.params.sessionId.trim();
+
+        // TODO Error Handling to be done
+
+        let reschedSession = req.body;
+
+        try{
+            const session = await sessionsData.rescheduleSession(sessionId, reschedSession.time, reschedSession.duration, reschedSession.status);
+            return res.status(200).json(session);
+        }catch(e){
+            console.log(e);
+            return res.status(500).json({error: e});
+        }
+    }
+);
 
 export { router as sessionRoutes };

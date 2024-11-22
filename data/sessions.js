@@ -80,6 +80,7 @@ export const createSession = async (
     mentor_id = mentor_id.trim();
     mentee_id = mentee_id.trim();
     subject_area = subject_area.trim();
+    time = time.trim();
 
     if(!ObjectId.isValid(mentor_id)){
         throw `${mentor_id} is not a valid ObjectID.`;
@@ -128,7 +129,7 @@ export const createSession = async (
     const result = await sessionCollection.insertOne(newSession);
 
     if (!result.acknowledged || !result.insertedId)
-      throw 'Could not create the mentee.';
+      throw 'Could not create the session.';
   
     const newId = result.insertedId.toString();
 
@@ -139,4 +140,47 @@ export const createSession = async (
     session._id = session._id.toString();
   
     return session;
+}
+
+export const rescheduleSession = async (id, time, duration, status) => {
+    checkStringParams(id);
+    if (!ObjectId.isValid(id)) {
+        throw 'Invalid object ID.';
+    }
+
+    if (!ObjectId.isValid(id)) {
+        throw 'Invalid object ID.';
+    }
+
+    checkDate(time);
+    checkNumber(duration);
+    checkStringParams(status);
+
+    time = time.trim();
+    status = status.trim();
+
+    //TODO Availability and Time Frame Implementation for rescheduling session logic will be implemented.
+
+    let reschedSession = {
+        time: time,
+        duration: duration,
+        status: status
+    }
+
+    const sessionCollection = await sessions();
+  
+    const result = await sessionCollection.findOneAndUpdate(
+      {_id: new ObjectId(id)},
+      {$set: reschedSession},
+      {returnDocument: 'after'}
+    );
+  
+    if(!result){
+      throw `Could not Reschedule the Session.`;
+    }
+  
+    result._id = result._id.toString();
+  
+    return result;
+
 }
