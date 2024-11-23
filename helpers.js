@@ -1,5 +1,6 @@
 // You can add and export any helper functions you want here - if you aren't using any, then you can just leave this file as is
 import { mentors, mentees } from "./config/mongoCollections.js";
+import { ObjectId } from "mongodb";
 
 export const postVerify=async (content)=>
 {
@@ -224,5 +225,54 @@ export const checkEmail = async (email, user) => {
 
   if(emailId){
     throw `This email already Exists. Please Provide another email.`;
+  }
+}
+
+
+const combineDateAndTime = (date, time) => {
+  const [hours, minutes] = time.split(':');
+  // console.log(hours);
+  const combinedDate = new Date(date);
+  // console.log(parseInt(hours, 10));
+  combinedDate.setUTCHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0); 
+  // console.log(combinedDate);
+  return combinedDate;
+}
+
+export const  isTimeSlotAvailable = async (mentorId, dateTime) => {
+  const mentorsCollection = await mentors();
+  const mentor = await mentorsCollection.findOne({ _id: new ObjectId(mentorId) });
+
+  // console.log(mentor);
+
+  const dayOfWeek = new Date(dateTime).toLocaleString('en-US', { weekday: 'long' });
+  // const mentorDays = Object.keys(mentor.availability);
+  const availability = mentor.availability.find(a => a.day === dayOfWeek);
+
+  // console.log(availability);
+
+  if(!availability){
+    throw `The Mentor is not available on the day.`;
+  }
+
+  const requestedDateTime = new Date(dateTime); // Full requested datetime
+  const startTime = combineDateAndTime(requestedDateTime, availability.start_time); // Combine start time
+  const endTime = combineDateAndTime(requestedDateTime, availability.end_time);     // Combine end time
+
+  // console.log(startTime);
+  // console.log(requestedDateTime);
+  // console.log(endTime);
+
+    const isWithinHours =
+        requestedDateTime >= startTime && requestedDateTime <= endTime;
+
+  if(!isWithinHours){
+    throw `The time slot is not within Mentor's hours of availability.`;
+  }                        
+
+  const isBooked = availability.booked_slots.includes(requestedDateTime.toISOString());
+
+  if(isBooked){
+    throw `The time slot has been booked for the Mentor.`;
   }
 }

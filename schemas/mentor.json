@@ -41,15 +41,22 @@
     "subject_areas": [
         "subject_area_ref"
     ],
-    "availability": {
-        "Monday": {
-            "start_time": "2024-11-05T14:00:00Z",
-            "end_time": "2024-11-05T14:00:00Z"
+    "availability": [
+       {
+            "day": "Monday",
+            "start_time": "14:00",
+            "end_time": "16:00",
+            "booked_slots": [
+            "2024-11-13T14:30:00Z",
+            "2024-11-13T15:00:00Z"
+        ]  
         },
-        "Tuesday": {
-            "start_time": "2024-11-05T14:00:00Z",
-            "end_time": "2024-11-05T14:00:00Z"
+        {
+            "day": "Tuesday",
+            "start_time": "10:00",
+            "end_time": "12:00",
+            "booked_slots": []
         }
-    }
+    ]
         
 }

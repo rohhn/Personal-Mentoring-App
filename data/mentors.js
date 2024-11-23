@@ -28,7 +28,7 @@ export const createMentor = async (
     education = checkEducation(education);
     experience = checkExperience(experience);
     subject_areas = checkArrayOfStrings(subject_areas);
-    availability = checkAvailability(availability);
+    // availability = checkAvailability(availability);
 
     first_name = first_name.trim();
     last_name = last_name.trim();
@@ -169,7 +169,7 @@ export const updateMentor = async (
   education = checkEducation(education);
   experience = checkExperience(experience);
   subject_areas = checkArrayOfStrings(subject_areas);
-  availability = checkAvailability(availability);
+  // availability = checkAvailability(availability);
 
 
   first_name = first_name.trim();

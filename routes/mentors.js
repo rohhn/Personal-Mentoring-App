@@ -37,7 +37,7 @@ router
             newMentor.education = checkEducation(newMentor.education);
             newMentor.experience = checkExperience(newMentor.experience);
             newMentor.subject_areas = checkArrayOfStrings(newMentor.subject_areas);
-            newMentor.availability = checkAvailability(newMentor.availability);
+            // newMentor.availability = checkAvailability(newMentor.availability);
         }catch(e){
             // console.log(e);
             return res.status(400).json({error: e});
@@ -182,7 +182,7 @@ router
             updatedMentor.education = checkEducation(updatedMentor.education);
             updatedMentor.experience = checkExperience(updatedMentor.experience);
             updatedMentor.subject_areas = checkArrayOfStrings(updatedMentor.subject_areas);
-            updatedMentor.availability = checkAvailability(updatedMentor.availability);
+            // updatedMentor.availability = checkAvailability(updatedMentor.availability);
         }catch(e){
             // console.log(e);
             return res.status(400).json({error: e});

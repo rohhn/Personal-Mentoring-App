@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { sessions, mentees, mentors } from "../config/mongoCollections.js";
-import { checkDate, checkNumber, checkStringParams } from "../helpers.js";
+import { checkDate, checkNumber, checkStringParams, isTimeSlotAvailable } from "../helpers.js";
 import axios from "axios";
 // import jsonwebtoken from "jsonwebtoken";
 
@@ -74,7 +74,7 @@ export const createSession = async (
     checkStringParams(mentor_id);
     checkStringParams(mentee_id);
     checkStringParams(subject_area);
-    checkDate(time);
+    // checkDate(time);
     checkNumber(duration);
 
     mentor_id = mentor_id.trim();
@@ -112,6 +112,24 @@ export const createSession = async (
     // console.log(meeting);
 
     //TODO Availability Logic to be worked on
+
+    await isTimeSlotAvailable(mentor_id, time);
+
+    const booked = await mentorCollection.findOneAndUpdate(
+        { _id: mentor_id, 
+            "availability.day": new Date(time).toLocaleString('en-US', { weekday: 'long' }) },
+        { $push: { "availability.$.booked_slots": new Date(time).toISOString() } },
+        { returnDocument: "after" }
+    );
+
+    const filter = {
+        _id: mentor_id,
+        "availability.day": new Date(time).toLocaleString('en-US', { weekday: 'long' })
+    };
+    console.log("Filter:", filter);
+    
+    const mentor2 = await mentorCollection.findOne(filter);
+    console.log("Matched Mentor:", mentor2);
 
     let newSession = {
         mentor_id: mentor_id,
