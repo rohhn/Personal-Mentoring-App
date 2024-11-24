@@ -1,0 +1,30 @@
+<header>
+    <nav class="navbar p-1 pt-2 navbar-expand-md">
+        <div class="container-fluid">
+
+            {{#if options.isAuthenticated}}
+                <a class="navbar-brand text-white" href="/dashboard">Personal Mentoring App</a>
+            {{else}}
+                <a class="navbar-brand text-white" href="/">Personal Mentoring App</a>
+            {{/if}}
+
+            <ul class="d-flex nav">
+
+                {{#if options.isAuthenticated}}
+                    <li class="nav-item me-2">
+                        <form action="/logout" method="get" id="logout-form">
+                            <button class="btn btn-primary" type="submit" form="logout-form">Logout</button>
+                        </form>
+                    </li>
+                {{else}}
+                    <li class="nav-item me-2"><a class="btn btn-primary" href="/login">Login</a></li>
+                    <li class="nav-item me-2"><a class="btn btn-primary" href="/signup">Sign Up</a></li>
+                {{/if}}
+                
+            </ul>
+            
+            
+        </div>
+        
+    </nav>
+</header>

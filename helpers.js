@@ -1,197 +1,193 @@
 // You can add and export any helper functions you want here - if you aren't using any, then you can just leave this file as is
 
-
-export const postVerify=async (content)=>
-{
-    if(content=="")
-    {
+export const postVerify = async (content) => {
+    if (content == "") {
         throw "Error, please enter something";
     }
-    if(content==null)
-    {
+    if (content == null) {
         throw "Error, please enter something";
     }
-    if(typeof content !== "string")
-    {
+    if (typeof content !== "string") {
         throw "Erorr, post body must be a string";
     }
-    content=content.trim();
-    if(content.length==0)
-    {
+    content = content.trim();
+    if (content.length == 0) {
         throw "Error, post body cannot be empty";
     }
-    if(content=="")
-    {
+    if (content == "") {
         throw "Error, post body cannot be just empty spaces";
     }
-}
+};
 
 export function validateRating(rating) {
-    if (typeof rating !== 'number' || rating < 1 || rating > 5 || rating % 1 !== 0) {
-      throw new Error('Rating must be a whole number between 1 and 5');
+    if (typeof rating !== "number" || rating < 1 || rating > 5 || rating % 1 !== 0) {
+        throw new Error("Rating must be a whole number between 1 and 5");
     }
     return true;
-  }
+}
 
 export const checkStringParams = (param) => {
-    if(!param){
-      throw `The input is an empty paramter.`;
+    if (!param) {
+        throw `The input is an empty paramter.`;
     }
-    if(typeof param !== 'string'){
-      console.log(param);
-      throw `The input is not a string: ${param}.`;
+    if (typeof param !== "string") {
+        console.log(param);
+        throw `The input is not a string: ${param}.`;
     }
-    
-    if(param.trim() === ''){
-      throw `The input is an empty string: ${param}.`;
+
+    if (param.trim() === "") {
+        throw `The input is an empty string: ${param}.`;
     }
-  }
+};
 
 export const checkBoolean = (param) => {
-    if(typeof param !== 'boolean'){
+    if (typeof param !== "boolean") {
         throw `The input should be a boolean. : ${param}`;
     }
-} 
+};
 
 export const checkObject = (param) => {
-  if(Array.isArray(param) || param === null || param === undefined){
-      throw `The input should be an object.`;
-      }
+    if (Array.isArray(param) || param === null || param === undefined) {
+        throw `The input should be an object.`;
+    }
 
-      if(typeof param !== 'object'){
-      throw `The input should be an object.`;
-      }
+    if (typeof param !== "object") {
+        throw `The input should be an object.`;
+    }
 
-      if(Object.keys(param).length === 0){
-        throw `The imput is an empty Object.`
-      }
-}
+    if (Object.keys(param).length === 0) {
+        throw `The imput is an empty Object.`;
+    }
+};
 
 export const checkDate = (inputDate) => {
-  checkStringParams(inputDate);
-  let dateRegex = /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/\d{4}$/;
+    checkStringParams(inputDate);
+    let dateRegex = /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/\d{4}$/;
 
-  if(!dateRegex.test(inputDate)){
-    throw `The Input Date is not in mm/dd/yyyy format. : ${inputDate}`;
-  }
+    if (!dateRegex.test(inputDate)) {
+        throw `The Input Date is not in mm/dd/yyyy format. : ${inputDate}`;
+    }
 
-  let [month, day, year] = inputDate.split('/').map(Number);
+    let [month, day, year] = inputDate.split("/").map(Number);
 
-  let date = new Date(year, month - 1, day);
+    let date = new Date(year, month - 1, day);
 
-  if(date.getFullYear() !== year || date.getMonth() !== month -1 || date.getDate() !== day){
-    throw `Invalid Date.`
-  }
-  
-  let today = new Date();
+    if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+        throw `Invalid Date.`;
+    }
 
-  if(date > today){
-    throw `Date cannot be in the future.`
-  }
-}
+    let today = new Date();
 
-export const checkYears = (years) =>{
-  if(typeof years !== 'number' || Number.isNaN(years)){
-    throw `The Year input should be a number.`;
-  }
+    if (date > today) {
+        throw `Date cannot be in the future.`;
+    }
+};
 
-  let currYear = new Date().getFullYear();
+export const checkYears = (years) => {
+    if (typeof years !== "number" || Number.isNaN(years)) {
+        throw `The Year input should be a number.`;
+    }
 
-  if(years > currYear){
-    throw `Year cannot be in future.`;
-  }
+    let currYear = new Date().getFullYear();
 
-}
+    if (years > currYear) {
+        throw `Year cannot be in future.`;
+    }
+};
 
 export const checkEducation = (education) => {
-  if(!Array.isArray(education)){
-    throw `${education} is not an array`;
-  }
-
-  for(let i = 0; i < education.length; i++){
-    let ed = education[i];
-    checkObject(ed);
-
-    if(!Object.keys(ed).includes('degree') || !Object.keys(ed).includes('institution') || !Object.keys(ed).includes('year')){
-      throw `The Education Object should contain degree, institution and year keys.`;
+    if (!Array.isArray(education)) {
+        throw `${education} is not an array`;
     }
 
-    checkStringParams(ed.degree);
-    checkStringParams(ed.institution);
-    checkYears(ed.year);
+    for (let i = 0; i < education.length; i++) {
+        let ed = education[i];
+        checkObject(ed);
 
-    ed.degree = ed.degree.trim();
-    ed.institution = ed.institution.trim();
-    
-  }
-  return education;
-}
+        if (
+            !Object.keys(ed).includes("degree") ||
+            !Object.keys(ed).includes("institution") ||
+            !Object.keys(ed).includes("year")
+        ) {
+            throw `The Education Object should contain degree, institution and year keys.`;
+        }
+
+        checkStringParams(ed.degree);
+        checkStringParams(ed.institution);
+        checkYears(ed.year);
+
+        ed.degree = ed.degree.trim();
+        ed.institution = ed.institution.trim();
+    }
+    return education;
+};
 
 export const checkExperience = (experience) => {
-  if(!Array.isArray(experience)){
-    throw `${experience} is not an array`;
-  }
-
-  for(let i = 0; i < experience.length; i++){
-    let ex = experience[i];
-    checkObject(ex);
-
-    if(!Object.keys(ex).includes('title') || !Object.keys(ex).includes('institution') || !Object.keys(ex).includes('years')){
-      throw `The Experience Object should contain title, institution and years keys.`;
+    if (!Array.isArray(experience)) {
+        throw `${experience} is not an array`;
     }
 
+    for (let i = 0; i < experience.length; i++) {
+        let ex = experience[i];
+        checkObject(ex);
 
-    checkStringParams(ex.title);
-    checkStringParams(ex.institution);
-    checkYears(ex.years);
+        if (
+            !Object.keys(ex).includes("title") ||
+            !Object.keys(ex).includes("institution") ||
+            !Object.keys(ex).includes("years")
+        ) {
+            throw `The Experience Object should contain title, institution and years keys.`;
+        }
 
-    ex.title = ex.title.trim();
-    ex.institution = ex.institution.trim();
-      
-  }
-  return experience;
-}
+        checkStringParams(ex.title);
+        checkStringParams(ex.institution);
+        checkYears(ex.years);
 
-export const checkArrayOfStrings = (array) =>{
-  if(!Array.isArray(array)){
-    throw `${array} is not an array`;
-  }
-  
-  for(let i = 0; i <+array.length; i++){
-    checkStringParams(array[i]);
+        ex.title = ex.title.trim();
+        ex.institution = ex.institution.trim();
+    }
+    return experience;
+};
 
-    array[i] = array[i].trim();
-  }
+export const checkArrayOfStrings = (array) => {
+    if (!Array.isArray(array)) {
+        throw `${array} is not an array`;
+    }
 
-  return array;
-}
+    for (let i = 0; i < +array.length; i++) {
+        checkStringParams(array[i]);
+
+        array[i] = array[i].trim();
+    }
+
+    return array;
+};
 
 export const checkAvailability = (availability) => {
-  checkObject(availability);
-  let days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    checkObject(availability);
+    let days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-  let keys = Object.keys(availability);
-  // console.log(keys);
-  for(let i = 0; i < keys.length; i++){
-    let key = keys[i];
-    
-    // console.log(key);
+    let keys = Object.keys(availability);
+    // console.log(keys);
+    for (let i = 0; i < keys.length; i++) {
+        let key = keys[i];
 
-    if(!days.includes(key)){
-      throw `${key} not a valid day.`
+        // console.log(key);
+
+        if (!days.includes(key)) {
+            throw `${key} not a valid day.`;
+        }
+
+        //I am marking this as this can be an Array.
+        let avail = availability[key];
+
+        if (!Object.keys(avail).includes("start_time") || !Object.keys(avail).includes("end_time")) {
+            throw `The Availability Object should have a start time and an end time.`;
+        }
+
+        avail.start_time = avail.start_time.trim();
+        avail.end_time = avail.end_time.trim();
     }
 
-    //I am marking this as this can be an Array.
-    let avail = availability[key];
-
-    if(!Object.keys(avail).includes("start_time") || !Object.keys(avail).includes("end_time")){
-      throw `The Availability Object should have a start time and an end time.`
-    }
-
-    avail.start_time = avail.start_time.trim();
-    avail.end_time = avail.end_time.trim();
-
-  }
-
-  return availability;
-}
+    return availability;
+};

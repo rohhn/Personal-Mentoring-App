@@ -1,0 +1,82 @@
+[
+  {
+    "_id": {
+      "$oid": "673d883adb96807a441f99d2"
+    },
+    "name": "Subject1",
+    "description": "Description for subject 1.",
+    "created_at": "2024-11-20T06:56:58.905Z"
+  },
+  {
+    "_id": {
+      "$oid": "673d883adb96807a441f99d3"
+    },
+    "name": "Subject2",
+    "description": "Description for subject 2.",
+    "created_at": "2024-11-20T06:56:58.905Z"
+  },
+  {
+    "_id": {
+      "$oid": "673d883adb96807a441f99d4"
+    },
+    "name": "Subject3",
+    "description": "Description for subject 3.",
+    "created_at": "2024-11-20T06:56:58.905Z"
+  },
+  {
+    "_id": {
+      "$oid": "673d883adb96807a441f99d5"
+    },
+    "name": "Subject4",
+    "description": "Description for subject 4.",
+    "created_at": "2024-11-20T06:56:58.905Z"
+  },
+  {
+    "_id": {
+      "$oid": "673d883adb96807a441f99d6"
+    },
+    "name": "Subject5",
+    "description": "Description for subject 5.",
+    "created_at": "2024-11-20T06:56:58.905Z"
+  },
+  {
+    "_id": {
+      "$oid": "673d883adb96807a441f99d7"
+    },
+    "name": "Subject6",
+    "description": "Description for subject 6.",
+    "created_at": "2024-11-20T06:56:58.905Z"
+  },
+  {
+    "_id": {
+      "$oid": "673d883adb96807a441f99d8"
+    },
+    "name": "Subject7",
+    "description": "Description for subject 7.",
+    "created_at": "2024-11-20T06:56:58.905Z"
+  },
+  {
+    "_id": {
+      "$oid": "673d883adb96807a441f99d9"
+    },
+    "name": "Subject8",
+    "description": "Description for subject 8.",
+    "created_at": "2024-11-20T06:56:58.905Z"
+  },
+  {
+    "_id": {
+      "$oid": "673d883adb96807a441f99da"
+    },
+    "name": "Subject9",
+    "description": "Description for subject 9.",
+    "created_at": "2024-11-20T06:56:58.905Z"
+  },
+  {
+    "_id": {
+      "$oid": "673d883adb96807a441f99db"
+    },
+    "name": "Subject10",
+    "description": "Description for subject 10.",
+    "created_at": "2024-11-20T06:56:58.905Z"
+  }
+]

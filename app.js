@@ -1,12 +1,72 @@
 // This file should set up the express server as shown in the lecture code
-import express from 'express';
-import constructorMethod from "./routes/index.js";
+import express from "express";
+
 const app = express();
 
+import session from "express-session";
+import exphbs from "express-handlebars";
+
+import constructorMethod from "./routes/index.js";
+import { loginMiddleware, makeHeaderOptions } from "./middleware/auth.js";
+import { privateRouteMiddleware, rootMiddleware } from "./middleware/root.js";
+import { Cookie } from "express-session";
+
+const rewriteUnsupportedBrowserMethods = (req, res, next) => {
+    // If the user posts to the server with a property called _method, rewrite the request's method
+    // To be that method; so if they post _method=PUT you can now allow browsers to POST to a route that gets
+    // rewritten in this middleware to a PUT route
+    if (req.body && req.body._method) {
+        req.method = req.body._method;
+        delete req.body._method;
+    }
+
+    // let the next middleware run:
+    next();
+};
+
+const handlebarsInstance = exphbs.create({
+    defaultLayout: "main",
+    partialsDir: ["views/partials/"],
+    // Specify helpers which are only registered on this instance.
+    helpers: {
+        asJSON: (obj, spacing) => {
+            if (typeof spacing === "number") return new Handlebars.SafeString(JSON.stringify(obj, null, spacing));
+
+            return new Handlebars.SafeString(JSON.stringify(obj));
+        },
+        partialsDir: ["views/partials/"],
+    },
+});
+
+app.use(
+    session({
+        name: "PersonalMentoringApp",
+        secret: process.env.EXPRESS_SESSION_SECRET,
+        saveUninitialized: false,
+        resave: false,
+        cookie: { maxAge: 60000 },
+    })
+);
+
+// setup public and static directories
+app.use("/public", express.static("public"));
+app.use("/static", express.static("static"));
+
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(rewriteUnsupportedBrowserMethods);
+
+app.use(makeHeaderOptions);
+app.use("/dashboard", privateRouteMiddleware);
+app.use("/login", loginMiddleware);
+app.use("/signup", loginMiddleware);
+
+app.engine("handlebars", handlebarsInstance.engine);
+app.set("view engine", "handlebars");
+
 constructorMethod(app);
 
-app.listen(3000,()=>{
+app.listen(3000, () => {
     console.log("We have now got a server");
-    console.log("your routes will be running on http://localhost:3000")
-})
+    console.log("your routes will be running on http://localhost:3000");
+});
