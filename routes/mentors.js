@@ -3,7 +3,7 @@ import express from 'express';
 import { ObjectId } from 'mongodb';
 import { mentors } from '../config/mongoCollections.js';
 import { mentees } from '../config/mongoCollections.js';
-import { checkArrayOfStrings, checkAvailability, checkBoolean, checkDate, checkEducation, checkExperience, checkStringParams, checkEmail } from "../helpers.js";
+import { checkArrayOfStrings, checkBoolean, checkDate, checkEducation, checkExperience, checkStringParams, checkEmail, validateAvailability } from "../helpers.js";
 import { mentorData } from '../data/index.js';
 import {dbConnection, closeConnection} from '../config/mongoConnection.js';
 
@@ -37,7 +37,6 @@ router
             newMentor.education = checkEducation(newMentor.education);
             newMentor.experience = checkExperience(newMentor.experience);
             newMentor.subject_areas = checkArrayOfStrings(newMentor.subject_areas);
-            // newMentor.availability = checkAvailability(newMentor.availability);
         }catch(e){
             // console.log(e);
             return res.status(400).json({error: e});
@@ -202,42 +201,46 @@ router
 .route('/availability/:mentorId')
 .post(async (req,res) => {
     let mentorId = req.params.mentorId.trim();
-        //Error Handling Will be done here
+    
+    try{
+        checkStringParams(mentorId);
+        if (!ObjectId.isValid(mentorId)) {
+            throw 'Invalid object ID.';
+            }
+    }catch(e){
+        return res.status(400).json({error: e});
+    }
 
-        try{
-            checkStringParams(mentorId);
-            if (!ObjectId.isValid(mentorId)) {
-                throw 'Invalid object ID.';
-              }
-        }catch(e){
-            return res.status(400).json({error: e});
-        }
+    mentorId = mentorId.trim();
 
-        mentorId = mentorId.trim();
+    try{
+    const mentorCollection = await mentors();
 
-        try{
-        const mentorCollection = await mentors();
+    const mentor = await mentorCollection.findOne({_id: new ObjectId(mentorId)});
 
-        const mentor = await mentorCollection.findOne({_id: new ObjectId(mentorId)});
+    if (!mentor) {
+        throw `Mentor with the id ${mentorId} does not exist.`;
+    }
+    }catch(e){
+        return res
+        .status(404)
+        .json({error: e});
+    }
 
-        if (!mentor) {
-            throw `Mentor with the id ${mentorId} does not exist.`;
-        }
-        }catch(e){
-            return res
-            .status(404)
-            .json({error: e});
-        }
-
-        let availability = req.body;
-
-        try{
-            let avail = await mentorData.toAddAvailability(mentorId,availability.av)
-            return res.status(200).json(avail);
-        }catch(e){
-            console.log(e);
-            return res.status(500).json({error: e});
-        }
+    let availability = req.body;
+    
+    try{
+        availability = validateAvailability(availability);
+    }catch(e){
+        return res.status(400).json({error: e});
+    }
+    try{
+        let avail = await mentorData.toAddAvailability(mentorId,availability.av)
+        return res.status(200).json(avail);
+    }catch(e){
+        console.log(e);
+        return res.status(500).json({error: e});
+    }
 
 
 });

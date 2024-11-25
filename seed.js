@@ -1,7 +1,7 @@
 import { ObjectId } from 'mongodb';
-import { mentees, mentors } from './config/mongoCollections.js';
+import { mentees, mentors, sessions } from './config/mongoCollections.js';
 import { closeConnection, dbConnection } from './config/mongoConnection.js';
-import { parentsData, ratingData } from './data/index.js';
+import { parentsData, ratingData, sessionsData } from './data/index.js';
 
 const seedDatabase = async () => {
   const db = await dbConnection();
@@ -10,6 +10,7 @@ const seedDatabase = async () => {
   try {
     const mentorCollection = await mentors();
     const menteeCollection = await mentees();
+    const sessionCollection = await sessions();
 
     // Add sample mentor
     const mentor1 = await mentorCollection.insertOne({

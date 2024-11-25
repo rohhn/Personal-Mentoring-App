@@ -79,7 +79,7 @@ export const checkObject = (param) => {
 
 export const checkDate = (inputDate) => {
   checkStringParams(inputDate);
-  let dateRegex = /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/\d{4}$/;
+  let dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
 
   if(!dateRegex.test(inputDate)){
     throw `The Input Date is not in mm/dd/yyyy format. : ${inputDate}`;
@@ -176,35 +176,35 @@ export const checkArrayOfStrings = (array) =>{
   return array;
 }
 
-// export const checkAvailability = (availability) => {
-//   checkObject(availability);
-//   let days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+export const validateAvailability = (availability) => {
+  checkObject(availability);
+  let days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-//   let keys = Object.keys(availability);
-//   // console.log(keys);
-//   for(let i = 0; i < keys.length; i++){
-//     let key = keys[i];
-    
-//     // console.log(key);
+  let keys = Object.keys(availability);
+  // console.log(keys);
+  for(let i in availability){
 
-//     if(!days.includes(key)){
-//       throw `${key} not a valid day.`
-//     }
+    if(!Object.keys(availability[i]).includes("days") || !Object.keys(availability[i]).includes("start_time") || !Object.keys(availability[i]).includes("end_time")){
 
-//     //I am marking this as this can be an Array.
-//     let avail = availability[key];
+    }
 
-//     if(!Object.keys(avail).includes("start_time") || !Object.keys(avail).includes("end_time")){
-//       throw `The Availability Object should have a start time and an end time.`
-//     }
+    let day = availability[i].day;
+    let start_time = availability[i].start_time;
+    let end_time = availability[i].end_time;
 
-//     avail.start_time = avail.start_time.trim();
-//     avail.end_time = avail.end_time.trim();
+    checkStringParams(day);
+    checkDate(start_time);
+    checkDate(end_time);
 
-//   }
+    availability[i].day = day.trim();
+    availability[i].start_time = new Date(start_time.trim());
+    availability[i].end_time = new Date(end_time.trim());    
 
-//   return availability;
-// }
+
+  }
+
+  return availability;
+}
 
 
 export const checkEmail = async (email, user) => {

@@ -37,7 +37,6 @@ const createZoomMeeting = async (start_time, end_time) => {
         type: 2, 
         start_time: start_time,
         end_time: end_time,
-        // duration: duration/60,
         timezone: 'UTC',
         settings: {
             host_video: true,
@@ -57,11 +56,9 @@ const createZoomMeeting = async (start_time, end_time) => {
             }
         );
 
-        // console.log('Meeting created successfully:', response.data);
         return response.data;
     } catch (e) {
         console.error('Error creating Zoom meeting:', e.response.data);
-        // return response.status(500).json({error:e.response.data});
     }
 }
 
@@ -79,13 +76,14 @@ export const createSession = async (
     checkStringParams(mentor_id);
     checkStringParams(mentee_id);
     checkStringParams(subject_area);
-    // checkDate(time);
-    // checkNumber(duration);
+    checkDate(start_time);
+    checkDate(end_time);
 
     mentor_id = mentor_id.trim();
     mentee_id = mentee_id.trim();
     subject_area = subject_area.trim();
-    // time = time.trim();
+    start_time = new Date(start_time);
+    end_time = new Date(end_time);
 
     if(!ObjectId.isValid(mentor_id)){
         throw `${mentor_id} is not a valid ObjectID.`;
@@ -165,18 +163,15 @@ export const rescheduleSession = async (id, start_time, end_time, status) => {
         throw 'Invalid object ID.';
     }
 
-    if (!ObjectId.isValid(id)) {
-        throw 'Invalid object ID.';
-    }
 
-    // checkDate(time);
-    // checkNumber(duration);
-    // checkStringParams(status);
+    checkDate(start_time);
+    checkDate(end_time);
+    checkStringParams(status);
 
 
 
-    start_time = start_time.trim();
-    start_time = start_time.trim();
+    start_time = new Date(start_time.trim());
+    start_time = new Date(end_time.trim());
 
 
     let reschedSession = {

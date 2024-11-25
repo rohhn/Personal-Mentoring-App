@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 import { mentors } from "../config/mongoCollections.js";
 
-import { checkArrayOfStrings, checkAvailability, checkBoolean, checkDate, checkEducation, checkExperience, checkStringParams, checkEmail, createCalendarForMentor, addAvailability } from "../helpers.js";
+import { checkArrayOfStrings, checkAvailability, checkBoolean, checkDate, checkEducation, checkExperience, checkStringParams, checkEmail, createCalendarForMentor, addAvailability, validateAvailability } from "../helpers.js";
 
 export const createMentor = async (
   first_name,
@@ -49,7 +49,6 @@ export const createMentor = async (
       profile_image: profile_image,
       created_at: new Date().toISOString(),
       education: education,
-      // availability: availability,
       calendarId: calendarId,
       approved: approved,
       experience: experience,
@@ -215,6 +214,7 @@ export const toAddAvailability = async (
   availability
 ) => {
   checkStringParams(id);
+  availability = validateAvailability(availability);
 
   id = id.trim();
 

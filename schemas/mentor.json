@@ -42,18 +42,6 @@
         "subject_area_ref"
     ],
 
-    "calendar_id": "google_calendar_id",
-    "availability": [
-       {
-            "day": "Monday",
-            "start_time": "2024-11-13T14:00:00Z",
-            "end_time": "16:00"
-        },
-        {
-            "day": "Tuesday",
-            "start_time": "10:00",
-            "end_time": "12:00"
-        }
-    ]
+    "calendar_id": "google_calendar_id"
         
 }
