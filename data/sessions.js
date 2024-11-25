@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { sessions, mentees, mentors } from "../config/mongoCollections.js";
-import { checkDate, checkNumber, checkStringParams, checkAvailability, bookSession } from "../helpers.js";
+import { mentorData } from "./index.js";
+import { checkDate, checkNumber, checkStringParams, checkAvailability, bookSession, updateSessionOnCalendar, deleteSessionFromCalendar } from "../helpers.js";
 import axios from "axios";
 import { google } from "googleapis";
 
@@ -122,7 +123,7 @@ export const createSession = async (
 
     let bookedSession = await bookSession(calendarId, subject_area, start_time, end_time);
 
-    console.log(bookedSession);
+    // console.log(bookedSession);
 
     
     let meeting = await createZoomMeeting(start_time, end_time);
@@ -134,6 +135,7 @@ export const createSession = async (
         subject_area: subject_area,
         start_time: start_time,
         end_time: end_time,
+        eventId: bookedSession.id,
         status: "scheduled",
         meeting_link: meeting.join_url,
         created_at: new Date().toISOString()
@@ -176,16 +178,31 @@ export const rescheduleSession = async (id, start_time, end_time, status) => {
     start_time = start_time.trim();
     start_time = start_time.trim();
 
-    //TODO Availability and Time Frame Implementation for rescheduling session logic will be implemented.
 
     let reschedSession = {
         start_time: start_time,
         end_time: end_time,
-        // duration: duration,
         status: status
     }
 
     const sessionCollection = await sessions();
+
+    let session = await getSessionById(id);
+
+    let eventId = session.eventId;
+
+    let mentor = await mentorData.getMentorById(session.mentor_id);
+
+    let calendarId = mentor.calendarId;
+
+    let isAvailable = await checkAvailability(calendarId, start_time, end_time);
+
+    if(!isAvailable){
+        throw `This Mentor is not available for this slot, please book another slot.`;
+    }
+
+    let seshUpdateOnCal = await updateSessionOnCalendar(calendarId, eventId, start_time, end_time);
+
   
     const result = await sessionCollection.findOneAndUpdate(
       {_id: new ObjectId(id)},
@@ -217,6 +234,18 @@ export const deleteSession = async (id) => {
 
     if (!session) {
         throw `Session with the id ${id} does not exist.`;
+    }
+
+    let eventId = session.eventId;
+
+    let mentor = await mentorData.getMentorById(session.mentor_id);
+
+    let calendarId = mentor.calendarId;
+
+    let deleteEvent = await deleteSessionFromCalendar(calendarId, eventId);
+
+    if(!deleteEvent){
+        throw `Could not delete session from calendar.`
     }
 
     let result = await sessionCollection.deleteOne({_id: new ObjectId(id)});

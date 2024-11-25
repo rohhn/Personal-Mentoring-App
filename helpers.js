@@ -245,9 +245,8 @@ try {
 const calendar = google.calendar('v3');
 
 const auth = new google.auth.GoogleAuth({
-    // keyFile: './credentials/client_secret_75435018716-qmbomqrjao2ig97npss6jt2u5mfsne6i.apps.googleusercontent.com.json', // Path to your JSON key file
     credentials: keyFileContent.web,
-    scopes: ['https://www.googleapis.com/auth/calendar'], // Calendar scope
+    scopes: ['https://www.googleapis.com/auth/calendar'],
 });
 
 export const getAuthClient = async () => {
@@ -269,8 +268,6 @@ export const createCalendarForMentor = async () => {
 
   const calendarId = response.data.id;
 
-  // Save calendarId to the mentor's record in your database
-  // console.log(`Calendar created with ID: ${calendarId}`);
   return calendarId;
 }
 
@@ -288,7 +285,7 @@ const getNextWeekdayDate = (weekday) => {
     const today = new Date();
     const currentDay = today.getDay();
     const targetDay = weekdaysMap[weekday];
-    const daysUntilNext = (targetDay - currentDay + 7) % 7 || 7; // Ensure it's at least 1 day ahead
+    const daysUntilNext = (targetDay - currentDay + 7) % 7 || 7; 
 
     const nextDate = new Date(today);
     nextDate.setDate(today.getDate() + daysUntilNext);
@@ -298,7 +295,6 @@ const getNextWeekdayDate = (weekday) => {
 export const addAvailability = async (calendarId, weekday, startTime, endTime) => {
     const authClient = await getAuthClient();
 
-    // Get the next date for the input weekday
     const day = getNextWeekdayDate(weekday);
 
     // console.log(weekday);
@@ -306,15 +302,15 @@ export const addAvailability = async (calendarId, weekday, startTime, endTime) =
     const event = {
         summary: 'Available',
         start: {
-            dateTime: `${day}T${startTime}:00Z`, // e.g., 2024-11-20T10:00:00Z
+            dateTime: `${day}T${startTime}:00Z`, 
             timeZone: 'UTC',
         },
         end: {
-            dateTime: `${day}T${endTime}:00Z`, // e.g., 2024-11-20T12:00:00Z
+            dateTime: `${day}T${endTime}:00Z`, 
             timeZone: 'UTC',
         },
         recurrence: [
-            `RRULE:FREQ=WEEKLY;BYDAY=${weekday.slice(0, 2).toUpperCase()}`, // Repeat availability weekly on the given weekday
+            `RRULE:FREQ=WEEKLY;BYDAY=${weekday.slice(0, 2).toUpperCase()}`,
         ],
     };
 
@@ -324,7 +320,6 @@ export const addAvailability = async (calendarId, weekday, startTime, endTime) =
             calendarId,
             requestBody: event,
         });
-        console.log('Availability added:', response.data);
         return response.data;
     } catch (error) {
         console.error('Error adding availability:', error.message);
@@ -340,8 +335,8 @@ export const checkAvailability = async (calendarId, startTime, endTime) => {
   const response = await calendar.freebusy.query({
       auth: authClient,
       requestBody: {
-          timeMin: startTime, // ISO string of the start time
-          timeMax: endTime,  // ISO string of the end time
+          timeMin: startTime, 
+          timeMax: endTime,  
           timeZone: 'UTC',
           items: [{ id: calendarId }],
       },
@@ -349,9 +344,7 @@ export const checkAvailability = async (calendarId, startTime, endTime) => {
 
   const busySlots = response.data.calendars[calendarId].busy;
 
-  // If no busy slots overlap, the time slot is free
   const isAvailable = busySlots.length === 0;
-  console.log(`Is available: ${isAvailable}`);
   return isAvailable;
 }
 
@@ -377,6 +370,55 @@ export const bookSession= async (calendarId, subject, startTime, endTime) => {
       requestBody: event,
   });
 
-  console.log('Session booked:', response.data);
-  return response.data; // Return the meeting link
+  return response.data; 
 }
+
+
+export const updateSessionOnCalendar = async (calendarId, eventId, start_time, end_time) => {
+  const authClient = await getAuthClient();
+
+
+  const updatedEvent = {
+      start: {
+          dateTime: new Date(start_time).toISOString(), 
+          timeZone: 'UTC', 
+      },
+      end: {
+          dateTime: new Date(end_time).toISOString(), 
+          timeZone: 'UTC', 
+      },
+  };
+
+  try {
+      const response = await calendar.events.update({
+          auth: authClient,
+          calendarId: calendarId,
+          eventId: eventId, 
+          requestBody: updatedEvent,
+      });
+
+      return response.data;
+  } catch (e) {
+      // console.error('e updating session on calendar:', error.message);
+      throw new Error('Could not update session on calendar.');
+  }
+};
+
+export const deleteSessionFromCalendar = async (calendarId, eventId) => {
+  // Get authenticated client
+  const authClient = await getAuthClient();
+
+  try {
+
+      await calendar.events.delete({
+          auth: authClient,
+          calendarId: calendarId,
+          eventId: eventId,
+      });
+
+      return { success: true, message: `Event with ID ${eventId} successfully deleted.` };
+  } catch (error) {
+      console.error('Error deleting event from calendar:', error.message);
+      throw new Error(`Could not delete the event with ID ${eventId} on the calendar.`);
+  }
+};

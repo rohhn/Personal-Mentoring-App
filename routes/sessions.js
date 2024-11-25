@@ -86,7 +86,7 @@ router
         let reschedSession = req.body;
 
         try{
-            const session = await sessionsData.rescheduleSession(sessionId, reschedSession.time, reschedSession.duration, reschedSession.status);
+            const session = await sessionsData.rescheduleSession(sessionId, reschedSession.start_time, reschedSession.end_time, reschedSession.status);
             return res.status(200).json(session);
         }catch(e){
             console.log(e);
