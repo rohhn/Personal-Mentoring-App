@@ -1,0 +1,82 @@
+[
+  {
+    "_id": {
+      "$oid": "673d883adb96807a441f99dc"
+    },
+    "name": "Badge1",
+    "description": "Earned for completing milestone 1.",
+    "icon": "https://example.com/badge1.png"
+  },
+  {
+    "_id": {
+      "$oid": "673d883adb96807a441f99dd"
+    },
+    "name": "Badge2",
+    "description": "Earned for completing milestone 2.",
+    "icon": "https://example.com/badge2.png"
+  },
+  {
+    "_id": {
+      "$oid": "673d883adb96807a441f99de"
+    },
+    "name": "Badge3",
+    "description": "Earned for completing milestone 3.",
+    "icon": "https://example.com/badge3.png"
+  },
+  {
+    "_id": {
+      "$oid": "673d883adb96807a441f99df"
+    },
+    "name": "Badge4",
+    "description": "Earned for completing milestone 4.",
+    "icon": "https://example.com/badge4.png"
+  },
+  {
+    "_id": {
+      "$oid": "673d883adb96807a441f99e0"
+    },
+    "name": "Badge5",
+    "description": "Earned for completing milestone 5.",
+    "icon": "https://example.com/badge5.png"
+  },
+  {
+    "_id": {
+      "$oid": "673d883adb96807a441f99e1"
+    },
+    "name": "Badge6",
+    "description": "Earned for completing milestone 6.",
+    "icon": "https://example.com/badge6.png"
+  },
+  {
+    "_id": {
+      "$oid": "673d883adb96807a441f99e2"
+    },
+    "name": "Badge7",
+    "description": "Earned for completing milestone 7.",
+    "icon": "https://example.com/badge7.png"
+  },
+  {
+    "_id": {
+      "$oid": "673d883adb96807a441f99e3"
+    },
+    "name": "Badge8",
+    "description": "Earned for completing milestone 8.",
+    "icon": "https://example.com/badge8.png"
+  },
+  {
+    "_id": {
+      "$oid": "673d883adb96807a441f99e4"
+    },
+    "name": "Badge9",
+    "description": "Earned for completing milestone 9.",
+    "icon": "https://example.com/badge9.png"
+  },
+  {
+    "_id": {
+      "$oid": "673d883adb96807a441f99e5"
+    },
+    "name": "Badge10",
+    "description": "Earned for completing milestone 10.",
+    "icon": "https://example.com/badge10.png"
+  }
+]

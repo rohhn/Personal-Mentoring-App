@@ -1,0 +1,50 @@
+<main class="container">
+
+    <section id="intro-hero-section" class="text-center mb-4">
+        <h1>{{pageTitle}}</h1>
+        <p>Unlock Expertise, One Mentor at a Time</p>
+        <p>Discover a personalized learning experience with our 1-on-1 mentoring platform. 
+            Connect with verified professors and industry experts from around the world to enhance your skills and dive into niche topics. 
+            Whether you're exploring a new field or mastering a specific subject, our mentors are here to guide you. 
+            Empower your growth, and let expertise meet accessibility.</p>
+    </section>
+    <section id="best-mentors-hero" class="mb-4">
+        <h2 class="text-center">Our Top Mentors!</h2>
+        <div class="row justify-content-center">
+            {{#each mentors}}
+
+            
+                <div class="card col-md-3 col-sm-4 m-2" >
+                    <a class="text-decoration-none" href="/mentors/{{_id}}">
+                    <img class="card-top-img" href="">
+                    <div class="card-body">
+                        <h5 class="card-title">{{name}}</h5>
+                        <p class="card-text text-muted"> subject areas?</p>
+                        
+                    </div>
+                    </a>
+                </div>
+            
+                
+            {{/each}}
+        </div>
+        
+    </section>
+
+    {{#if subject_areas}}
+    <section id="subject-areas-hero" class="text-center mb-4">
+        <h2>Explore a variety of subjects!</h2>
+        <div class="row justify-content-center">
+            {{#each subject_areas}}
+                <div class="card col-md-3 col-sm-4 m-2" >
+                    <img class="card-top-img" href="">
+                    <div class="card-body">
+                        <h5 class="card-title">{{name}}</h5>
+                        <p class="card-text text-muted"> subject areas?</p>
+                    </div>
+                </div>
+            {{/each}}
+        </div>
+    </section>
+    {{/if}}
+</main>
