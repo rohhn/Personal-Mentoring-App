@@ -140,7 +140,6 @@ router
     })
     .put(async (req, res) =>{
         let mentorId = req.params.mentorId.trim();
-        //Error Handling Will be done here
 
         try{
             checkStringParams(mentorId);
@@ -198,6 +197,50 @@ router
         }
     }
     );
+
+router
+.route('/availability/:mentorId')
+.post(async (req,res) => {
+    let mentorId = req.params.mentorId.trim();
+        //Error Handling Will be done here
+
+        try{
+            checkStringParams(mentorId);
+            if (!ObjectId.isValid(mentorId)) {
+                throw 'Invalid object ID.';
+              }
+        }catch(e){
+            return res.status(400).json({error: e});
+        }
+
+        mentorId = mentorId.trim();
+
+        try{
+        const mentorCollection = await mentors();
+
+        const mentor = await mentorCollection.findOne({_id: new ObjectId(mentorId)});
+
+        if (!mentor) {
+            throw `Mentor with the id ${mentorId} does not exist.`;
+        }
+        }catch(e){
+            return res
+            .status(404)
+            .json({error: e});
+        }
+
+        let availability = req.body;
+
+        try{
+            let avail = await mentorData.toAddAvailability(mentorId,availability.av)
+            return res.status(200).json(avail);
+        }catch(e){
+            console.log(e);
+            return res.status(500).json({error: e});
+        }
+
+
+});
 
 
 export { router as mentorRoutes };

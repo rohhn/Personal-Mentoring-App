@@ -18,7 +18,7 @@ router
 
 
         try{
-            let session = await sessionsData.createSession(newSession.mentor_id, newSession.mentee_id, newSession.subject_area, newSession.time, newSession.duration);
+            let session = await sessionsData.createSession(newSession.mentor_id, newSession.mentee_id, newSession.subject_area, newSession.start_time, newSession.end_time);
             return res.status(200).json(session);
         }catch(e){
             console.log(e);

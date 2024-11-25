@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 import { mentors } from "../config/mongoCollections.js";
 
-import { checkArrayOfStrings, checkAvailability, checkBoolean, checkDate, checkEducation, checkExperience, checkStringParams, checkEmail } from "../helpers.js";
+import { checkArrayOfStrings, checkAvailability, checkBoolean, checkDate, checkEducation, checkExperience, checkStringParams, checkEmail, createCalendarForMentor, addAvailability } from "../helpers.js";
 
 export const createMentor = async (
   first_name,
@@ -38,7 +38,7 @@ export const createMentor = async (
     profile_image = profile_image.trim();
     summary = summary.trim();
 
-
+    const calendarId = await createCalendarForMentor();    
 
     let newMentor = {
       first_name: first_name,
@@ -49,7 +49,8 @@ export const createMentor = async (
       profile_image: profile_image,
       created_at: new Date().toISOString(),
       education: education,
-      availability: availability,
+      // availability: availability,
+      calendarId: calendarId,
       approved: approved,
       experience: experience,
       subject_areas: subject_areas,
@@ -65,11 +66,10 @@ export const createMentor = async (
       throw 'Could not create the mentor.';
   
     const newId = result.insertedId.toString();
-  
+    
     const mentor = await getMentorById(newId);
   
     mentor._id = mentor._id.toString();
-  
     return mentor;
 }
 
@@ -208,4 +208,35 @@ export const updateMentor = async (
   result._id = result._id.toString();
 
   return result;
+}
+
+export const toAddAvailability = async (
+  id,
+  availability
+) => {
+  checkStringParams(id);
+
+  id = id.trim();
+
+  if(!ObjectId.isValid(id)){
+    throw `${id} is not a valid ObjectID.`;
+  }
+
+  let mentor = await getMentorById(id);
+
+  let calendarId = mentor.calendarId;
+  
+  console.log(availability);
+  
+  for(let i in availability){
+    let day = availability[i].day;
+    let start_time = availability[i].start_time;
+    let end_time = availability[i].end_time;
+
+    console.log(day);
+
+    let av = await addAvailability(calendarId, day, start_time, end_time);
+
+    // console.log(av);
+  }
 }

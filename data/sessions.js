@@ -1,8 +1,8 @@
 import { ObjectId } from "mongodb";
 import { sessions, mentees, mentors } from "../config/mongoCollections.js";
-import { checkDate, checkNumber, checkStringParams, isTimeSlotAvailable } from "../helpers.js";
+import { checkDate, checkNumber, checkStringParams, checkAvailability, bookSession } from "../helpers.js";
 import axios from "axios";
-// import jsonwebtoken from "jsonwebtoken";
+import { google } from "googleapis";
 
 const clientId = "xVOOK02JTwSW6xEvYeU5Gw";
 const clientSecret = 'zrfgF41GpvGzQFcbpRUfSZlLMYpr4NVf'; 
@@ -28,14 +28,15 @@ const  getAccessToken = async () => {
     }
 }
 
-const createZoomMeeting = async (start_time, duration) => {
+const createZoomMeeting = async (start_time, end_time) => {
     const accessToken = await getAccessToken();
 
     const meetingDetails = {
         topic: 'Test Meeting',
         type: 2, 
         start_time: start_time,
-        duration: duration/60,
+        end_time: end_time,
+        // duration: duration/60,
         timezone: 'UTC',
         settings: {
             host_video: true,
@@ -64,23 +65,26 @@ const createZoomMeeting = async (start_time, duration) => {
 }
 
 
+
+
+
 export const createSession = async (
     mentor_id,
     mentee_id,
     subject_area,
-    time,
-    duration
+    start_time,
+    end_time,
 ) => {
     checkStringParams(mentor_id);
     checkStringParams(mentee_id);
     checkStringParams(subject_area);
     // checkDate(time);
-    checkNumber(duration);
+    // checkNumber(duration);
 
     mentor_id = mentor_id.trim();
     mentee_id = mentee_id.trim();
     subject_area = subject_area.trim();
-    time = time.trim();
+    // time = time.trim();
 
     if(!ObjectId.isValid(mentor_id)){
         throw `${mentor_id} is not a valid ObjectID.`;
@@ -106,37 +110,30 @@ export const createSession = async (
         throw `Mentee with the id ${mentee_id} does not exist.`;
     }
 
+    let calendarId = mentor.calendarId;
+
     
-    let meeting = await createZoomMeeting(time, duration);
 
-    // console.log(meeting);
+    let isAvailable = await checkAvailability(calendarId, start_time, end_time);
 
-    //TODO Availability Logic to be worked on
+    if(!isAvailable){
+        throw `This Mentor is not available for this slot, please book another slot.`;
+    }
 
-    await isTimeSlotAvailable(mentor_id, time);
+    let bookedSession = await bookSession(calendarId, subject_area, start_time, end_time);
 
-    const booked = await mentorCollection.findOneAndUpdate(
-        { _id: mentor_id, 
-            "availability.day": new Date(time).toLocaleString('en-US', { weekday: 'long' }) },
-        { $push: { "availability.$.booked_slots": new Date(time).toISOString() } },
-        { returnDocument: "after" }
-    );
+    console.log(bookedSession);
 
-    const filter = {
-        _id: mentor_id,
-        "availability.day": new Date(time).toLocaleString('en-US', { weekday: 'long' })
-    };
-    console.log("Filter:", filter);
     
-    const mentor2 = await mentorCollection.findOne(filter);
-    console.log("Matched Mentor:", mentor2);
+    let meeting = await createZoomMeeting(start_time, end_time);
+
 
     let newSession = {
         mentor_id: mentor_id,
         mentee_id: mentee_id,
         subject_area: subject_area,
-        time: time,
-        duration: duration,
+        start_time: start_time,
+        end_time: end_time,
         status: "scheduled",
         meeting_link: meeting.join_url,
         created_at: new Date().toISOString()
@@ -160,7 +157,7 @@ export const createSession = async (
     return session;
 }
 
-export const rescheduleSession = async (id, time, duration, status) => {
+export const rescheduleSession = async (id, start_time, end_time, status) => {
     checkStringParams(id);
     if (!ObjectId.isValid(id)) {
         throw 'Invalid object ID.';
@@ -170,18 +167,21 @@ export const rescheduleSession = async (id, time, duration, status) => {
         throw 'Invalid object ID.';
     }
 
-    checkDate(time);
-    checkNumber(duration);
-    checkStringParams(status);
+    // checkDate(time);
+    // checkNumber(duration);
+    // checkStringParams(status);
 
-    time = time.trim();
-    status = status.trim();
+
+
+    start_time = start_time.trim();
+    start_time = start_time.trim();
 
     //TODO Availability and Time Frame Implementation for rescheduling session logic will be implemented.
 
     let reschedSession = {
-        time: time,
-        duration: duration,
+        start_time: start_time,
+        end_time: end_time,
+        // duration: duration,
         status: status
     }
 

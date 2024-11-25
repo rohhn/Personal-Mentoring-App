@@ -1,6 +1,9 @@
 // You can add and export any helper functions you want here - if you aren't using any, then you can just leave this file as is
 import { mentors, mentees } from "./config/mongoCollections.js";
 import { ObjectId } from "mongodb";
+import { google } from "googleapis";
+import path from 'path';
+import fs from 'fs';
 
 export const postVerify=async (content)=>
 {
@@ -173,35 +176,35 @@ export const checkArrayOfStrings = (array) =>{
   return array;
 }
 
-export const checkAvailability = (availability) => {
-  checkObject(availability);
-  let days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+// export const checkAvailability = (availability) => {
+//   checkObject(availability);
+//   let days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-  let keys = Object.keys(availability);
-  // console.log(keys);
-  for(let i = 0; i < keys.length; i++){
-    let key = keys[i];
+//   let keys = Object.keys(availability);
+//   // console.log(keys);
+//   for(let i = 0; i < keys.length; i++){
+//     let key = keys[i];
     
-    // console.log(key);
+//     // console.log(key);
 
-    if(!days.includes(key)){
-      throw `${key} not a valid day.`
-    }
+//     if(!days.includes(key)){
+//       throw `${key} not a valid day.`
+//     }
 
-    //I am marking this as this can be an Array.
-    let avail = availability[key];
+//     //I am marking this as this can be an Array.
+//     let avail = availability[key];
 
-    if(!Object.keys(avail).includes("start_time") || !Object.keys(avail).includes("end_time")){
-      throw `The Availability Object should have a start time and an end time.`
-    }
+//     if(!Object.keys(avail).includes("start_time") || !Object.keys(avail).includes("end_time")){
+//       throw `The Availability Object should have a start time and an end time.`
+//     }
 
-    avail.start_time = avail.start_time.trim();
-    avail.end_time = avail.end_time.trim();
+//     avail.start_time = avail.start_time.trim();
+//     avail.end_time = avail.end_time.trim();
 
-  }
+//   }
 
-  return availability;
-}
+//   return availability;
+// }
 
 
 export const checkEmail = async (email, user) => {
@@ -228,51 +231,152 @@ export const checkEmail = async (email, user) => {
   }
 }
 
+const keyFilePath = path.resolve('./secrets/gc_cloud_key.json');
 
-const combineDateAndTime = (date, time) => {
-  const [hours, minutes] = time.split(':');
-  // console.log(hours);
-  const combinedDate = new Date(date);
-  // console.log(parseInt(hours, 10));
-  combinedDate.setUTCHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0); 
-  // console.log(combinedDate);
-  return combinedDate;
+let keyFileContent;
+try {
+    keyFileContent = JSON.parse(fs.readFileSync(keyFilePath, 'utf8'));
+} catch (err) {
+    console.error("Error reading or parsing the key file:", err.message);
+    process.exit(1);
 }
 
-export const  isTimeSlotAvailable = async (mentorId, dateTime) => {
-  const mentorsCollection = await mentors();
-  const mentor = await mentorsCollection.findOne({ _id: new ObjectId(mentorId) });
 
-  // console.log(mentor);
+const calendar = google.calendar('v3');
 
-  const dayOfWeek = new Date(dateTime).toLocaleString('en-US', { weekday: 'long' });
-  // const mentorDays = Object.keys(mentor.availability);
-  const availability = mentor.availability.find(a => a.day === dayOfWeek);
+const auth = new google.auth.GoogleAuth({
+    // keyFile: './credentials/client_secret_75435018716-qmbomqrjao2ig97npss6jt2u5mfsne6i.apps.googleusercontent.com.json', // Path to your JSON key file
+    credentials: keyFileContent.web,
+    scopes: ['https://www.googleapis.com/auth/calendar'], // Calendar scope
+});
 
-  // console.log(availability);
+export const getAuthClient = async () => {
+  // console.log(keyFileContent);
+    return await auth.getClient();
+}
 
-  if(!availability){
-    throw `The Mentor is not available on the day.`;
-  }
+export const createCalendarForMentor = async () => {
+  const authClient = await getAuthClient();
 
-  const requestedDateTime = new Date(dateTime); // Full requested datetime
-  const startTime = combineDateAndTime(requestedDateTime, availability.start_time); // Combine start time
-  const endTime = combineDateAndTime(requestedDateTime, availability.end_time);     // Combine end time
+  const response = await calendar.calendars.insert({
+      auth: authClient,
+      requestBody: {
+          summary: `Mentor's Calendar`,
+          description: `Calendar for mentor mentor`,
+          timeZone: 'UTC',
+      },
+  });
 
-  // console.log(startTime);
-  // console.log(requestedDateTime);
-  // console.log(endTime);
+  const calendarId = response.data.id;
 
-    const isWithinHours =
-        requestedDateTime >= startTime && requestedDateTime <= endTime;
+  // Save calendarId to the mentor's record in your database
+  // console.log(`Calendar created with ID: ${calendarId}`);
+  return calendarId;
+}
 
-  if(!isWithinHours){
-    throw `The time slot is not within Mentor's hours of availability.`;
-  }                        
+const getNextWeekdayDate = (weekday) => {
+    const weekdaysMap = {
+        Sunday: 0,
+        Monday: 1,
+        Tuesday: 2,
+        Wednesday: 3,
+        Thursday: 4,
+        Friday: 5,
+        Saturday: 6,
+    };
 
-  const isBooked = availability.booked_slots.includes(requestedDateTime.toISOString());
+    const today = new Date();
+    const currentDay = today.getDay();
+    const targetDay = weekdaysMap[weekday];
+    const daysUntilNext = (targetDay - currentDay + 7) % 7 || 7; // Ensure it's at least 1 day ahead
 
-  if(isBooked){
-    throw `The time slot has been booked for the Mentor.`;
-  }
+    const nextDate = new Date(today);
+    nextDate.setDate(today.getDate() + daysUntilNext);
+    return nextDate.toISOString().split('T')[0]; // Return the date part (YYYY-MM-DD)
+};
+
+export const addAvailability = async (calendarId, weekday, startTime, endTime) => {
+    const authClient = await getAuthClient();
+
+    // Get the next date for the input weekday
+    const day = getNextWeekdayDate(weekday);
+
+    // console.log(weekday);
+
+    const event = {
+        summary: 'Available',
+        start: {
+            dateTime: `${day}T${startTime}:00Z`, // e.g., 2024-11-20T10:00:00Z
+            timeZone: 'UTC',
+        },
+        end: {
+            dateTime: `${day}T${endTime}:00Z`, // e.g., 2024-11-20T12:00:00Z
+            timeZone: 'UTC',
+        },
+        recurrence: [
+            `RRULE:FREQ=WEEKLY;BYDAY=${weekday.slice(0, 2).toUpperCase()}`, // Repeat availability weekly on the given weekday
+        ],
+    };
+
+    try {
+        const calendar = google.calendar({ version: 'v3', auth: authClient });
+        const response = await calendar.events.insert({
+            calendarId,
+            requestBody: event,
+        });
+        console.log('Availability added:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error adding availability:', error.message);
+        throw error;
+    }
+};
+
+
+
+export const checkAvailability = async (calendarId, startTime, endTime) => {
+  const authClient = await getAuthClient();
+
+  const response = await calendar.freebusy.query({
+      auth: authClient,
+      requestBody: {
+          timeMin: startTime, // ISO string of the start time
+          timeMax: endTime,  // ISO string of the end time
+          timeZone: 'UTC',
+          items: [{ id: calendarId }],
+      },
+  });
+
+  const busySlots = response.data.calendars[calendarId].busy;
+
+  // If no busy slots overlap, the time slot is free
+  const isAvailable = busySlots.length === 0;
+  console.log(`Is available: ${isAvailable}`);
+  return isAvailable;
+}
+
+export const bookSession= async (calendarId, subject, startTime, endTime) => {
+  const authClient = await getAuthClient();
+
+  const event = {
+      summary: `Session with menteexew`,
+      description: `Subject: ${subject}`,
+      start: {
+          dateTime: startTime, // e.g., 2024-11-20T10:00:00Z
+          timeZone: 'UTC',
+      },
+      end: {
+          dateTime: endTime, // e.g., 2024-11-20T10:30:00Z
+          timeZone: 'UTC',
+      },
+  };
+
+  const response = await calendar.events.insert({
+      auth: authClient,
+      calendarId: calendarId,
+      requestBody: event,
+  });
+
+  console.log('Session booked:', response.data);
+  return response.data; // Return the meeting link
 }
