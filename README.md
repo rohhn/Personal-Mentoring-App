@@ -24,3 +24,17 @@ Final project code for CS 546, Stevens Institute of Technology
     - Pull all latest changes in the `dev` branch using `git pull`
     - Create your own feature branch from the `dev` branch using `git checkout -b feature/{feature_name}`
     - Push all your changes to your `feature` branch and create a pull request to the `dev` branch.
+
+
+## Front-end
+
+- Setup the required environment variables.
+  - Create a copy of the `env_template` file and rename it to `.env`
+  
+  ```shell
+  cp env_template .env
+  ```
+
+  - Populate all values in the `.env` file.
+
+You can use this [website](https://djecrety.ir/) to generate an express session secret token.

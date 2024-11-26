@@ -3,5 +3,6 @@ import * as menteeData from "./mentees.js";
 import * as mentorData from "./mentors.js";
 import * as parentsData from './parent.js';
 import * as ratingData from "./ratings.js";
+import * as sessionsData from "./sessions.js";
 
-export { badgesData, menteeData, mentorData, parentsData, ratingData };
+export { badgesData, menteeData, mentorData, parentsData, ratingData , sessionsData};

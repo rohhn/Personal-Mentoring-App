@@ -1,0 +1,33 @@
+<main class="container my-3">
+    {{#if userData }}
+    <h1 class="text-center mb-5">Welcome {{userData.first_name}}. This is your Dashboard!</h1>
+    {{/if}}
+
+    <section id="dashboard-links" class="mb-4">
+        <div class="row">
+            <div class="col d-flex justify-content-center">
+                <a class="btn btn-primary me-3" href="/profile/{{userData._id}}">Profile</a>
+                <a class="btn btn-primary">My sessions</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="upcoming-sessions-section mb-4">
+        <h2>Upcoming sessions</h2>
+
+        <div class="row justify-content-center">
+            {{#each upcomingSessions}}
+                <div class="card col-md-3 col-sm-4 m-2" >
+                    <img class="card-top-img" href="">
+                    <div class="card-body">
+                        <h5 class="card-title">{{_id}}</h5>
+                        <p class="card-text text-muted"> time?</p>
+                        <a href="#" class="card-link">meeting link?</a>
+                    </div>
+                </div>
+            {{/each}}
+        </div>
+        
+    </section>
+    
+</main>
