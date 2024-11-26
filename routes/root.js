@@ -1,12 +1,5 @@
 import bcrypt from "bcrypt";
-<<<<<<< HEAD
-import { mentorData, subjectData } from "../data/index.js";
-import { menteeData } from "../data/index.js";
-import multer from "multer";
-=======
-import express from "express";
-import { menteeData, mentorData } from "../data/index.js";
->>>>>>> 11dc2ed (Fixed the bug where dob was not working for signup page(mentee))
+import { menteeData, mentorData, subjectData } from "../data/index.js";
 
 const router = express.Router();
 
