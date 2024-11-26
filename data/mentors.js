@@ -1,15 +1,7 @@
 import { ObjectId } from "mongodb";
 import { mentors } from "../config/mongoCollections.js";
+import { checkArrayOfStrings, checkAvailability, checkBoolean, checkDate, checkEducation, checkExperience, checkStringParams, checkEmail, createCalendarForMentor, addAvailability, validateAvailability } from "../helpers.js";
 
-import {
-    checkArrayOfStrings,
-    checkAvailability,
-    checkBoolean,
-    checkDate,
-    checkEducation,
-    checkExperience,
-    checkStringParams,
-} from "../helpers.js";
 
 export const createMentor = async (
     first_name,
@@ -25,10 +17,11 @@ export const createMentor = async (
     approved = false,
     subject_areas = null
 ) => {
+
     checkStringParams(first_name);
     checkStringParams(last_name);
     checkDate(dob);
-    checkStringParams(email);
+    await checkEmail(email, "mentor"); 
     checkStringParams(pwd_hash);
 
     // TODO: These must be optional params
@@ -47,24 +40,26 @@ export const createMentor = async (
     pwd_hash = pwd_hash.trim();
     profile_image = profile_image.trim();
     summary = summary.trim();
-    const created_at = new Date();
+
+    const calendarId = await createCalendarForMentor();    
 
     let newMentor = {
-        first_name: first_name,
-        last_name: last_name,
-        dob: dob,
-        email: email,
-        pwd_hash: pwd_hash,
-        profile_image: profile_image,
-        created_at: created_at,
-        education: education,
-        availability: availability,
-        approved: approved,
-        experience: experience,
-        subject_areas: subject_areas,
-        reviews: [],
-        badges: [],
-    };
+      first_name: first_name,
+      last_name: last_name,
+      dob: dob,
+      email: email,
+      pwd_hash: pwd_hash,
+      profile_image: profile_image,
+      created_at: new Date(),
+      education: education,
+      calendarId: calendarId,
+      approved: approved,
+      experience: experience,
+      subject_areas: subject_areas,
+      reviews: [],
+      badges: []
+    }
+
 
     const mentorCollection = await mentors();
 
@@ -161,81 +156,107 @@ export const removeMentor = async (id) => {
 };
 
 export const updateMentor = async (
-    id,
-    first_name,
-    last_name,
-    dob,
-    email,
-    pwd_hash,
-    profile_image,
-    created_at,
-    summary,
-    education,
-    experience,
-    availability,
-    approved,
-    subject_areas
+  id,
+  first_name,
+  last_name,
+  dob,
+  pwd_hash,
+  profile_image,
+  summary,
+  education,
+  experience,
+  availability,
+  approved,
+  subject_areas
 ) => {
-    checkStringParams(id);
+  checkStringParams(id);
 
-    id = id.trim();
+  id = id.trim();
 
-    if (!ObjectId.isValid(id)) {
-        throw `${id} is not a valid ObjectID.`;
-    }
+  if(!ObjectId.isValid(id)){
+    throw `${id} is not a valid ObjectID.`;
+  }
 
-    checkStringParams(first_name);
-    checkStringParams(last_name);
-    checkDate(dob);
-    checkStringParams(email);
-    checkStringParams(pwd_hash);
-    checkStringParams(profile_image);
-    checkDate(created_at);
-    checkStringParams(summary);
-    checkBoolean(approved);
-    education = checkEducation(education);
-    experience = checkExperience(experience);
-    subject_areas = checkArrayOfStrings(subject_areas);
-    availability = checkAvailability(availability);
+  checkStringParams(first_name);
+  checkStringParams(last_name);
+  checkDate(dob);
+  // await checkEmail(email, "mentor");
+  checkStringParams(pwd_hash);
+  checkStringParams(profile_image);
+  checkStringParams(summary);
+  checkBoolean(approved);
+  education = checkEducation(education);
+  experience = checkExperience(experience);
+  subject_areas = checkArrayOfStrings(subject_areas);
+  // availability = checkAvailability(availability);
 
-    first_name = first_name.trim();
-    last_name = last_name.trim();
-    dob = dob.trim();
-    email = email.trim();
-    pwd_hash = pwd_hash.trim();
-    profile_image = profile_image.trim();
-    created_at = created_at.trim();
-    summary = summary.trim();
 
-    let mentorUpdate = {
-        first_name: first_name,
-        last_name: last_name,
-        dob: dob,
-        email: email,
-        pwd_hash: pwd_hash,
-        profile_image: profile_image,
-        created_at: created_at,
-        summary: summary,
-        education: education,
-        experience: experience,
-        availability: availability,
-        approved: approved,
-        subject_areas: subject_areas,
-    };
+  first_name = first_name.trim();
+  last_name = last_name.trim();
+  dob = dob.trim();
+  pwd_hash = pwd_hash.trim();
+  profile_image = profile_image.trim();
+  summary = summary.trim();
 
-    const mentorCollection = await mentors();
+  let mentorUpdate = {
+    first_name: first_name,
+    last_name: last_name,
+    dob: dob,
+    pwd_hash: pwd_hash,
+    profile_image: profile_image,
+    summary: summary,
+    education: education,
+    experience: experience,
+    availability: availability,
+    approved: approved,
+    subject_areas: subject_areas
+  }
 
-    const result = await mentorCollection.findOneAndUpdate(
-        { _id: new ObjectId(id) },
-        { $set: mentorUpdate },
-        { returnDocument: "after" }
-    );
+  const mentorCollection = await mentors();
+  
+  const result = await mentorCollection.findOneAndUpdate(
+    {_id: new ObjectId(id)},
+    {$set: mentorUpdate},
+    {returnDocument: 'after'}
+  );
 
-    if (!result) {
-        throw `Could not Update the Mentor.`;
-    }
+  if(!result){
+    throw `Could not Update the Mentor.`;
+  }
 
-    result._id = result._id.toString();
+  result._id = result._id.toString();
 
-    return result;
-};
+  return result;
+}
+
+export const toAddAvailability = async (
+  id,
+  availability
+) => {
+  checkStringParams(id);
+  availability = validateAvailability(availability);
+
+  id = id.trim();
+
+  if(!ObjectId.isValid(id)){
+    throw `${id} is not a valid ObjectID.`;
+  }
+
+  let mentor = await getMentorById(id);
+
+  let calendarId = mentor.calendarId;
+  
+  console.log(availability);
+  
+  for(let i in availability){
+    let day = availability[i].day;
+    let start_time = availability[i].start_time;
+    let end_time = availability[i].end_time;
+
+    console.log(day);
+
+    let av = await addAvailability(calendarId, day, start_time, end_time);
+
+    // console.log(av);
+  }
+}

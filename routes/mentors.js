@@ -1,19 +1,12 @@
-import express from "express";
 
-import { ObjectId } from "mongodb";
-import { mentors } from "../config/mongoCollections.js";
-import { mentees } from "../config/mongoCollections.js";
-import {
-    checkArrayOfStrings,
-    checkAvailability,
-    checkBoolean,
-    checkDate,
-    checkEducation,
-    checkExperience,
-    checkStringParams,
-} from "../helpers.js";
-import { mentorData } from "../data/index.js";
-import { dbConnection, closeConnection } from "../config/mongoConnection.js";
+import express from 'express';
+
+import { ObjectId } from 'mongodb';
+import { mentors } from '../config/mongoCollections.js';
+import { mentees } from '../config/mongoCollections.js';
+import { checkArrayOfStrings, checkBoolean, checkDate, checkEducation, checkExperience, checkStringParams, checkEmail, validateAvailability } from "../helpers.js";
+import { mentorData } from '../data/index.js';
+import {dbConnection, closeConnection} from '../config/mongoConnection.js';
 
 const router = express.Router();
 
@@ -35,37 +28,31 @@ router
             checkStringParams(newMentor.first_name);
             checkStringParams(newMentor.last_name);
             checkDate(newMentor.dob);
-            checkStringParams(newMentor.email);
+            await checkEmail(newMentor.email, "mentor"); 
             checkStringParams(newMentor.pwd_hash);
             checkStringParams(newMentor.profile_image);
-            checkDate(newMentor.created_at);
             checkStringParams(newMentor.summary);
             checkBoolean(newMentor.approved);
             newMentor.education = checkEducation(newMentor.education);
             newMentor.experience = checkExperience(newMentor.experience);
             newMentor.subject_areas = checkArrayOfStrings(newMentor.subject_areas);
-            newMentor.availability = checkAvailability(newMentor.availability);
-        } catch (e) {
+        }catch(e){
             // console.log(e);
-            return res.status(400).json({ error: e });
+            return res.status(400).json({error: e});
         }
-
-        try {
-            let mentorCreate = await mentorData.createMentor(
-                newMentor.first_name,
-                newMentor.last_name,
-                newMentor.dob,
-                newMentor.email,
-                newMentor.pwd_hash,
-                newMentor.profile_image,
-                newMentor.created_at,
-                newMentor.summary,
-                newMentor.education,
-                newMentor.experience,
-                newMentor.availability,
-                newMentor.approved,
-                newMentor.subject_areas
-            );
+        try{
+            let mentorCreate = await mentorData.createMentor(newMentor.first_name, 
+                                                             newMentor.last_name, 
+                                                             newMentor.dob, 
+                                                             newMentor.email, 
+                                                             newMentor.pwd_hash, 
+                                                             newMentor.profile_image, 
+                                                             newMentor.summary, 
+                                                             newMentor.education, 
+                                                             newMentor.experience, 
+                                                             newMentor.availability, 
+                                                             newMentor.approved, 
+                                                             newMentor.subject_areas);
 
             return res.status(200).json(mentorCreate);
         } catch (e) {
@@ -149,7 +136,6 @@ router
     })
     .put(async (req, res) => {
         let mentorId = req.params.mentorId.trim();
-        //Error Handling Will be done here
 
         try {
             checkStringParams(mentorId);
@@ -180,43 +166,77 @@ router
             checkStringParams(updatedMentor.first_name);
             checkStringParams(updatedMentor.last_name);
             checkDate(updatedMentor.dob);
-            checkStringParams(updatedMentor.email);
+            // await checkEmail(updatedMentor.email, "mentor"); 
             checkStringParams(updatedMentor.pwd_hash);
             checkStringParams(updatedMentor.profile_image);
-            checkDate(updatedMentor.created_at);
             checkStringParams(updatedMentor.summary);
             checkBoolean(updatedMentor.approved);
             updatedMentor.education = checkEducation(updatedMentor.education);
             updatedMentor.experience = checkExperience(updatedMentor.experience);
             updatedMentor.subject_areas = checkArrayOfStrings(updatedMentor.subject_areas);
-            updatedMentor.availability = checkAvailability(updatedMentor.availability);
-        } catch (e) {
+            // updatedMentor.availability = checkAvailability(updatedMentor.availability);
+        }catch(e){
             // console.log(e);
-            return res.status(400).json({ error: e });
+            return res.status(400).json({error: e});
         }
-
-        try {
-            let mentorCreate = await mentorData.updateMentor(
-                mentorId,
-                updatedMentor.first_name,
-                updatedMentor.last_name,
-                updatedMentor.dob,
-                updatedMentor.email,
-                updatedMentor.pwd_hash,
-                updatedMentor.profile_image,
-                updatedMentor.created_at,
-                updatedMentor.summary,
-                updatedMentor.education,
-                updatedMentor.experience,
-                updatedMentor.availability,
-                updatedMentor.approved,
-                updatedMentor.subject_areas
-            );
+        
+        try{
+            let mentorCreate = await mentorData.updateMentor(mentorId, updatedMentor.first_name, updatedMentor.last_name, updatedMentor.dob, updatedMentor.pwd_hash, updatedMentor.profile_image, updatedMentor.summary, updatedMentor.education, updatedMentor.experience, updatedMentor.availability, updatedMentor.approved, updatedMentor.subject_areas);
 
             return res.status(200).json(mentorCreate);
-        } catch (e) {
-            return res.status(500).json({ error: e });
+        }catch(e){
+            console.log(e);
+            return res.status(500).json({error: e});
         }
-    });
+    }
+    );
+
+router
+.route('/availability/:mentorId')
+.post(async (req,res) => {
+    let mentorId = req.params.mentorId.trim();
+    
+    try{
+        checkStringParams(mentorId);
+        if (!ObjectId.isValid(mentorId)) {
+            throw 'Invalid object ID.';
+            }
+    }catch(e){
+        return res.status(400).json({error: e});
+    }
+
+    mentorId = mentorId.trim();
+
+    try{
+    const mentorCollection = await mentors();
+
+    const mentor = await mentorCollection.findOne({_id: new ObjectId(mentorId)});
+
+    if (!mentor) {
+        throw `Mentor with the id ${mentorId} does not exist.`;
+    }
+    }catch(e){
+        return res
+        .status(404)
+        .json({error: e});
+    }
+
+    let availability = req.body;
+    
+    try{
+        availability = validateAvailability(availability);
+    }catch(e){
+        return res.status(400).json({error: e});
+    }
+    try{
+        let avail = await mentorData.toAddAvailability(mentorId,availability.av)
+        return res.status(200).json(avail);
+    }catch(e){
+        console.log(e);
+        return res.status(500).json({error: e});
+    }
+
+
+});
 
 export { router as mentorRoutes };

@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { mentees } from "../config/mongoCollections.js";
-import { checkBoolean, checkStringParams, checkArrayOfStrings, checkDate } from "../helpers.js";
+import { checkBoolean, checkStringParams, checkArrayOfStrings, checkDate, checkEmail } from "../helpers.js";
 
 export const createMentee = async (
     first_name,
@@ -13,12 +13,13 @@ export const createMentee = async (
     summary = null,
     skills = null
 ) => {
+
     checkStringParams(first_name);
     checkStringParams(last_name);
     checkDate(dob);
-    checkStringParams(email);
+    await checkEmail(email, "mentee"); 
     checkStringParams(pwd_hash);
-
+  
     // TODO: These must be optional params
     // checkStringParams(parent_email);
     // checkStringParams(profile_image);
@@ -32,23 +33,23 @@ export const createMentee = async (
     pwd_hash = pwd_hash.trim();
     parent_email = parent_email.trim();
     profile_image = profile_image.trim();
-    const created_at = new Date();
     summary = summary.trim();
 
     let newMentee = {
-        first_name: first_name,
-        last_name: last_name,
-        dob: dob,
-        email: email,
-        pwd_hash: pwd_hash,
-        parent_email: parent_email,
-        profile_image: profile_image,
-        created_at: created_at,
-        summary: summary,
-        skills: skills,
-        reviews: [],
-        badges: [],
-    };
+      first_name: first_name,
+      last_name: last_name,
+      dob: dob,
+      email: email,
+      pwd_hash: pwd_hash,
+      parent_email: parent_email,
+      profile_image: profile_image,
+      created_at: new Date(),
+      summary: summary,
+      skills: skills,
+      reviews: [],
+      badges: []
+    }
+
 
     const menteeCollection = await mentees();
 
@@ -215,3 +216,4 @@ export const updateMentee = async (
 
     return result;
 };
+
