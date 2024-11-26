@@ -1,17 +1,20 @@
 import express from "express";
 import bcrypt from "bcrypt";
-import { mentorData } from "../data/index.js";
+import { mentorData, subjectData } from "../data/index.js";
 import { menteeData } from "../data/index.js";
+import multer from "multer";
 
 const router = express.Router();
 
 router.route("/").get(async (req, res) => {
     const mentorsList = await mentorData.getAllMentors();
-
+    const subjectAreasList = await subjectData.getAllSubjectAreas();
+    console.dir(subjectAreasList, { depth: null });
     res.render("landing/landing-page", {
         pageTitle: "Personal Mentoring App",
         headerOptions: req.headerOptions,
         mentors: mentorsList,
+        subject_areas: subjectAreasList,
     });
 });
 
@@ -211,6 +214,8 @@ router.route("/dashboard").get(async (req, res) => {
             res.status(500).redirect("/");
         }
 
+        userData.userType = userType;
+
         res.render("users/dashboard", {
             pageTitle: "Dashboard",
             headerOptions: req.headerOptions,
@@ -219,3 +224,19 @@ router.route("/dashboard").get(async (req, res) => {
     } catch (error) {}
 });
 export { router as rootRoutes };
+
+router.route("/profile/:userType/:userId").get(async (req, res) => {
+    const userType = req.params.userType;
+    const userId = req.params.userId;
+
+    if (["mentee", "mentor"].includes(userType)) {
+        res.redirect(`/${userType}/${userId}`);
+    } else {
+        res.redirect("/dashboard");
+    }
+});
+
+// router.route("/test").put(multer().single("profile_image"), async (req, res, next) => {
+//     console.dir(req.body, { depth: null });
+//     console.log(Object.keys(req.file));
+// });

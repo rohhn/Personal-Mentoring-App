@@ -7,8 +7,8 @@ import { rootRoutes } from "./root.js";
 
 const constructorMethod = (app) => {
     app.use("/", rootRoutes);
-    app.use("/mentees", menteeRoutes);
-    app.use("/mentors", mentorRoutes);
+    app.use("/mentee", menteeRoutes);
+    app.use("/mentor", mentorRoutes);
     app.use("/ratings", ratingsRoutes);
     app.use("/badges", badgesRoutes);
     app.use("/sessions", parentEmailRoutes); //yet to implemented

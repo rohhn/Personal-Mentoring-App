@@ -94,10 +94,13 @@ router
                 throw errorObj;
             });
 
+            mentor.userType = "mentor";
+
             res.render("mentors/profile", {
                 pageTitle: `${mentor.first_name}'s Profile`,
                 headerOptions: req.headerOptions,
                 profileInfo: mentor,
+                isOwner: req.session.user.userId === mentor._id,
             });
         } catch (error) {
             let statusCode = 400;
@@ -218,5 +221,50 @@ router
             return res.status(500).json({ error: e });
         }
     });
+
+router.route("/:mentorId/edit").get(async (req, res) => {
+    let mentorId = req.params.mentorId.trim();
+
+    if (req.session.user.userId !== mentorId) {
+        res.redirect("/dashboard");
+    }
+
+    try {
+        checkStringParams(mentorId);
+        if (!ObjectId.isValid(mentorId)) {
+            const errorObj = new Error("Invalid ID.");
+            errorObj.name = "InvalidID";
+            throw errorObj;
+        }
+
+        let mentor = await mentorData.getMentorById(mentorId).catch((error) => {
+            console.log(error);
+            const errorObj = new Error("User not found!");
+            errorObj.name = "NotFound";
+            throw errorObj;
+        });
+
+        mentor.userType = "mentor";
+
+        res.render("mentors/edit-profile", {
+            pageTitle: `${mentor.first_name}'s Profile`,
+            headerOptions: req.headerOptions,
+            profileInfo: mentor,
+            isOwner: req.session.user.userId === mentor._id,
+        });
+    } catch (error) {
+        let statusCode = 400;
+        let errorMessage = error.message;
+
+        if (error.name === "NotFound") {
+            statusCode = 404;
+        } else {
+            console.log(error);
+            errorMessage = "User not found!";
+        }
+
+        res.redirect("/dashboard");
+    }
+});
 
 export { router as mentorRoutes };
