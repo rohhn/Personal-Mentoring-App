@@ -1,10 +1,22 @@
-import express from "express";
 import bcrypt from "bcrypt";
+<<<<<<< HEAD
 import { mentorData, subjectData } from "../data/index.js";
 import { menteeData } from "../data/index.js";
 import multer from "multer";
+=======
+import express from "express";
+import { menteeData, mentorData } from "../data/index.js";
+>>>>>>> 11dc2ed (Fixed the bug where dob was not working for signup page(mentee))
 
 const router = express.Router();
+
+const formatDate = (dateStr) => {
+    const date = new Date(dateStr);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${month}/${day}/${year}`;
+};
 
 router.route("/").get(async (req, res) => {
     const mentorsList = await mentorData.getAllMentors();
@@ -120,6 +132,7 @@ router
         const userType = req.body.user_type;
         const email = req.body.email;
         const dob = req.body.dob;
+        console.log("Handle the wrong dob here")
         const password = req.body.password;
 
         try {
@@ -129,11 +142,12 @@ router
                 console.log("Creating mentee");
 
                 const parentEmail = req.body.parentEmail || null;
+                const formattedDob = formatDate(dob);
 
                 const createdUser = await menteeData.createMentee(
                     firstName,
                     lastName,
-                    dob,
+                    formattedDob,
                     email,
                     pwdHash,
                     parentEmail
