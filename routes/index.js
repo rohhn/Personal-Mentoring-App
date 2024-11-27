@@ -1,7 +1,22 @@
-// This file will import both route files and export the constructor method as shown in the lecture code
+import { badgesRoutes } from "./badges.js";
+import { parentEmailRoutes } from "./parent.js";
+import { ratingsRoutes } from "./rating.js";
+import { menteeRoutes } from "./mentees.js";
+import { mentorRoutes } from "./mentors.js";
+import { rootRoutes } from "./root.js";
+import { sessionRoutes } from './sessions.js';
 
-/*
-    - When the route is /teams use the routes defined in the teams.js routing file
-    - When the route is /games use the routes defined in games.js routing file
-    - All other enpoints should respond with a 404 as shown in the lecture code
-*/
+const constructorMethod = (app) => {
+    app.use("/", rootRoutes);
+    app.use("/mentee", menteeRoutes);
+    app.use("/mentor", mentorRoutes);
+    app.use("/ratings", ratingsRoutes);
+    app.use('/sessions', sessionRoutes);
+    // app.use('/sessions', parentEmailRoutes); //yet to implemented
+
+    app.use("*", (req, res) => {
+        res.status(404).json({ error: "Not found" });
+    });
+};
+
+export default constructorMethod;

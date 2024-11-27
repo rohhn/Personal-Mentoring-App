@@ -1,0 +1,162 @@
+<main class="container my-5">
+    <div class="main-body">
+        {{#if isOwner}}
+            <div class="row mb-3">
+                <div class="d-flex justify-content-end">
+                    <a class="btn btn-primary" href="/{{profileInfo.userType}}/{{profileInfo._id}}/edit"><i
+                            class="fa-regular fa-pen-to-square me-2"
+                            style="color: #ffffff;"
+                        ></i>Edit Profile</a>
+                </div>
+            </div>
+        {{/if}}
+        <div class="row gutters-sm">
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex flex-column align-items-center text-center">
+                            {{#if profileInfo.profile_img}}
+                                <img
+                                    src="{{profileInfo.profile_img}}"
+                                    alt="{{profileInfo.first_name}}"
+                                    class="rounded-circle"
+                                    width="150"
+                                />
+                            {{else}}
+                                {{! <svg xmlns="http://www.w3.org/2000/svg" width="100" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#003c8a" d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z"/></svg> }}
+                                <i class="fa-solid fa-user" style="color: #003c8a; font-size:75"></i>
+                            {{/if}}
+                            <div class="mt-3">
+                                <h4>{{profileInfo.first_name}} {{profileInfo.last_name}}</h4>
+                                <div class="mb-1 d-flex flex-row gutters-sm justify-content-center">
+                                    <div class="ratings-render" data-rating={{profileInfo.averageRating}}></div>
+                                    <p class="text-secondary">({{profileInfo.reviews.length}})</p>
+                                </div>
+                                <p class="text-secondary mb-1">{{profileInfo.summary}}</p>
+                                {{! <p class="text-muted font-size-sm">Bay Area, San Francisco, CA</p>
+                      <button class="btn btn-primary">Follow</button>
+                      <button class="btn btn-outline-primary">Message</button> }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mt-3">
+                    {{#if profileInfo.badges}}
+                        <h5>Badges</h5>
+                        <div class="d-flex flex-row">
+
+                            {{#each profileInfo.badges}}
+                                <div class="p-2">
+                                    <img src="/public/badges/{{icon}}" />
+                                </div>
+                            {{/each}}
+                        </div>
+                    {{else}}
+                        <p class="text-secondary text-center p-4 mb-0"><em>No badges to display</em></p>
+                    {{/if}}
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h6 class="mb-0">Name</h6>
+                            </div>
+                            <div class="col-sm-9 text-secondary">
+                                {{profileInfo.first_name}}
+                                {{profileInfo.last_name}}
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h6 class="mb-0">Email</h6>
+                            </div>
+                            <div class="col-sm-9 text-secondary">
+                                {{profileInfo.email}}
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h6 class="mb-0">Experience</h6>
+                            </div>
+
+                            <div class="col-sm-9">
+                                {{#each profileInfo.experience}}
+                                    <div class="row">
+                                        <div class="d-flex flex-col justify-content-between">
+                                            <p class="mb-0">{{title}}</p>
+                                            <p class="mb-0 me-5 text-muted"><em>{{years}} years</em></p>
+                                        </div>
+                                        <p class="mb-0 text-secondary">{{institution}}</p>
+                                    </div>
+                                {{/each}}
+                            </div>
+
+                        </div>
+                        <hr />
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h6 class="mb-0">Education</h6>
+                            </div>
+
+                            <div class="col-sm-9">
+                                {{#each profileInfo.education}}
+                                    <div class="row">
+                                        <div class="d-flex flex-col justify-content-between">
+                                            <p class="mb-0">{{degree}}</p>
+                                            <p class="mb-0 me-5 text-muted"><em>{{year}}</em></p>
+                                        </div>
+                                        <p class="mb-0 text-secondary">{{institution}}</p>
+                                    </div>
+                                {{/each}}
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h6 class="mb-0">Subject Areas</h6>
+                            </div>
+
+                            <div class="col-sm-9">
+                                <ul class="list-group list-group-flush">
+                                    {{#each profileInfo.subject_areas}}
+                                        <li
+                                            class="list-group-item d-flex justify-content-between align-items-center flex-wrap"
+                                        >
+                                            <p>{{name}}</p>
+                                        </li>
+                                    {{/each}}
+                                </ul>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row gutters-sm">
+            <div class="col-sm-12 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="d-flex align-items-center mb-3">Reviews</h5>
+                        {{#each profileInfo.reviews}}
+                            <div>
+                                <div class="mb-1 ratings-render" data-rating={{rating}}></div>
+                                <p class="mb-0">{{author}}</p>
+                                <p class="text-secondary">{{feedback}}</p>
+                            </div>
+                        {{/each}}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</main>
+
+{{> ratings_generator}}

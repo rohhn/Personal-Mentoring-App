@@ -1,0 +1,8 @@
+{
+    "_id": "12345",
+    "first_name": "Test",
+    "last_name": "Test",
+    "email": "test@test.com",
+    "pwd_hash": "pwd",
+    "created_at": "02/12/2024"
+}

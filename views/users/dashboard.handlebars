@@ -1,0 +1,188 @@
+<main class="container my-3">
+    {{#if userData}}
+        <h1 class="text-center mb-5">Welcome {{userData.first_name}}. This is your Dashboard!</h1>
+    {{/if}}
+
+    <section id="dashboard-links" class="mb-4" hidden>
+        <div class="row">
+            <div class="col d-flex justify-content-center">
+                <a class="btn btn-primary me-3" href="/profile/{{userData.userType}}/{{userData._id}}">Profile</a>
+                <a class="btn btn-primary">My sessions</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="mb-4">
+
+        <div class="row">
+            <div id="upcoming-sessions-section" class="col col-sm-12 col-md-8 bg-light text-dark rounded p-2">
+                <div class="d-flex justify-content-between mb-4">
+                    <h2 class="mb-0">Upcoming sessions</h2>
+                    <a class="btn btn-primary mb-0">My sessions</a>
+                </div>
+                <div class="row justify-content-center">
+                    {{#each upcomingSessions}}
+                        <div class="card col-md-3 col-sm-4 m-2">
+                            <img class="card-top-img" href="" />
+                            <div class="card-body">
+                                <h5 class="card-title">{{_id}}</h5>
+                                <p class="card-text text-muted"> time?</p>
+                                <a href="#" class="card-link">meeting link?</a>
+                            </div>
+                        </div>
+                    {{/each}}
+                </div>
+            </div>
+            <div id="profile-card" class="col col-sm-12 col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex flex-column align-items-end mb-4">
+                            <a class="btn btn-primary" href="/profile/{{userData.userType}}/{{userData._id}}">View Full
+                                Profile</a>
+                        </div>
+                        <div class="d-flex flex-column align-items-center text-center">
+                            {{#if userData.profile_img}}
+                                <img
+                                    src="{{userData.profile_img}}"
+                                    alt="{{userData.first_name}}"
+                                    class="rounded-circle"
+                                    width="150"
+                                />
+                            {{else}}
+                                {{! <svg xmlns="http://www.w3.org/2000/svg" width="100" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#003c8a" d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z"/></svg> }}
+                                <i class="fa-solid fa-user" style="color: #003c8a; font-size:75"></i>
+                            {{/if}}
+                            <div class="mt-3">
+                                <h4>{{userData.first_name}} {{userData.last_name}}</h4>
+                                <div class="mb-1 d-flex flex-row gutters-sm justify-content-center">
+                                    <div class="ratings-render" data-rating={{userData.averageRating}}></div>
+                                    <p class="text-secondary">({{userData.reviews.length}})</p>
+                                </div>
+                                <p class="text-secondary mb-1">{{userData.summary}}</p>
+
+                                <div class="row">
+                                    <hr />
+                                    <h6 class="mb-0">Email</h6>
+                                    <div class="text-secondary">
+                                        {{userData.email}}
+                                    </div>
+                                </div>
+
+                                <div class="row" hidden>
+                                    <hr />
+                                    <h6 class="mb-0">Experience</h6>
+
+                                    <div class="text-start">
+                                        <ul class="list-group">
+                                            {{#each userData.experience}}
+                                                <li class="list-group-item">
+                                                    <p class="mb-0">Title</p>
+                                                    <p class="mb-0 text-secondary">{{title}}</p>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <p class="mb-0">Company</p>
+                                                    <p class="mb-0 text-secondary">{{institution}}</p>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <p class="mb-0">Years of experience</p>
+                                                    <p class="mb-0 text-secondary">{{years}}</p>
+                                                </li>
+                                            {{/each}}
+                                        </ul>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="row" hidden>
+                                    <hr />
+                                    <h6 class="mb-0">Education</h6>
+
+                                    <div class="text-start">
+                                        <ul class="list-group">
+                                            {{#each userData.education}}
+                                                <li class="list-group-item">
+                                                    <p class="mb-0">Degree</p>
+                                                    <p class="mb-0 text-secondary">{{degree}}</p>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <p class="mb-0">Company</p>
+                                                    <p class="mb-0 text-secondary">{{institution}}</p>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <p class="mb-0">Years of completion</p>
+                                                    <p class="mb-0 text-secondary">{{year}}</p>
+                                                </li>
+                                            {{/each}}
+                                        </ul>
+
+                                    </div>
+
+                                </div>
+
+                                {{#if userData.subject_areas}}
+                                    <div class="row">
+                                        <hr />
+
+                                        <h6 class="mb-0">Subject Areas</h6>
+
+                                        <div class="justify-content-center">
+                                            <ul class="list-group list-group-flush">
+                                                {{#each userData.subject_areas}}
+                                                    <li
+                                                        class="list-group-item d-flex justify-content-between align-items-center flex-wrap"
+                                                    >
+                                                        <p>{{name}}</p>
+                                                    </li>
+                                                {{/each}}
+                                            </ul>
+                                        </div>
+
+                                    </div>
+                                {{/if}}
+
+                                {{#if userData.skills}}
+                                    <div class="row">
+                                        <hr />
+
+                                        <h6 class="mb-2">Skills</h6>
+
+                                        <div class="justify-content-center">
+                                            <ol class="list-group list-group-horizontal mb-2">
+                                                {{#each userData.skills}}
+                                                    <li class="list-group-item border-0 p-0 me-2 bg-transparent">
+                                                        <p class="badge rounded-pill text-bg-info m-0">{{this}}</p>
+                                                    </li>
+                                                {{/each}}
+                                            </ol>
+                                        </div>
+
+                                    </div>
+                                {{/if}}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="card mt-3">
+                    {{#if profileInfo.badges}}
+                        <h5>Badges</h5>
+                        <div class="d-flex flex-row">
+
+                            {{#each profileInfo.badges}}
+                                <div class="p-2">
+                                    <img src="/public/badges/{{icon}}" />
+                                </div>
+                            {{/each}}
+                        </div>
+                    {{else}}
+                        <p class="text-secondary text-center p-4 mb-0"><em>No badges to display</em></p>
+                    {{/if}}
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+</main>
+{{> ratings_generator}}

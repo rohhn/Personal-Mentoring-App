@@ -1,0 +1,127 @@
+1. Users Collection
+json
+Copy code
+{
+   "_id": ObjectId("unique_user_id"),
+   "name": "Full Name",
+   "email": "user@example.com",
+   "password_hash": "hashed_password",
+   "user_type": "mentee", // or "mentor", "admin"
+   "parent_email": "parent@example.com",
+   "profile_image": "profile_image_url",
+   "created_at": ISODate("2024-11-04T00:00:00Z")
+}
+2. Mentors Collection
+json
+Copy code
+{
+   "_id": ObjectId("unique_mentor_id"), // same as user_id in Users if mentor
+   "qualifications": "Ph.D. in Computer Science",
+   "experience": "10 years in software development",
+   "availability": {
+      "Monday": ["10:00-12:00", "14:00-16:00"],
+      "Wednesday": ["09:00-11:00"]
+   },
+   "approval_status": true
+}
+3. Mentees Collection
+json
+Copy code
+{
+   "_id": ObjectId("unique_mentee_id"), // same as user_id in Users if mentee
+}
+4. Subjects Collection
+json
+Copy code
+{
+   "_id": ObjectId("unique_subject_id"),
+   "name": "Data Science",
+   "description": "Learn the basics of data analysis and machine learning."
+}
+5. Mentor_Subjects Collection
+json
+Copy code
+{
+   "_id": ObjectId("unique_mentor_subject_id"),
+   "mentor_id": ObjectId("mentor_id"),
+   "subject_id": ObjectId("subject_id")
+}
+6. Sessions Collection
+json
+Copy code
+{
+   "_id": ObjectId("unique_session_id"),
+   "mentor_id": ObjectId("mentor_id"),
+   "mentee_id": ObjectId("mentee_id"),
+   "subject_id": ObjectId("subject_id"),
+   "scheduled_time": ISODate("2024-11-10T14:00:00Z"),
+   "status": "scheduled", // "completed" or "canceled"
+   "meeting_link": "https://meetinglink.com/12345",
+   "created_at": ISODate("2024-11-04T00:00:00Z")
+}
+7. Ratings Collection
+json
+Copy code
+{
+   "_id": ObjectId("unique_rating_id"),
+   "session_id": ObjectId("session_id"),
+   "rating": 5,
+   "feedback": "The session was very helpful and insightful!",
+   "created_at": ISODate("2024-11-04T00:00:00Z")
+}
+8. Forums Collection
+json
+Copy code
+{
+   "_id": ObjectId("unique_forum_id"),
+   "subject_id": ObjectId("subject_id"),
+   "title": "Data Science Discussions",
+   "created_at": ISODate("2024-11-04T00:00:00Z")
+}
+9. Forum_Posts Collection
+json
+Copy code
+{
+   "_id": ObjectId("unique_post_id"),
+   "forum_id": ObjectId("forum_id"),
+   "user_id": ObjectId("user_id"),
+   "content": "I need help understanding linear regression.",
+   "created_at": ISODate("2024-11-04T00:00:00Z")
+}
+10. Badges Collection
+json
+Copy code
+{
+   "_id": ObjectId("unique_badge_id"),
+   "name": "5 Sessions Completed",
+   "description": "Awarded for attending 5 mentoring sessions",
+   "icon": "badge_icon_url"
+}
+11. User_Badges Collection
+json
+Copy code
+{
+   "_id": ObjectId("unique_user_badge_id"),
+   "user_id": ObjectId("user_id"),
+   "badge_id": ObjectId("badge_id"),
+   "earned_at": ISODate("2024-11-04T00:00:00Z")
+}
+12. Chats Collection
+json
+Copy code
+{
+   "_id": ObjectId("unique_chat_id"),
+   "mentor_id": ObjectId("mentor_id"),
+   "mentee_id": ObjectId("mentee_id"),
+   "created_at": ISODate("2024-11-04T00:00:00Z")
+}
+13. Messages Collection
+json
+Copy code
+{
+   "_id": ObjectId("unique_message_id"),
+   "chat_id": ObjectId("chat_id"),
+   "sender_id": ObjectId("user_id"),
+   "content": "Looking forward to our session on data science!",
+   "timestamp": ISODate("2024-11-04T14:00:00Z")
+}
