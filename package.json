@@ -20,10 +20,12 @@
   },
   "homepage": "https://github.com/rohhn/CS546_TeamProject#readme",
   "dependencies": {
+    "@google-cloud/local-auth": "^2.1.0",
     "axios": "^1.7.7",
     "bcrypt": "^5.1.1",
     "express": "^4.21.1",
     "express-handlebars": "^8.0.1",
+    "googleapis": "^105.0.0",
     "express-session": "^1.18.1",
     "fs": "^0.0.1-security",
     "mongo": "^0.1.0",

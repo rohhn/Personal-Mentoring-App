@@ -1,11 +1,11 @@
 import express from "express";
 
+
 import { ObjectId } from "mongodb";
 import multer from "multer";
 import { mentees } from "../config/mongoCollections.js";
-import { menteeData } from "../data/index.js";
-import { checkArrayOfStrings, checkDate, checkStringParams } from "../helpers.js";
-
+import { menteeData, mentorData } from "../data/index.js";
+import { checkArrayOfStrings, checkDate, checkStringParams, checkEmail } from "../helpers.js";
 const router = express.Router();
 
 router
@@ -25,13 +25,13 @@ router
             checkStringParams(newMentee.first_name);
             checkStringParams(newMentee.last_name);
             checkDate(newMentee.dob);
-            checkStringParams(newMentee.email);
+            await checkEmail(newMentee.email, "mentee");
             checkStringParams(newMentee.pwd_hash);
             checkStringParams(newMentee.parent_email);
             checkStringParams(newMentee.profile_image);
-            checkDate(newMentee.created_at);
             checkStringParams(newMentee.summary);
             newMentee.skills = checkArrayOfStrings(newMentee.skills);
+
         } catch (e) {
             return res.status(400).json({ error: e });
         }
@@ -198,6 +198,7 @@ router
 
             res.status(statusCode).json(false);
             // res.status(statusCode).redirect(`/profile/mentee/${menteeId}`);
+
         }
     });
 

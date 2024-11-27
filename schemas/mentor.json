@@ -41,15 +41,7 @@
     "subject_areas": [
         "subject_area_ref"
     ],
-    "availability": {
-        "Monday": {
-            "start_time": "2024-11-05T14:00:00Z",
-            "end_time": "2024-11-05T14:00:00Z"
-        },
-        "Tuesday": {
-            "start_time": "2024-11-05T14:00:00Z",
-            "end_time": "2024-11-05T14:00:00Z"
-        }
-    }
+
+    "calendar_id": "google_calendar_id"
         
 }
