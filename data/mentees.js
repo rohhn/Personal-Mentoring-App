@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { mentees } from "../config/mongoCollections.js";
-import { checkBoolean, checkStringParams, checkArrayOfStrings, checkDate } from "../helpers.js";
+import { checkArrayOfStrings, checkDate, checkStringParams } from "../helpers.js";
 
 export const createMentee = async (
     first_name,
@@ -30,10 +30,10 @@ export const createMentee = async (
     dob = dob.trim();
     email = email.trim();
     pwd_hash = pwd_hash.trim();
-    parent_email = parent_email.trim();
-    profile_image = profile_image.trim();
+    // parent_email = parent_email.trim();
+    // profile_image = profile_image.trim();
     const created_at = new Date();
-    summary = summary.trim();
+    // summary = summary.trim();
 
     let newMentee = {
         first_name: first_name,
