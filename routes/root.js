@@ -1,21 +1,13 @@
 import bcrypt from "bcrypt";
 import express from "express";
 import { menteeData, mentorData, subjectData } from "../data/index.js";
+import { formatDate } from "../helpers.js";
 
 const router = express.Router();
-
-const formatDate = (dateStr) => {
-    const date = new Date(dateStr);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${month}/${day}/${year}`;
-};
 
 router.route("/").get(async (req, res) => {
     const mentorsList = await mentorData.getAllMentors();
     const subjectAreasList = await subjectData.getAllSubjectAreas();
-    console.dir(subjectAreasList, { depth: null });
     res.render("landing/landing-page", {
         pageTitle: "Personal Mentoring App",
         headerOptions: req.headerOptions,
@@ -41,14 +33,21 @@ router
             if (userType === "mentee") {
                 console.log("Logging in as mentee");
 
-                const userData = await menteeData.getMenteeByEmail(email).catch((error) => {
-                    console.log(error);
-                    const errorObj = new Error("Incorrect E-mail or password.");
-                    errorObj.name = "Unauthorized";
-                    throw errorObj;
-                });
+                const userData = await menteeData
+                    .getMenteeByEmail(email)
+                    .catch((error) => {
+                        console.log(error);
+                        const errorObj = new Error(
+                            "Incorrect E-mail or password."
+                        );
+                        errorObj.name = "Unauthorized";
+                        throw errorObj;
+                    });
 
-                const comparePwd = await bcrypt.compare(password, userData.pwd_hash);
+                const comparePwd = await bcrypt.compare(
+                    password,
+                    userData.pwd_hash
+                );
 
                 if (comparePwd) {
                     req.session.user = {
@@ -64,14 +63,21 @@ router
             } else if (userType == "mentor") {
                 console.log("Logging in as mentor");
 
-                const userData = await mentorData.getMentorByEmail(email).catch((error) => {
-                    console.log(error);
-                    const errorObj = new Error("Incorrect E-mail or password.");
-                    errorObj.name = "Unauthorized";
-                    throw errorObj;
-                });
+                const userData = await mentorData
+                    .getMentorByEmail(email)
+                    .catch((error) => {
+                        console.log(error);
+                        const errorObj = new Error(
+                            "Incorrect E-mail or password."
+                        );
+                        errorObj.name = "Unauthorized";
+                        throw errorObj;
+                    });
 
-                const comparePwd = await bcrypt.compare(password, userData.pwd_hash);
+                const comparePwd = await bcrypt.compare(
+                    password,
+                    userData.pwd_hash
+                );
 
                 if (comparePwd) {
                     req.session.user = {
@@ -85,7 +91,9 @@ router
                     throw errorObj;
                 }
             } else {
-                const errorObj = new Error("Please select one of mentee/mentor.");
+                const errorObj = new Error(
+                    "Please select one of mentee/mentor."
+                );
                 errorObj.name = "UserError";
                 throw errorObj;
             }
@@ -125,23 +133,24 @@ router
         const lastName = req.body.last_name;
         const userType = req.body.user_type;
         const email = req.body.email;
-        const dob = req.body.dob;
-        console.log("Handle the wrong dob here")
+        const dob = formatDate(req.body.dob);
         const password = req.body.password;
 
         try {
-            const pwdHash = await bcrypt.hash(password, parseInt(process.env.SALT_ROUNDS));
+            const pwdHash = await bcrypt.hash(
+                password,
+                parseInt(process.env.SALT_ROUNDS)
+            );
 
             if (userType === "mentee") {
                 console.log("Creating mentee");
 
                 const parentEmail = req.body.parentEmail || null;
-                const formattedDob = formatDate(dob);
 
                 const createdUser = await menteeData.createMentee(
                     firstName,
                     lastName,
-                    formattedDob,
+                    dob,
                     email,
                     pwdHash,
                     parentEmail
@@ -154,14 +163,23 @@ router
                 };
             } else if (userType == "mentor") {
                 console.log("Creating mentor");
-                const createdUser = await mentorData.createMentor(firstName, lastName, dob, email, pwdHash);
+
+                const createdUser = await mentorData.createMentor(
+                    firstName,
+                    lastName,
+                    dob,
+                    email,
+                    pwdHash
+                );
                 req.session.user = {
                     email,
                     userId: createdUser._id,
                     userType,
                 };
             } else {
-                const errorObj = new Error("Please select one of mentee/mentor.");
+                const errorObj = new Error(
+                    "Please select one of mentee/mentor."
+                );
                 errorObj.name = "UserError";
                 throw errorObj;
             }
@@ -194,8 +212,6 @@ router.route("/logout").get(async (req, res) => {
 });
 
 router.route("/dashboard").get(async (req, res) => {
-    console.log("dashboard - ", req.session.user);
-
     const userType = req.session.user.userType;
     const userId = req.session.user.userId;
 
