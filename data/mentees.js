@@ -1,7 +1,11 @@
 import { ObjectId } from "mongodb";
 import { mentees } from "../config/mongoCollections.js";
-import { checkArrayOfStrings, checkDate, checkEmail, checkStringParams } from "../helpers.js";
-
+import {
+    checkArrayOfStrings,
+    checkDate,
+    checkEmail,
+    checkStringParams,
+} from "../helpers.js";
 
 export const createMentee = async (
     first_name,
@@ -14,13 +18,12 @@ export const createMentee = async (
     summary = null,
     skills = null
 ) => {
-
     checkStringParams(first_name);
     checkStringParams(last_name);
-    checkDate(dob);
-    await checkEmail(email, "mentee"); 
+    // checkDate(dob);
+    await checkEmail(email, "mentee");
     checkStringParams(pwd_hash);
-  
+
     // TODO: These must be optional params
     // checkStringParams(parent_email);
     // checkStringParams(profile_image);
@@ -38,26 +41,26 @@ export const createMentee = async (
     summary = summary.trim();
 
     let newMentee = {
-      first_name: first_name,
-      last_name: last_name,
-      dob: dob,
-      email: email,
-      pwd_hash: pwd_hash,
-      parent_email: parent_email,
-      profile_image: profile_image,
-      created_at: new Date(),
-      summary: summary,
-      skills: skills,
-      reviews: [],
-      badges: []
-    }
-
+        first_name: first_name,
+        last_name: last_name,
+        dob: dob,
+        email: email,
+        pwd_hash: pwd_hash,
+        parent_email: parent_email,
+        profile_image: profile_image,
+        created_at: new Date(),
+        summary: summary,
+        skills: skills,
+        reviews: [],
+        badges: [],
+    };
 
     const menteeCollection = await mentees();
 
     const result = await menteeCollection.insertOne(newMentee);
 
-    if (!result.acknowledged || !result.insertedId) throw "Could not create the mentee.";
+    if (!result.acknowledged || !result.insertedId)
+        throw "Could not create the mentee.";
 
     const newId = result.insertedId.toString();
 
@@ -159,10 +162,8 @@ export const updateMentee = async (
     skills = []
 ) => {
     try {
-        console.log("Update function reached");
-        console.log("Mentee ID:", id);
-
-        if (!id || typeof id !== "string") throw new Error("ID must be a non-empty string.");
+        if (!id || typeof id !== "string")
+            throw new Error("ID must be a non-empty string.");
         if (!ObjectId.isValid(id)) throw new Error(`Invalid Object ID: ${id}`);
         id = id.trim();
 
@@ -170,19 +171,10 @@ export const updateMentee = async (
         checkStringParams(last_name, "Last Name");
         checkStringParams(email, "Email");
 
-        if (dob) checkDate(dob, "Date of Birth");
+        // if (dob) checkDate(dob, "Date of Birth");
         if (parent_email) checkStringParams(parent_email, "Parent Email");
         if (summary) checkStringParams(summary, "Summary");
         if (skills) skills = checkArrayOfStrings(skills);
-
-        let profileImageBinary = null;
-        if (profileImageBase64) {
-            if (typeof profileImageBase64 === "string") {
-                profileImageBinary = Buffer.from(profileImageBase64, "base64");
-            } else {
-                throw new Error("Invalid image format. Expected a Base64 string.");
-            }
-        }
 
         const menteeUpdate = {
             first_name: first_name.trim(),
@@ -190,24 +182,26 @@ export const updateMentee = async (
             dob: dob ? dob.trim() : null,
             email: email.trim(),
             parent_email: parent_email ? parent_email.trim() : null,
-            profile_image: profileImageBinary,
             summary: summary ? summary.trim() : null,
             skills,
         };
 
+        if (profileImageBase64) {
+            menteeUpdate.profile_image = profileImageBase64;
+        }
 
         const menteeCollection = await mentees();
 
         const result = await menteeCollection.findOneAndUpdate(
-            { _id: new ObjectId(id) }, 
-            { $set: menteeUpdate },    
-            { returnDocument: "after" } 
+            { _id: new ObjectId(id) },
+            { $set: menteeUpdate },
+            { returnDocument: "after" }
         );
 
-        console.log("Update result:", result);
-
         if (!result) {
-            throw new Error(`Could not update the mentee. No document found with ID: ${id}`);
+            throw new Error(
+                `Could not update the mentee. No document found with ID: ${id}`
+            );
         }
 
         return result;

@@ -3,7 +3,13 @@ import { ObjectId } from "mongodb";
 import multer from "multer";
 import { mentees } from "../config/mongoCollections.js";
 import { menteeData } from "../data/index.js";
-import { checkArrayOfStrings, checkDate, checkEmail, checkStringParams } from "../helpers.js";
+import {
+    checkArrayOfStrings,
+    checkDate,
+    checkEmail,
+    checkStringParams,
+    formatDate,
+} from "../helpers.js";
 const router = express.Router();
 
 const upload = multer({
@@ -12,7 +18,11 @@ const upload = multer({
     fileFilter: (req, file, cb) => {
         const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
         if (!allowedTypes.includes(file.mimetype)) {
-            return cb(new Error("Unsupported file format. Please upload JPEG or PNG images."));
+            return cb(
+                new Error(
+                    "Unsupported file format. Please upload JPEG or PNG images."
+                )
+            );
         }
         cb(null, true);
     },
@@ -41,7 +51,6 @@ router
             checkStringParams(newMentee.profile_image);
             checkStringParams(newMentee.summary);
             newMentee.skills = checkArrayOfStrings(newMentee.skills);
-
         } catch (e) {
             return res.status(400).json({ error: e });
         }
@@ -79,12 +88,14 @@ router
                 throw errorObj;
             }
 
-            let mentee = await menteeData.getMenteeById(menteeId).catch((error) => {
-                console.log(error);
-                const errorObj = new Error("User not found!");
-                errorObj.name = "NotFound";
-                throw errorObj;
-            });
+            let mentee = await menteeData
+                .getMenteeById(menteeId)
+                .catch((error) => {
+                    console.log(error);
+                    const errorObj = new Error("User not found!");
+                    errorObj.name = "NotFound";
+                    throw errorObj;
+                });
 
             mentee.userType = "mentee";
 
@@ -125,7 +136,9 @@ router
         try {
             const menteeCollection = await mentees();
 
-            const mentor = await menteeCollection.findOne({ _id: new ObjectId(menteeId) });
+            const mentor = await menteeCollection.findOne({
+                _id: new ObjectId(menteeId),
+            });
 
             if (!mentor) {
                 throw `Mentor with the id ${menteeId} does not exist.`;
@@ -140,25 +153,61 @@ router
             return res.status(404).json({ error: e });
         }
     })
-    router.put("/:menteeId", upload.single("profileImage"), async (req, res) => {
+    .put(upload.any(), async (req, res) => {
         try {
             const menteeId = req.params.menteeId.trim();
             if (!menteeId) throw new Error("Mentee ID is required.");
-            const { first_name, last_name, dob, email, parent_email, summary, skills } = req.body;
-            if (!first_name || !last_name || !email) {
-                throw new Error("First name, last name, and email are required.");
+
+            if (req.session.user.userId !== menteeId) {
+                errObj = new Error("Forbidden!");
+                errorObj.statusCode = 403;
+                throw errObj;
             }
+
+            const {
+                first_name,
+                last_name,
+                dob,
+                email,
+                parent_email,
+                summary,
+                skills,
+            } = req.body;
+            // const dob = formatDate(req.body.dob);
+
+            if (!first_name || !last_name || !email) {
+                errorObj = new Error(
+                    "First name, last name, and email are required."
+                );
+                errorObj.statusCode = 400;
+            }
+
             let skillsArray = [];
             if (skills) {
                 if (typeof skills === "string") {
-                    skillsArray = [skills];
+                    skillsArray = JSON.parse(skills);
                 } else if (Array.isArray(skills)) {
                     skillsArray = skills;
                 } else {
-                    throw new Error("Invalid format for skills. Must be a string or an array of strings.");
+                    errorObj = new Error(
+                        "Invalid format for skills. Must be a string or an array of strings."
+                    );
+                    errObj.statusCode = 400;
                 }
             }
-            const profileImageBase64 = req.file ? req.file.buffer.toString("base64") : null;
+
+            let profileImageBase64 = null;
+            if (Array.isArray(req.files) && req.files.length == 1) {
+                const profileImgFile = req.files[0];
+                // data:image/[format]; base64,
+
+                if (profileImgFile.fieldname == "profile_image") {
+                    profileImageBase64 = `data:${
+                        profileImgFile.mimetype
+                    }; base64,${profileImgFile.buffer.toString("base64")}`;
+                }
+            }
+
             const updatedMentee = await menteeData.updateMentee(
                 menteeId,
                 first_name,
@@ -170,13 +219,16 @@ router
                 summary || null,
                 skillsArray
             );
-            return res.status(200).json({ success: true, mentee: updatedMentee });
+
+            return res.status(200).json({ success: true });
         } catch (error) {
             console.error(error);
-            return res.status(400).json({ success: false, error: error.message });
+            const statusCode = error.statusCode || 400;
+            return res
+                .status(statusCode)
+                .json({ success: false, error: error.message });
         }
     });
-    
 
 router.route("/:menteeId/edit").get(async (req, res) => {
     let menteeId = req.params.menteeId.trim();
