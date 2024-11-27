@@ -1,17 +1,26 @@
-import express from "express";
 import bcrypt from "bcrypt";
-import { mentorData } from "../data/index.js";
-import { menteeData } from "../data/index.js";
+import express from "express";
+import { menteeData, mentorData, subjectData } from "../data/index.js";
 
 const router = express.Router();
 
+const formatDate = (dateStr) => {
+    const date = new Date(dateStr);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${month}/${day}/${year}`;
+};
+
 router.route("/").get(async (req, res) => {
     const mentorsList = await mentorData.getAllMentors();
-
+    const subjectAreasList = await subjectData.getAllSubjectAreas();
+    console.dir(subjectAreasList, { depth: null });
     res.render("landing/landing-page", {
         pageTitle: "Personal Mentoring App",
         headerOptions: req.headerOptions,
         mentors: mentorsList,
+        subject_areas: subjectAreasList,
     });
 });
 
@@ -117,6 +126,7 @@ router
         const userType = req.body.user_type;
         const email = req.body.email;
         const dob = req.body.dob;
+        console.log("Handle the wrong dob here")
         const password = req.body.password;
 
         try {
@@ -126,11 +136,12 @@ router
                 console.log("Creating mentee");
 
                 const parentEmail = req.body.parentEmail || null;
+                const formattedDob = formatDate(dob);
 
                 const createdUser = await menteeData.createMentee(
                     firstName,
                     lastName,
-                    dob,
+                    formattedDob,
                     email,
                     pwdHash,
                     parentEmail
@@ -211,6 +222,8 @@ router.route("/dashboard").get(async (req, res) => {
             res.status(500).redirect("/");
         }
 
+        userData.userType = userType;
+
         res.render("users/dashboard", {
             pageTitle: "Dashboard",
             headerOptions: req.headerOptions,
@@ -219,3 +232,19 @@ router.route("/dashboard").get(async (req, res) => {
     } catch (error) {}
 });
 export { router as rootRoutes };
+
+router.route("/profile/:userType/:userId").get(async (req, res) => {
+    const userType = req.params.userType;
+    const userId = req.params.userId;
+
+    if (["mentee", "mentor"].includes(userType)) {
+        res.redirect(`/${userType}/${userId}`);
+    } else {
+        res.redirect("/dashboard");
+    }
+});
+
+// router.route("/test").put(multer().single("profile_image"), async (req, res, next) => {
+//     console.dir(req.body, { depth: null });
+//     console.log(Object.keys(req.file));
+// });

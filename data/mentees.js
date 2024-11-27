@@ -2,6 +2,7 @@ import { ObjectId } from "mongodb";
 import { mentees } from "../config/mongoCollections.js";
 import { checkBoolean, checkStringParams, checkArrayOfStrings, checkDate, checkEmail } from "../helpers.js";
 
+
 export const createMentee = async (
     first_name,
     last_name,
@@ -31,8 +32,9 @@ export const createMentee = async (
     dob = dob.trim();
     email = email.trim();
     pwd_hash = pwd_hash.trim();
-    parent_email = parent_email.trim();
-    profile_image = profile_image.trim();
+
+    // parent_email = parent_email.trim();
+    // profile_image = profile_image.trim();
     summary = summary.trim();
 
     let newMentee = {
@@ -145,19 +147,7 @@ export const removeMentee = async (id) => {
     return `${mentee.name} have been successfully deleted!`;
 };
 
-export const updateMentee = async (
-    id,
-    first_name,
-    last_name,
-    dob,
-    email,
-    pwd_hash,
-    parent_email,
-    profile_image,
-    created_at,
-    summary,
-    skills
-) => {
+export const updateMentee = async (id, first_name, last_name, dob, email, parent_email, summary, skills) => {
     checkStringParams(id);
 
     id = id.trim();
@@ -168,12 +158,10 @@ export const updateMentee = async (
 
     checkStringParams(first_name);
     checkStringParams(last_name);
-    checkDate(dob);
+    // checkDate(dob);
     checkStringParams(email);
-    checkStringParams(pwd_hash);
     checkStringParams(parent_email);
-    checkStringParams(profile_image);
-    checkDate(created_at);
+    // checkStringParams(profile_image);
     checkStringParams(summary);
     skills = checkArrayOfStrings(skills);
 
@@ -181,10 +169,8 @@ export const updateMentee = async (
     last_name = last_name.trim();
     dob = dob.trim();
     email = email.trim();
-    pwd_hash = pwd_hash.trim();
     parent_email = parent_email.trim();
-    profile_image = profile_image.trim();
-    created_at = created_at.trim();
+    // profile_image = profile_image.trim();
     summary = summary.trim();
 
     let menteeUpdate = {
@@ -192,10 +178,8 @@ export const updateMentee = async (
         last_name: last_name,
         dob: dob,
         email: email,
-        pwd_hash: pwd_hash,
         parent_email: parent_email,
-        profile_image: profile_image,
-        created_at: created_at,
+        // profile_image: profile_image,
         summary: summary,
         skills: skills,
     };

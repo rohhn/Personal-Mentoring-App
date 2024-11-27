@@ -33,8 +33,8 @@ export function validateRating(rating) {
     return true;
 }
 
-export const checkStringParams = (param) => {
-    if (!param) {
+export const checkStringParams = (param, allowEmpty = false) => {
+    if (!param && !allowEmpty) {
         throw `The input is an empty paramter.`;
     }
     if (typeof param !== "string") {
@@ -42,7 +42,7 @@ export const checkStringParams = (param) => {
         throw `The input is not a string: ${param}.`;
     }
 
-    if (param.trim() === "") {
+    if (param.trim() === "" && !allowEmpty) {
         throw `The input is an empty string: ${param}.`;
     }
 };
