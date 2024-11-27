@@ -1,9 +1,8 @@
 // You can add and export any helper functions you want here - if you aren't using any, then you can just leave this file as is
-import { mentors, mentees } from "./config/mongoCollections.js";
-import { ObjectId } from "mongodb";
+import fs from 'fs';
 import { google } from "googleapis";
 import path from 'path';
-import fs from 'fs';
+import { mentees, mentors } from "./config/mongoCollections.js";
 
 export const postVerify=async (content)=>
 {
