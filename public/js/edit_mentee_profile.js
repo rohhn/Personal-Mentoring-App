@@ -77,29 +77,41 @@ document.addEventListener("DOMContentLoaded", () => {
         updateUserForm.addEventListener("submit", async (event) => {
             event.preventDefault();
             const data = new FormData(updateUserForm);
-
+        
             const skillsList = document.getElementById("skills-list");
             const newSkillsList = [];
             for (let index = 0; index < skillsList.children.length; index++) {
                 newSkillsList.push(skillsList.children[index].getAttribute("data-skill"));
             }
-
-            // data.append("skills", JSON.stringify(newSkillsList));
-
-            if (data.has("profile_image")) {
-                // TODO: Make a separate function to handle profile image uploads.
-                data.delete("profile_image");
-            }
-
+        
             const payload = {};
             data.forEach((value, key) => (payload[key] = value));
             payload.skills = newSkillsList;
-
-            const completed = await updateUser(payload);
-            if (completed) {
-                window.location.href = `${window.location.origin}/${payload.user_type}/${payload.user_id}`;
+        
+            // Handle the profile image
+            const profileImageInput = document.getElementById("profile-image");
+            if (profileImageInput.files.length > 0) {
+                const file = profileImageInput.files[0];
+                const reader = new FileReader();
+                reader.onload = async () => {
+                    const base64String = reader.result.split(",")[1];
+                    payload.profile_image = base64String;
+        
+                    const completed = await updateUser(payload);
+                    if (completed) {
+                        window.location.href = `${window.location.origin}/${payload.user_type}/${payload.user_id}`;
+                    } else {
+                        console.log("error");
+                    }
+                };
+                reader.readAsDataURL(file);
             } else {
-                console.log("error");
+                const completed = await updateUser(payload);
+                if (completed) {
+                    window.location.href = `${window.location.origin}/${payload.user_type}/${payload.user_id}`;
+                } else {
+                    console.log("error");
+                }
             }
         });
     }

@@ -2,7 +2,8 @@ import express from 'express';
 import { parentsSessionData } from '../data/parent.js';
 
 const router = express.Router();
-router.post('/parentSession', async (req, res) => {
+router.post('/Session', async (req, res) => {
+    console.log("Reached here")
     const { mentorId, menteeId, subjectArea, time, duration, meetingLink } = req.body;
     if (!mentorId || !menteeId || !subjectArea || !time || !duration || !meetingLink) {
         return res.status(400).json({ error: 'Missing required fields' });
