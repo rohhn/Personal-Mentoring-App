@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { mentors } from "../config/mongoCollections.js";
+import * as subjectData from  './subject_areas.js';
 import { checkArrayOfStrings, checkAvailability, checkBoolean, checkDate, checkEducation, checkExperience, checkStringParams, checkEmail, createCalendarForMentor, addAvailability, validateAvailability } from "../helpers.js";
 
 
@@ -180,7 +181,7 @@ export const updateMentor = async (
   checkStringParams(first_name);
   checkStringParams(last_name);
   checkDate(dob);
-  // await checkEmail(email, "mentor");
+  await checkEmail(email, "mentor");
   checkStringParams(pwd_hash);
   checkStringParams(profile_image);
   checkStringParams(summary);
@@ -188,7 +189,6 @@ export const updateMentor = async (
   education = checkEducation(education);
   experience = checkExperience(experience);
   subject_areas = checkArrayOfStrings(subject_areas);
-  // availability = checkAvailability(availability);
 
 
   first_name = first_name.trim();
@@ -207,7 +207,6 @@ export const updateMentor = async (
     summary: summary,
     education: education,
     experience: experience,
-    availability: availability,
     approved: approved,
     subject_areas: subject_areas
   }
