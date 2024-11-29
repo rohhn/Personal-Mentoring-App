@@ -162,4 +162,4 @@ router
         }
     });
 
-export default router;
+export {router as postRoutes};
