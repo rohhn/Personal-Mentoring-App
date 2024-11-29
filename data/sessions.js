@@ -1,9 +1,10 @@
 import { ObjectId } from "mongodb";
 import { sessions, mentees, mentors } from "../config/mongoCollections.js";
-import { mentorData } from "./index.js";
+import { mentorData, subjectData } from "./index.js";
 import { checkDate, checkNumber, checkStringParams, checkAvailability, bookSession, updateSessionOnCalendar, deleteSessionFromCalendar } from "../helpers.js";
 import axios from "axios";
-import { google } from "googleapis";
+
+//TODO Allow to cancel sessions only 24 hrs before.
 
 const clientId = "xVOOK02JTwSW6xEvYeU5Gw";
 const clientSecret = 'zrfgF41GpvGzQFcbpRUfSZlLMYpr4NVf'; 
@@ -93,6 +94,16 @@ export const createSession = async (
         throw `${mentee_id} is not a valid ObjectID.`;
     }
 
+    if(!ObjectId.isValid(subject_area)){
+        throw `${subject_area} is not a valid ObjectID.`;
+    }
+
+    const subject = await subjectData.getSubjectById(subject_area);
+
+    if(!subject){
+        throw `The subject does not exists.`;
+    }
+
     const mentorCollection = await mentors();
 
     const mentor = await mentorCollection.findOne({_id: new ObjectId(mentor_id)});
@@ -110,8 +121,6 @@ export const createSession = async (
     }
 
     let calendarId = mentor.calendarId;
-
-    
 
     let isAvailable = await checkAvailability(calendarId, start_time, end_time);
 

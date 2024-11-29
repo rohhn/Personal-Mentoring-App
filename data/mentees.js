@@ -169,7 +169,7 @@ export const updateMentee = async (
     checkStringParams(first_name);
     checkStringParams(last_name);
     checkDate(dob);
-    checkStringParams(email);
+    await checkEmail(email, "mentee");
     checkStringParams(pwd_hash);
     checkStringParams(parent_email);
     checkStringParams(profile_image);

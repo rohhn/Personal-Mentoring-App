@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { mentors } from "../config/mongoCollections.js";
+import { subjectData } from "./index.js";
 import { checkArrayOfStrings, checkAvailability, checkBoolean, checkDate, checkEducation, checkExperience, checkStringParams, checkEmail, createCalendarForMentor, addAvailability, validateAvailability } from "../helpers.js";
 
 
@@ -180,7 +181,7 @@ export const updateMentor = async (
   checkStringParams(first_name);
   checkStringParams(last_name);
   checkDate(dob);
-  // await checkEmail(email, "mentor");
+  await checkEmail(email, "mentor");
   checkStringParams(pwd_hash);
   checkStringParams(profile_image);
   checkStringParams(summary);
@@ -188,7 +189,6 @@ export const updateMentor = async (
   education = checkEducation(education);
   experience = checkExperience(experience);
   subject_areas = checkArrayOfStrings(subject_areas);
-  // availability = checkAvailability(availability);
 
 
   first_name = first_name.trim();
@@ -207,7 +207,6 @@ export const updateMentor = async (
     summary: summary,
     education: education,
     experience: experience,
-    availability: availability,
     approved: approved,
     subject_areas: subject_areas
   }
@@ -259,4 +258,191 @@ export const toAddAvailability = async (
 
     // console.log(av);
   }
+}
+
+
+export const updateSubjectAreaToMentor = async (id, subjectId) => {
+  checkStringParams(id);
+  checkStringParams(subjectId);
+
+  id = id.trim();
+  subjectId = subjectId.trim();
+
+  if(!ObjectId.isValid(subjectId)){
+    throw `${id} is not a valid ObjectID.`;
+  }
+
+  if(!ObjectId.isValid(subjectId)){
+    throw `${subjectId} is not a valid ObjectID.`;
+  }
+
+  let mentor = await getMentorById(id);
+
+  let subject = await subjectData.getSubjectById(subjectId);
+  
+  let subject_areas = mentor.subject_areas;
+
+  if(subject_areas.includes(subjectId)){
+    throw `You already have the subject area.`;
+  }
+
+  subject_areas.push(subjectId);
+
+  let updateDoc = {
+    subject_areas: subject_areas
+  }
+
+  const result = await mentorCollection.findOneAndUpdate(
+    {_id: new ObjectId(id)},
+    {$set: updateDoc},
+    {returnDocument: 'after'}
+  );
+
+  if(!result){
+    throw `Could not Update the Mentor.`;
+  }
+
+  result._id = result._id.toString();
+
+  return result;  
+
+}
+
+export const updateSubjectAreaToMentorByName = async (id, subjectName) => {
+  checkStringParams(id);
+  checkStringParams(subjectName);
+
+  id = id.trim();
+  subjectName = subjectName.trim();
+
+
+  if(!ObjectId.isValid(subjectId)){
+    throw `${subjectId} is not a valid ObjectID.`;
+  }
+
+  let mentor = await getMentorById(id);
+
+  let subject = await subjectData.getSubjectByName(subjectName);
+
+  let subjectId = subject._id.toString();
+  
+  let subject_areas = mentor.subject_areas;
+
+  if(subject_areas.includes(subjectId)){
+    throw `You already have the subject area.`;
+  }
+
+  subject_areas.push(subjectId);
+
+  let updateDoc = {
+    subject_areas: subject_areas
+  }
+
+  const result = await mentorCollection.findOneAndUpdate(
+    {_id: new ObjectId(id)},
+    {$set: updateDoc},
+    {returnDocument: 'after'}
+  );
+
+  if(!result){
+    throw `Could not Update the Mentor.`;
+  }
+
+  result._id = result._id.toString();
+
+  return result;  
+
+}
+
+export const removeSubjectAreaFromMentor = async (id, subjectId) => {
+  checkStringParams(id);
+  checkStringParams(subjectId);
+
+  id = id.trim();
+  subjectId = subjectId.trim();
+
+  if(!ObjectId.isValid(subjectId)){
+    throw `${id} is not a valid ObjectID.`;
+  }
+
+  if(!ObjectId.isValid(subjectId)){
+    throw `${subjectId} is not a valid ObjectID.`;
+  }
+
+  let mentor = await getMentorById(id);
+
+  let subject = await subjectData.getSubjectById(subjectId);
+  
+  let subject_areas = mentor.subject_areas;
+
+  if(!subject_areas.includes(subjectId)){
+    throw `Subject Area is not in your profile.`;
+  }
+
+  subject_areas = subject_areas.filter(value => value !== subjectId);
+
+  let updateDoc = {
+    subject_areas: subject_areas
+  }
+
+  const result = await mentorCollection.findOneAndUpdate(
+    {_id: new ObjectId(id)},
+    {$set: updateDoc},
+    {returnDocument: 'after'}
+  );
+
+  if(!result){
+    throw `Could not Update the Mentor.`;
+  }
+
+  result._id = result._id.toString();
+
+  return result;  
+
+}
+
+export const removeSubjectAreaToMentorByName = async (id, subjectName) => {
+  checkStringParams(id);
+  checkStringParams(subjectName);
+
+  id = id.trim();
+  subjectName = subjectName.trim();
+
+
+  if(!ObjectId.isValid(subjectId)){
+    throw `${subjectId} is not a valid ObjectID.`;
+  }
+
+  let mentor = await getMentorById(id);
+
+  let subject = await subjectData.getSubjectByName(subjectName);
+
+  let subjectId = subject._id.toString();
+  
+  let subject_areas = mentor.subject_areas;
+
+  if(subject_areas.includes(subjectId)){
+    throw `You already have the subject area.`;
+  }
+
+  subject_areas = subject_areas.filter(value => value !== subjectId);
+
+  let updateDoc = {
+    subject_areas: subject_areas
+  }
+
+  const result = await mentorCollection.findOneAndUpdate(
+    {_id: new ObjectId(id)},
+    {$set: updateDoc},
+    {returnDocument: 'after'}
+  );
+
+  if(!result){
+    throw `Could not Update the Mentor.`;
+  }
+
+  result._id = result._id.toString();
+
+  return result;  
+
 }
