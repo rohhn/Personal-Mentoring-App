@@ -5,17 +5,16 @@ import * as repliesData from "../data/replies.js";
 const router = express.Router();
 
 router
-    .route("/forum/:subject_name")
+    .route("/forum/:subject_id")
     .get(async (req, res) => {
         try {
-            let forum = await postData.getForums(req.params.subject_name);
+            let forum = await postData.getForums(req.params.subject_id);
             res.json(forum);
         } catch (e) {
             res.status(404).json({ error: e });
         }
     })
 
-    // Create a new post in a subject
     .post(async (req, res) => {
         let { authorID, title, content } = req.body;
 
@@ -27,7 +26,7 @@ router
 
         try {
             let newPost = await postData.makePost(
-                req.params.subject_name,
+                req.params.subject_id,
                 authorID,
                 title,
                 content
@@ -39,7 +38,7 @@ router
     });
 
 router
-    .route("/forum/:subject_name/:post_id")
+    .route("/forum/:subject_id/:post_id")
     .patch(async (req, res) => {
         let { authorID, updatedContent } = req.body;
 
@@ -82,7 +81,7 @@ router
     });
 
 router
-    .route("/forum/:subject_name/:post_id/replies")
+    .route("/forum/:subject_id/:post_id/replies")
     .get(async (req, res) => {
         try {
             let replies = await repliesData.getReplies(req.params.post_id);
@@ -116,7 +115,7 @@ router
     });
 
 router
-    .route("/forum/:subject_name/:post_id/replies/:reply_id")
+    .route("/forum/:subject_id/:post_id/replies/:reply_id")
     .patch(async (req, res) => {
         let { authorID, updatedContent } = req.body;
 

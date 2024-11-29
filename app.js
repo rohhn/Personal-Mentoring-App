@@ -41,7 +41,7 @@ const handlebarsInstance = exphbs.create({
 app.use(
     session({
         name: "PersonalMentoringApp",
-        secret: process.env.EXPRESS_SESSION_SECRET,
+        secret: process.env.EXPRESS_SESSION_SECRET || 'fallback',
         saveUninitialized: false,
         resave: false,
         cookie: { maxAge: 60000 },
