@@ -6,3 +6,13 @@
       column-count: 5;
     }
   }
+
+
+body {
+  background-color: #020617;
+}
+
+.card {
+  background-color: #f9fafb;
+  /* color: #e4e4e7; */
+}

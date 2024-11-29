@@ -260,7 +260,6 @@ export const toAddAvailability = async (
   }
 }
 
-
 export const updateSubjectAreaToMentor = async (id, subjectId) => {
   checkStringParams(id);
   checkStringParams(subjectId);
@@ -446,3 +445,4 @@ export const removeSubjectAreaToMentorByName = async (id, subjectName) => {
   return result;  
 
 }
+

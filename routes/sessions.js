@@ -1,10 +1,10 @@
 import express from 'express';
 
 import { ObjectId } from 'mongodb';
-import { sessions, mentees, mentors } from "../config/mongoCollections.js";
-import { checkDate, checkNumber, checkStringParams } from "../helpers.js";
+import { mentees, mentors, sessions } from "../config/mongoCollections.js";
+import { checkDate, checkStringParams } from "../helpers.js";
 
-import { menteeData, mentorData, sessionsData } from '../data/index.js';
+import { sessionsData } from '../data/index.js';
 
 const router = express.Router();
 

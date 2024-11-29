@@ -1,17 +1,18 @@
-import express from "express";
 import bcrypt from "bcrypt";
-import { mentorData } from "../data/index.js";
-import { menteeData } from "../data/index.js";
+import express from "express";
+import { menteeData, mentorData, subjectData } from "../data/index.js";
+import { formatDate } from "../helpers.js";
 
 const router = express.Router();
 
 router.route("/").get(async (req, res) => {
     const mentorsList = await mentorData.getAllMentors();
-
+    const subjectAreasList = await subjectData.getAllSubjectAreas();
     res.render("landing/landing-page", {
         pageTitle: "Personal Mentoring App",
         headerOptions: req.headerOptions,
         mentors: mentorsList,
+        subject_areas: subjectAreasList,
     });
 });
 
@@ -32,14 +33,21 @@ router
             if (userType === "mentee") {
                 console.log("Logging in as mentee");
 
-                const userData = await menteeData.getMenteeByEmail(email).catch((error) => {
-                    console.log(error);
-                    const errorObj = new Error("Incorrect E-mail or password.");
-                    errorObj.name = "Unauthorized";
-                    throw errorObj;
-                });
+                const userData = await menteeData
+                    .getMenteeByEmail(email)
+                    .catch((error) => {
+                        console.log(error);
+                        const errorObj = new Error(
+                            "Incorrect E-mail or password."
+                        );
+                        errorObj.name = "Unauthorized";
+                        throw errorObj;
+                    });
 
-                const comparePwd = await bcrypt.compare(password, userData.pwd_hash);
+                const comparePwd = await bcrypt.compare(
+                    password,
+                    userData.pwd_hash
+                );
 
                 if (comparePwd) {
                     req.session.user = {
@@ -55,14 +63,21 @@ router
             } else if (userType == "mentor") {
                 console.log("Logging in as mentor");
 
-                const userData = await mentorData.getMentorByEmail(email).catch((error) => {
-                    console.log(error);
-                    const errorObj = new Error("Incorrect E-mail or password.");
-                    errorObj.name = "Unauthorized";
-                    throw errorObj;
-                });
+                const userData = await mentorData
+                    .getMentorByEmail(email)
+                    .catch((error) => {
+                        console.log(error);
+                        const errorObj = new Error(
+                            "Incorrect E-mail or password."
+                        );
+                        errorObj.name = "Unauthorized";
+                        throw errorObj;
+                    });
 
-                const comparePwd = await bcrypt.compare(password, userData.pwd_hash);
+                const comparePwd = await bcrypt.compare(
+                    password,
+                    userData.pwd_hash
+                );
 
                 if (comparePwd) {
                     req.session.user = {
@@ -76,7 +91,9 @@ router
                     throw errorObj;
                 }
             } else {
-                const errorObj = new Error("Please select one of mentee/mentor.");
+                const errorObj = new Error(
+                    "Please select one of mentee/mentor."
+                );
                 errorObj.name = "UserError";
                 throw errorObj;
             }
@@ -116,11 +133,14 @@ router
         const lastName = req.body.last_name;
         const userType = req.body.user_type;
         const email = req.body.email;
-        const dob = req.body.dob;
+        const dob = formatDate(req.body.dob);
         const password = req.body.password;
 
         try {
-            const pwdHash = await bcrypt.hash(password, parseInt(process.env.SALT_ROUNDS));
+            const pwdHash = await bcrypt.hash(
+                password,
+                parseInt(process.env.SALT_ROUNDS)
+            );
 
             if (userType === "mentee") {
                 console.log("Creating mentee");
@@ -143,14 +163,23 @@ router
                 };
             } else if (userType == "mentor") {
                 console.log("Creating mentor");
-                const createdUser = await mentorData.createMentor(firstName, lastName, dob, email, pwdHash);
+
+                const createdUser = await mentorData.createMentor(
+                    firstName,
+                    lastName,
+                    dob,
+                    email,
+                    pwdHash
+                );
                 req.session.user = {
                     email,
                     userId: createdUser._id,
                     userType,
                 };
             } else {
-                const errorObj = new Error("Please select one of mentee/mentor.");
+                const errorObj = new Error(
+                    "Please select one of mentee/mentor."
+                );
                 errorObj.name = "UserError";
                 throw errorObj;
             }
@@ -183,8 +212,6 @@ router.route("/logout").get(async (req, res) => {
 });
 
 router.route("/dashboard").get(async (req, res) => {
-    console.log("dashboard - ", req.session.user);
-
     const userType = req.session.user.userType;
     const userId = req.session.user.userId;
 
@@ -211,6 +238,8 @@ router.route("/dashboard").get(async (req, res) => {
             res.status(500).redirect("/");
         }
 
+        userData.userType = userType;
+
         res.render("users/dashboard", {
             pageTitle: "Dashboard",
             headerOptions: req.headerOptions,
@@ -219,3 +248,19 @@ router.route("/dashboard").get(async (req, res) => {
     } catch (error) {}
 });
 export { router as rootRoutes };
+
+router.route("/profile/:userType/:userId").get(async (req, res) => {
+    const userType = req.params.userType;
+    const userId = req.params.userId;
+
+    if (["mentee", "mentor"].includes(userType)) {
+        res.redirect(`/${userType}/${userId}`);
+    } else {
+        res.redirect("/dashboard");
+    }
+});
+
+// router.route("/test").put(multer().single("profile_image"), async (req, res, next) => {
+//     console.dir(req.body, { depth: null });
+//     console.log(Object.keys(req.file));
+// });
