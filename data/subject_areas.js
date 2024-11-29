@@ -58,7 +58,7 @@ export const getSubjectById = async (id) => {
     const subjectAreasCollection = await subject_areas();
 
     const subject = await subjectAreasCollection.findOne({ _id: new ObjectId(id) });
-
+    console.log(subject);
     if (!subject) {
         throw `Subject area with the id ${id} does not exist.`;
     }

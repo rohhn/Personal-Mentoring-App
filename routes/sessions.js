@@ -18,14 +18,15 @@ router
             checkStringParams(newSession.mentor_id);
             checkStringParams(newSession.mentee_id);
             checkStringParams(newSession.subject_area);
-            checkDate(newSession.start_time);
-            checkDate(newSession.end_time);
+            // checkDate(newSession.start_time);
+            // checkDate(newSession.end_time);
 
-            mentor_id = mentor_id.trim();
-            mentee_id = mentee_id.trim();
-            subject_area = subject_area.trim();
-            start_time = new Date(start_time);
-            end_time = new Date(end_time);
+            newSession.mentor_id = newSession.mentor_id.trim();
+            newSession.mentee_id = newSession.mentee_id.trim();
+            newSession.subject_area = newSession.subject_area.trim();
+            newSession.start_time = new Date(newSession.start_time.trim());
+            newSession.end_time = new Date(newSession.end_time.trim());
+            console.log(newSession.start_time);
         }catch(e){
             return res.status(400).json({error: e});
         }
@@ -35,6 +36,7 @@ router
             let session = await sessionsData.createSession(newSession.mentor_id, newSession.mentee_id, newSession.subject_area, newSession.start_time, newSession.end_time);
             return res.status(200).json(session);
         }catch(e){
+            console.log(e);
             return res.status(500).json({error: e});
         }
        
@@ -169,8 +171,8 @@ router
         let reschedSession = req.body;
 
         try{
-            checkDate(reschedSession.start_time);
-            checkDate(reschedSession.end_time);
+            // checkDate(reschedSession.start_time);
+            // checkDate(reschedSession.end_time);
             checkStringParams(reschedSession.status);
         }catch(e){
             return res.status(400).json({error: e});

@@ -3,6 +3,9 @@ import fs from "fs";
 import { google } from "googleapis";
 import path from "path";
 import { mentees, mentors } from "./config/mongoCollections.js";
+import dotenv from 'dotenv';
+dotenv.config();
+
 
 export const postVerify = async (content) => {
     if (content == "") {
@@ -83,16 +86,21 @@ export const checkObject = (param) => {
 };
 
 export const checkDate = (inputDate) => {
-    checkStringParams(inputDate);
+    // checkStringParams(inputDate);
     let dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
 
     if (!dateRegex.test(inputDate)) {
         throw `The Input Date is not in mm/dd/yyyy format. : ${inputDate}`;
     }
 
-    let [month, day, year] = inputDate.split("/").map(Number);
+    // let [month, day, year] = inputDate.split("/").map(Number);
+    let [year, month, day] = inputDate.split("T")[0].split("-").map(Number);
 
     let date = new Date(year, month - 1, day);
+
+    console.log(day);
+    console.log(month - 1);
+    console.log(year);
 
     if (
         date.getFullYear() !== year ||
@@ -138,8 +146,8 @@ export const checkEducation = (education) => {
             throw `The Education Object should contain degree, institution and year keys.`;
         }
 
-        checkStringParams(ed.degree);
-        checkStringParams(ed.institution);
+        checkStringParams(ed.degree, "degree");
+        checkStringParams(ed.institution, "institution");
         checkYears(ed.year);
 
         ed.degree = ed.degree.trim();
@@ -165,8 +173,8 @@ export const checkExperience = (experience) => {
             throw `The Experience Object should contain title, institution and years keys.`;
         }
 
-        checkStringParams(ex.title);
-        checkStringParams(ex.institution);
+        checkStringParams(ex.title, "title");
+        checkStringParams(ex.institution, "institution");
         checkYears(ex.years);
 
         ex.title = ex.title.trim();
@@ -181,7 +189,7 @@ export const checkArrayOfStrings = (array) => {
     }
 
     for (let i = 0; i < +array.length; i++) {
-        checkStringParams(array[i]);
+        checkStringParams(array[i], "String");
 
         array[i] = array[i].trim();
     }
@@ -215,7 +223,7 @@ export const validateAvailability = (availability) => {
         let start_time = availability[i].start_time;
         let end_time = availability[i].end_time;
 
-        checkStringParams(day);
+        checkStringParams(day, "day");
         checkDate(start_time);
         checkDate(end_time);
 
@@ -230,7 +238,7 @@ export const validateAvailability = (availability) => {
 };
 
 export const checkEmail = async (email, user) => {
-    checkStringParams(email);
+    checkStringParams(email, "email");
 
     let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -253,11 +261,11 @@ export const checkEmail = async (email, user) => {
     }
 };
 
-const keyFilePath = path.resolve("./secrets/gc_cloud_key.json");
+const keyFilePath = process.env.KEYFILECONTENT;
 
 let keyFileContent;
 try {
-    keyFileContent = JSON.parse(fs.readFileSync(keyFilePath, "utf8"));
+    keyFileContent = JSON.parse(keyFilePath);
 } catch (err) {
     console.error("Error reading or parsing the key file:", err.message);
     process.exit(1);
