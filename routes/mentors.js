@@ -23,7 +23,7 @@ router
         try {
             checkStringParams(newMentor.first_name);
             checkStringParams(newMentor.last_name);
-            // checkDate(newMentor.dob);
+            checkDate(newMentor.dob);
             await checkEmail(newMentor.email, "mentor"); 
             checkStringParams(newMentor.pwd_hash);
             checkStringParams(newMentor.profile_image);

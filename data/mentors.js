@@ -21,7 +21,7 @@ export const createMentor = async (
 
     checkStringParams(first_name);
     checkStringParams(last_name);
-    // checkDate(dob);
+    checkDate(dob);
     await checkEmail(email, "mentor"); 
     checkStringParams(pwd_hash);
 
@@ -180,7 +180,7 @@ export const updateMentor = async (
 
   checkStringParams(first_name);
   checkStringParams(last_name);
-  // checkDate(dob);
+  checkDate(dob);
   await checkEmail(email, "mentor");
   checkStringParams(pwd_hash);
   checkStringParams(profile_image);

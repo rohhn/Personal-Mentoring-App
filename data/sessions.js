@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 import { sessions, mentees, mentors } from "../config/mongoCollections.js";
 import { mentorData, subjectData, parentsData } from "./index.js";
-import { checkDate, checkNumber, checkStringParams, checkAvailability, bookSession, updateSessionOnCalendar, deleteSessionFromCalendar } from "../helpers.js";
+import { checkDate, checkNumber, checkStringParams, checkAvailability, bookSession, updateSessionOnCalendar, deleteSessionFromCalendar, checkTimestamp } from "../helpers.js";
 import axios from "axios";
 import dotenv from 'dotenv';
 dotenv.config();
@@ -80,14 +80,14 @@ export const createSession = async (
     checkStringParams(mentor_id);
     checkStringParams(mentee_id);
     checkStringParams(subject_area);
-    // checkDate(start_time);
-    // checkDate(end_time);
+    checkTimestamp(start_time);
+    checkTimestamp(end_time);
 
     mentor_id = mentor_id.trim();
     mentee_id = mentee_id.trim();
     subject_area = subject_area.trim();
-    start_time = start_time;
-    end_time = end_time;
+    start_time = new Date(start_time.trim()).toISOString();
+    end_time = new Date(end_time.trim()).toISOString();
 
     if(!ObjectId.isValid(mentor_id)){
         throw `${mentor_id} is not a valid ObjectID.`;
@@ -179,14 +179,14 @@ export const rescheduleSession = async (id, start_time, end_time, status) => {
     }
 
 
-    // checkDate(start_time);
-    // checkDate(end_time);
+    checkTimestamp(start_time);
+    checkTimestamp(end_time);
     checkStringParams(status);
 
 
 
-    start_time = new Date(start_time.trim());
-    start_time = new Date(end_time.trim());
+    start_time = new Date(start_time.trim()).toISOString();
+    start_time = new Date(end_time.trim()).toISOString();
 
 
     let reschedSession = {

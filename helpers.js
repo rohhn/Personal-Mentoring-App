@@ -86,21 +86,20 @@ export const checkObject = (param) => {
 };
 
 export const checkDate = (inputDate) => {
-    // checkStringParams(inputDate);
-    let dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
+    checkStringParams(inputDate);
+    let dateRegex = /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/\d{4}$/;
 
     if (!dateRegex.test(inputDate)) {
         throw `The Input Date is not in mm/dd/yyyy format. : ${inputDate}`;
     }
 
-    // let [month, day, year] = inputDate.split("/").map(Number);
-    let [year, month, day] = inputDate.split("T")[0].split("-").map(Number);
+    let [month, day, year] = inputDate.split("/").map(Number);
 
     let date = new Date(year, month - 1, day);
 
-    console.log(day);
-    console.log(month - 1);
-    console.log(year);
+    // console.log(day);
+    // console.log(month - 1);
+    // console.log(year);
 
     if (
         date.getFullYear() !== year ||
@@ -114,6 +113,32 @@ export const checkDate = (inputDate) => {
 
     if (date > today) {
         throw `Date cannot be in the future.`;
+    }
+};
+
+export const checkTimestamp = (inputDate) => {
+    checkStringParams(inputDate);
+    let dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
+
+    if (!dateRegex.test(inputDate)) {
+        throw `The Input Timestamp is not in ISO format. : ${inputDate}`;
+    }
+
+
+    let [year, month, day] = inputDate.split("T")[0].split("-").map(Number);
+
+    let date = new Date(year, month - 1, day);
+
+    // console.log(day);
+    // console.log(month - 1);
+    // console.log(year);
+
+    if (
+        date.getFullYear() !== year ||
+        date.getMonth() !== month - 1 ||
+        date.getDate() !== day
+    ) {
+        throw `Invalid Timestamp.`;
     }
 };
 

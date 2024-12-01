@@ -9,7 +9,7 @@ export const createSubjectArea = async (name, description = "") => {
     const subjectAreasCollection = await subject_areas();
 
     try {
-        const subjectArea = getSubjectByName(name);
+        const subjectArea = await getSubjectByName(name);
         return subjectArea;
     } catch {
         const newSubjectArea = {
@@ -17,7 +17,7 @@ export const createSubjectArea = async (name, description = "") => {
             description: description.toLowerCase().trim(),
         };
 
-        const result = subjectAreasCollection.insertOne(newSubjectArea);
+        const result = await subjectAreasCollection.insertOne(newSubjectArea);
 
         if (!result.acknowledged || !result.insertedId) throw Error("Could not create the subject area.");
 
@@ -92,7 +92,7 @@ export const removeSubjectArea = async (id) => {
         throw `${id} is not a valid ObjectID.`;
     }
 
-    const subjectAreasCollection = await mentees();
+    const subjectAreasCollection = await subject_areas();
 
     const subject = await subjectAreasCollection.findOne({ _id: new ObjectId(id) });
 

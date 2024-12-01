@@ -39,8 +39,6 @@ export const parentsSessionData = async (mentorId, menteeId, subjectArea, time, 
     };
 
 
-    if (mentorUpdate.modifiedCount === 0) throw new Error('Failed to add session for mentor');
-
     if (mentee.parent_email) {
         const mailOptions = {
             from: process.env.EMAIL_USER,
