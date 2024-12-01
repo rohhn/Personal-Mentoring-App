@@ -213,6 +213,16 @@ router
             if (!session) {
                 throw `Session with the id ${sessionId} does not exist.`;
             }
+
+            const currentTime = new Date();
+            const sessionStartTime = new Date(session.start_time);
+            const timeDifference = sessionStartTime - currentTime;
+
+            const hoursLeft = timeDifference / (1000 * 60 * 60);
+
+            if (hoursLeft < 24) {
+                throw `Cannot delete the session. Only ${hoursLeft.toFixed(1)} hours left until the session starts.`;
+            }
         }catch(e){
             return res.status(404).json({error: e});
         }

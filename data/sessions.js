@@ -7,8 +7,6 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 
-//TODO Allow to cancel sessions only 24 hrs before.
-
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET; 
 
@@ -244,6 +242,17 @@ export const deleteSession = async (id) => {
 
     if (!session) {
         throw `Session with the id ${id} does not exist.`;
+    }
+
+    
+    const currentTime = new Date();
+    const sessionStartTime = new Date(session.start_time);
+    const timeDifference = sessionStartTime - currentTime;
+
+    const hoursLeft = timeDifference / (1000 * 60 * 60);
+
+    if (hoursLeft < 24) {
+        throw `Cannot delete the session. Only ${hoursLeft.toFixed(1)} hours left until the session starts.`;
     }
 
     let eventId = session.eventId;
