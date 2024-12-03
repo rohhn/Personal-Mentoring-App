@@ -116,7 +116,7 @@ export const getMentorById = async (id) => {
 };
 
 export const getMentorByEmail = async (email) => {
-    checkStringParams(email);
+    checkStringParams(email, "email");
 
     email = email.trim();
 
@@ -133,7 +133,7 @@ export const getMentorByEmail = async (email) => {
 };
 
 export const removeMentor = async (id) => {
-    checkStringParams(id);
+    checkStringParams(id, "id");
     id = id.trim();
 
     if (!ObjectId.isValid(id)) {
@@ -170,7 +170,7 @@ export const updateMentor = async (
   approved,
   subject_areas
 ) => {
-  checkStringParams(id);
+  checkStringParams(id, "id");
 
   id = id.trim();
 
@@ -232,7 +232,7 @@ export const toAddAvailability = async (
   id,
   availability
 ) => {
-  checkStringParams(id);
+  checkStringParams(id, "id");
   availability = validateAvailability(availability);
 
   id = id.trim();

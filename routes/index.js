@@ -4,7 +4,9 @@ import { parentEmailRoutes } from "./parent.js";
 import { ratingsRoutes } from "./rating.js";
 import { rootRoutes } from "./root.js";
 import { sessionRoutes } from './sessions.js';
+import { subjectRoutes } from "./subject_areas.js";
 import { postRoutes } from "./posts.js";
+
 
 
 const constructorMethod = (app) => {
@@ -13,6 +15,7 @@ const constructorMethod = (app) => {
     app.use("/mentor", mentorRoutes);
     app.use("/ratings", ratingsRoutes);
     app.use('/sessions', sessionRoutes);
+    app.use('/subjects', subjectRoutes);
     app.use('/parentEmailNotify',parentEmailRoutes);
     app.use('/forum', postRoutes)
 

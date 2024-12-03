@@ -1,13 +1,14 @@
 import { ObjectId } from "mongodb";
 import { sessions, mentees, mentors } from "../config/mongoCollections.js";
-import { mentorData, subjectData } from "./index.js";
-import { checkDate, checkNumber, checkStringParams, checkAvailability, bookSession, updateSessionOnCalendar, deleteSessionFromCalendar } from "../helpers.js";
+import { mentorData, subjectData, parentsData } from "./index.js";
+import { checkDate, checkNumber, checkStringParams, checkAvailability, bookSession, updateSessionOnCalendar, deleteSessionFromCalendar, checkTimestamp } from "../helpers.js";
 import axios from "axios";
+import dotenv from 'dotenv';
+dotenv.config();
 
-//TODO Allow to cancel sessions only 24 hrs before.
 
-const clientId = "xVOOK02JTwSW6xEvYeU5Gw";
-const clientSecret = 'zrfgF41GpvGzQFcbpRUfSZlLMYpr4NVf'; 
+const clientId = process.env.CLIENT_ID;
+const clientSecret = process.env.CLIENT_SECRET; 
 
 const  getAccessToken = async () => {
     const tokenUrl = 'https://zoom.us/oauth/token?grant_type=account_credentials&account_id=aVTQcRZjQa-0PYowbsqg5A';
@@ -77,14 +78,14 @@ export const createSession = async (
     checkStringParams(mentor_id);
     checkStringParams(mentee_id);
     checkStringParams(subject_area);
-    checkDate(start_time);
-    checkDate(end_time);
+    checkTimestamp(start_time);
+    checkTimestamp(end_time);
 
     mentor_id = mentor_id.trim();
     mentee_id = mentee_id.trim();
     subject_area = subject_area.trim();
-    start_time = new Date(start_time);
-    end_time = new Date(end_time);
+    start_time = new Date(start_time.trim()).toISOString();
+    end_time = new Date(end_time.trim()).toISOString();
 
     if(!ObjectId.isValid(mentor_id)){
         throw `${mentor_id} is not a valid ObjectID.`;
@@ -135,6 +136,9 @@ export const createSession = async (
     
     let meeting = await createZoomMeeting(start_time, end_time);
 
+    if(mentee.parent_email){
+        let parentEmail = await parentsData.parentsSessionData(mentor_id, mentee_id, subject_area, start_time, end_time, meeting.join_url);
+    }
 
     let newSession = {
         mentor_id: mentor_id,
@@ -173,14 +177,14 @@ export const rescheduleSession = async (id, start_time, end_time, status) => {
     }
 
 
-    checkDate(start_time);
-    checkDate(end_time);
+    checkTimestamp(start_time);
+    checkTimestamp(end_time);
     checkStringParams(status);
 
 
 
-    start_time = new Date(start_time.trim());
-    start_time = new Date(end_time.trim());
+    start_time = new Date(start_time.trim()).toISOString();
+    start_time = new Date(end_time.trim()).toISOString();
 
 
     let reschedSession = {
@@ -238,6 +242,17 @@ export const deleteSession = async (id) => {
 
     if (!session) {
         throw `Session with the id ${id} does not exist.`;
+    }
+
+    
+    const currentTime = new Date();
+    const sessionStartTime = new Date(session.start_time);
+    const timeDifference = sessionStartTime - currentTime;
+
+    const hoursLeft = timeDifference / (1000 * 60 * 60);
+
+    if (hoursLeft < 24) {
+        throw `Cannot delete the session. Only ${hoursLeft.toFixed(1)} hours left until the session starts.`;
     }
 
     let eventId = session.eventId;
