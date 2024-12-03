@@ -1,54 +1,111 @@
-import { forums } from "../config/mongoCollections";
+import { forums } from "../config/mongoCollections.js";
 import axios from "axios";
-import * as helper from "../helpers.js"
+import * as helper from "../helpers.js";
 import { ObjectId, ReturnDocument } from "mongodb";
 import * as replies from "../data/replies.js";
 
-
-export const getForums=async (subject_id)=>
-{
-    let forumCollection=await forums();
-    let posts=forumCollection.findOne(
-    {
-        _id: ObjectId.createFromHexString(subject_id)
-    });
-    if(!posts)
-    {
+export const getForums = async (subject_id) => {
+    let forumCollection = await forums();
+    let posts = forumCollection.findOne(
+        { _id: ObjectId.createFromHexString(subject_id) },
+        { projection: { posts: 1 } }
+    );
+    if (!posts) {
         throw "Error, no posts in this forum, sorry";
     }
-    return posts;
-}
+    return posts.posts;
+};
 
-export const makePost=async (subject_id, authorID, content, comment)=>
-{
+export const makePost = async (subject_id, authorID, title, content) => {
     helper.postVerify(content);
-    let forumCollection=await forums();
-    let newPost=
-    {
-        _id:new ObjectId(),
-        author: 4,//getUserId
+    helper.postVerify(title);
+    title = title.trim();
+    content = content.trim();
+    let forumCollection = await forums();
+    let newPost = {
+        _id: new ObjectId(),
+        subject_id: subject_id,
+        author: authorID,
+        title: title,
         content: content,
         created_at: new Date(),
-        replies:[],
+        replies: [],
+    };
+
+    let updatedInformation = await forumCollection.fineOneAndUpdate(
+        { _id: ObjectId.createFromHexString(subject_id) },
+        { $push: { posts: newPost } }
+    );
+    if (!updatedInformation) {
+        throw "Error, unable to make new post";
     }
-    return forumCollection.posts;
-}
+    let updatedForum = await forumCollection.findOne({
+        _id: ObjectId.createFromHexString(subject_id),
+    });
+    if (!updatedForum) {
+        throw "Error, unable to get subject forum";
+    }
+    return await getForums(subject_id);
+};
 
-export const editPost=async(id, newContent)=>
-{
+export const editPost = async (id, newContent, authorID) => {
     helper.postVerify(newContent);
-    let forumCollection=await forums();
-    forumCollection.findOneAndUpdate(
-        {
-            _id: ObjectId.createFromHexString(id),
-            content: newContent
-        });
-    return forumCollection;
-}
+    let forumCollection = await forums();
+    let specPost = await forumCollection.findOne({
+        "posts._id": ObjectId.createFromHexString(id),
+    });
+    if (!specPost) {
+        throw "Error, unable to find that form or post";
+    }
+    let post = specPost.posts.find((post) => post._id.toString() == id);
+    if (!post) {
+        throw "Error, post not found";
+    }
+    if (post.author !== authorID) {
+        throw "Error, you cannot edit this post";
+    }
+    let updatedInformation = await forumCollection.fineOneAndUpdate(
+        { "posts._id": ObjectId.createFromHexString(id) },
+        { $set: { "posts.$.content": newContent } },
+        { returnDocument: "after" }
+    );
+    if (!updatedInformation) {
+        throw "Error, upabe to make that edit";
+    }
+    let updatedForum = await forumCollection.findOne({
+        "posts._id": ObjectId.createFromHexString(id),
+    });
+    if (!updatedForum) {
+        throw "Error, unable to retrieve updated post";
+    }
+    return updatedForum.posts;
+};
 
-export const deletePost=async(id)=>
-{
-    let forumCollection=await forums();
-    forumCollection.findOneAndDelete(id);
-    return forumCollection;
-}
+export const deletePost = async (id, authorID) => {
+    let forumCollection = await forums();
+    let specPost = await forumCollection.findOne({
+        "posts._id": ObjectId.createFromHexString(id),
+    });
+    if (!specPost) {
+        throw "Error, unable to find that form or post";
+    }
+    let post = specPost.posts.find((post) => post._id.toString() == id);
+    if (!post) {
+        throw "Error, post not found";
+    }
+    if (post.author !== authorID) {
+        throw "Error, you cannot edit this post";
+    }
+    let deletedInformation = await forumCollection.fineOneAndUpdate(
+        { _id: specPost._id },
+        { $pull: { posts: { _id: ObjectId.createFromHexString(id) } } }
+    );
+    if (!deletedInformation) {
+        throw "Error, unable to delete post";
+    }
+    let updatedForum = await forumCollection.findOne({ _id: specPost._id });
+    if (!updatedForum) {
+        throw "Error, unable to get the forum after the delete";
+    }
+    return updatedForum.posts;
+};
