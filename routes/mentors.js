@@ -1,12 +1,8 @@
-
 import express from 'express';
-
 import { ObjectId } from 'mongodb';
 import { mentors } from '../config/mongoCollections.js';
-import { mentees } from '../config/mongoCollections.js';
 import { checkArrayOfStrings, checkBoolean, checkDate, checkEducation, checkExperience, checkStringParams, checkEmail, validateAvailability } from "../helpers.js";
 import { mentorData } from '../data/index.js';
-import {dbConnection, closeConnection} from '../config/mongoConnection.js';
 
 const router = express.Router();
 
@@ -37,7 +33,7 @@ router
             newMentor.experience = checkExperience(newMentor.experience);
             newMentor.subject_areas = checkArrayOfStrings(newMentor.subject_areas);
         }catch(e){
-            // console.log(e);
+            console.log(e);
             return res.status(400).json({error: e});
         }
         try{
@@ -169,7 +165,7 @@ router
             checkStringParams(updatedMentor.first_name);
             checkStringParams(updatedMentor.last_name);
             checkDate(updatedMentor.dob);
-            // await checkEmail(updatedMentor.email, "mentor"); 
+            await checkEmail(updatedMentor.email, "mentor"); 
             checkStringParams(updatedMentor.pwd_hash);
             checkStringParams(updatedMentor.profile_image);
             checkStringParams(updatedMentor.summary);

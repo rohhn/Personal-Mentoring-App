@@ -169,7 +169,8 @@ export const updateMentee = async (
 
         checkStringParams(first_name, "First Name");
         checkStringParams(last_name, "Last Name");
-        checkStringParams(email, "Email");
+//         checkStringParams(email, "Email");
+        await checkEmail(email, "mentee");
 
         // if (dob) checkDate(dob, "Date of Birth");
         if (parent_email) checkStringParams(parent_email, "Parent Email");
