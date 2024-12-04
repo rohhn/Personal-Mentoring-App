@@ -292,8 +292,8 @@ let keyFileContent;
 try {
     keyFileContent = JSON.parse(keyFilePath);
 } catch (err) {
-    console.error("Error reading or parsing the key file:", err.message);
-    process.exit(1);
+    // console.error("Error reading or parsing the key file:", err.message);
+    // process.exit(1);
 }
 
 const calendar = google.calendar("v3");

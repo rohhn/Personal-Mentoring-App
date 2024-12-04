@@ -9,7 +9,9 @@ router
     .get(async (req, res) => {
         try {
             let forum = await postData.getForums(req.params.subject_id);
-            res.status(200).render("forum", { forum });
+            res.render("forum/forum", { subject_id: req.params.subject_id,
+                title: forum.title,
+                posts: forum.posts || [],});
         } catch (e) {
             res.status(500).json({ error: e });
         }
@@ -31,8 +33,14 @@ router
                 title,
                 content
             );
-            res.status(201).json({success: true, post: newPost});
+            let forum = await postData.getForums(req.params.subject_id);
+            res.render("forum/forum", { subject_id: req.params.subject_id,
+                title: forum.title,
+                posts: forum.posts || [],});
         } catch (e) {
+            if (e.code === 11000) {
+                return res.status(409).json({ error: "Duplicate key error. Please try again." });
+            }
             res.status(500).json({ error: e });
         }
     });
