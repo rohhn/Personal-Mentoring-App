@@ -6,10 +6,7 @@ import * as replies from "../data/replies.js";
 
 export const getForums = async (subject_id) => {
     let forumCollection = await forums();
-    let posts = forumCollection.findOne(
-        { _id: ObjectId.createFromHexString(subject_id) },
-        { projection: { posts: 1 } }
-    );
+    let posts = forumCollection.findOne({ _id: ObjectId.createFromHexString(subject_id) });
     if (!posts) {
         throw "Error, no posts in this forum, sorry";
     }

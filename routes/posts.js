@@ -5,13 +5,13 @@ import * as repliesData from "../data/replies.js";
 const router = express.Router();
 
 router
-    .route("/forum/:subject_id")
+    .route("/:subject_id")
     .get(async (req, res) => {
         try {
             let forum = await postData.getForums(req.params.subject_id);
-            res.json(forum);
+            res.status(200).render("forum", { forum });
         } catch (e) {
-            res.status(404).json({ error: e });
+            res.status(500).json({ error: e });
         }
     })
 
@@ -31,14 +31,14 @@ router
                 title,
                 content
             );
-            res.status(201).json(newPost);
+            res.status(201).json({success: true, post: newPost});
         } catch (e) {
-            res.status(400).json({ error: e });
+            res.status(500).json({ error: e });
         }
     });
 
 router
-    .route("/forum/:subject_id/:post_id")
+    .route("/:subject_id/:post_id")
     .patch(async (req, res) => {
         let { authorID, updatedContent } = req.body;
 
@@ -54,9 +54,10 @@ router
                 authorID,
                 updatedContent
             );
-            res.json(updatedPost);
-        } catch (e) {
-            res.status(400).json({ error: e });
+            res.status(200).json({ success: true, updatedPost });
+            } 
+        catch (e) {
+            res.status(404).json({ error: e });
         }
     })
 
@@ -74,18 +75,18 @@ router
                 req.params.post_id,
                 authorID
             );
-            res.json(updatedPosts);
+            res.status(200).json({ success: true, posts: updatedPosts });
         } catch (e) {
-            res.status(400).json({ error: e });
+            res.status(404).json({ error: e });
         }
     });
 
 router
-    .route("/forum/:subject_id/:post_id/replies")
+    .route("/:subject_id/:post_id/replies")
     .get(async (req, res) => {
         try {
             let replies = await repliesData.getReplies(req.params.post_id);
-            res.json(replies);
+            res.status(200).json({ replies });
         } catch (e) {
             res.status(404).json({ error: e });
         }
@@ -108,14 +109,14 @@ router
                 authorID,
                 content
             );
-            res.status(201).json(updatedPost);
+            res.status(201).json({ success: true, updatedPost });
         } catch (e) {
-            res.status(400).json({ error: e });
+            res.status(500).json({ error: e });
         }
     });
 
 router
-    .route("/forum/:subject_id/:post_id/replies/:reply_id")
+    .route("/:subject_id/:post_id/replies/:reply_id")
     .patch(async (req, res) => {
         let { authorID, updatedContent } = req.body;
 
@@ -134,9 +135,9 @@ router
                 authorID,
                 updatedContent
             );
-            res.json(updatedReply);
+            res.status(200).json({ success: true, updatedReply });
         } catch (e) {
-            res.status(400).json({ error: e });
+            res.status(404).json({ error: e });
         }
     })
 
@@ -155,9 +156,9 @@ router
                 req.params.reply_id,
                 authorID
             );
-            res.json(updatedPost);
+            res.status(200).json({ success: true, updatedPost });
         } catch (e) {
-            res.status(400).json({ error: e });
+            res.status(404).json({ error: e });
         }
     });
 
