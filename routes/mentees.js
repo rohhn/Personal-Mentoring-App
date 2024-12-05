@@ -10,23 +10,10 @@ import {
     checkStringParams,
     formatDate,
 } from "../helpers.js";
-const router = express.Router();
+import { fileUpload } from "../middleware/common.js";
+import { extractProfileImage } from "../helpers/common.js";
 
-const upload = multer({
-    storage: multer.memoryStorage(),
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-    fileFilter: (req, file, cb) => {
-        const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
-        if (!allowedTypes.includes(file.mimetype)) {
-            return cb(
-                new Error(
-                    "Unsupported file format. Please upload JPEG or PNG images."
-                )
-            );
-        }
-        cb(null, true);
-    },
-});
+const router = express.Router();
 
 router
     .route("/")
@@ -84,7 +71,7 @@ router
             checkStringParams(menteeId);
             if (!ObjectId.isValid(menteeId)) {
                 const errorObj = new Error("Invalid ID.");
-                errorObj.name = "InvalidID";
+                errorObj.statusCode = 400;
                 throw errorObj;
             }
 
@@ -93,30 +80,30 @@ router
                 .catch((error) => {
                     console.log(error);
                     const errorObj = new Error("User not found!");
-                    errorObj.name = "NotFound";
+                    errorObj.statusCode = 404;
                     throw errorObj;
                 });
 
             mentee.userType = "mentee";
 
-            res.render("mentees/profile", {
+            // set custom flag for isOwner for edit profile tag
+            let isOwner = false;
+            if (req.session.user) {
+                isOwner = req.session.user.userId === mentee._id;
+            }
+            res.render("users/mentees/profile", {
                 pageTitle: `${mentee.first_name}'s Profile`,
                 headerOptions: req.headerOptions,
                 profileInfo: mentee,
-                isOwner: req.session.user.userId === mentee._id,
+                isOwner,
             });
         } catch (error) {
-            let statusCode = 400;
-            let errorMessage = error.message;
+            let statusCode = error.statusCode || 400;
+            let errorMessage = error.message || "Something went wrong!";
 
-            if (error.name === "NotFound") {
-                statusCode = 404;
-            } else {
-                console.log(error);
-                errorMessage = "User not found!";
-            }
+            console.error(errorMessage);
 
-            res.redirect("/dashboard");
+            res.status(statusCode).redirect("/dashboard");
         }
     })
     .delete(async (req, res) => {
@@ -153,7 +140,7 @@ router
             return res.status(404).json({ error: e });
         }
     })
-    .put(upload.any(), async (req, res) => {
+    .put(fileUpload.any(), async (req, res) => {
         try {
             const menteeId = req.params.menteeId.trim();
             if (!menteeId) throw new Error("Mentee ID is required.");
@@ -196,17 +183,7 @@ router
                 }
             }
 
-            let profileImageBase64 = null;
-            if (Array.isArray(req.files) && req.files.length == 1) {
-                const profileImgFile = req.files[0];
-                // data:image/[format]; base64,
-
-                if (profileImgFile.fieldname == "profile_image") {
-                    profileImageBase64 = `data:${
-                        profileImgFile.mimetype
-                    }; base64,${profileImgFile.buffer.toString("base64")}`;
-                }
-            }
+            let profileImageBase64 = extractProfileImage(req);
 
             const updatedMentee = await menteeData.updateMentee(
                 menteeId,
@@ -254,11 +231,17 @@ router.route("/:menteeId/edit").get(async (req, res) => {
 
         mentee.userType = "mentee";
 
-        res.render("mentees/edit-profile", {
+        // set custom flag for isOwner for edit profile tag
+        let isOwner = false;
+        if (req.session.user) {
+            isOwner = req.session.user.userId === mentee._id;
+        }
+
+        res.render("users/mentees/edit-profile", {
             pageTitle: `${mentee.first_name}'s Profile`,
             headerOptions: req.headerOptions,
             profileInfo: mentee,
-            isOwner: req.session.user.userId === mentee._id,
+            isOwner,
         });
     } catch (error) {
         let statusCode = 400;

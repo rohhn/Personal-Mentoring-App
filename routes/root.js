@@ -1,7 +1,10 @@
 import bcrypt from "bcrypt";
 import express from "express";
 import { menteeData, mentorData, subjectData } from "../data/index.js";
-import { formatDate } from "../helpers.js";
+import { checkEmail, checkStringParams, formatDate } from "../helpers.js";
+import { isParentEmailRequired } from "../helpers/mentees.js";
+import { fileUpload } from "../middleware/common.js";
+import { extractProfileImage } from "../helpers/common.js";
 
 const router = express.Router();
 
@@ -19,7 +22,7 @@ router.route("/").get(async (req, res) => {
 router
     .route("/login")
     .get(async (req, res) => {
-        res.render("users/login-page", {
+        res.render("auth/login-page", {
             pageTitle: "Login",
             headerOptions: req.headerOptions,
         });
@@ -112,7 +115,7 @@ router
                 errorMessage = "Unexpected error occurred. Try again.";
             }
 
-            res.status(statusCode).render("users/login-page", {
+            res.status(statusCode).render("auth/login-page", {
                 pageTitle: "Login",
                 headerOptions: req.headerOptions,
                 error: errorMessage,
@@ -123,82 +126,111 @@ router
 router
     .route("/signup")
     .get(async (req, res) => {
-        res.render("users/signup-page", {
+        res.render("auth/signup-page", {
             pageTitle: "Sign Up",
             headerOptions: req.headerOptions,
         });
     })
-    .post(async (req, res) => {
-        const firstName = req.body.first_name;
-        const lastName = req.body.last_name;
-        const userType = req.body.user_type;
-        const email = req.body.email;
-        const dob = formatDate(req.body.dob);
-        const password = req.body.password;
+    .post(fileUpload.any(), async (req, res) => {
+        const {
+            first_name,
+            last_name,
+            user_type,
+            summary,
+            email,
+            dob,
+            password,
+        } = req.body;
 
         try {
-            const pwdHash = await bcrypt.hash(
+            // validations
+            try {
+                checkStringParams(first_name);
+                checkStringParams(last_name);
+                checkEmail(email);
+                checkStringParams(summary);
+                checkStringParams(password); // TODO: replace with password validation
+            } catch (error) {
+                const errorObj = new Error(error.message || error);
+                errorObj.statusCode = 400;
+                throw errorObj;
+            }
+
+            let profile_image = extractProfileImage(req);
+
+            const pwd_hash = await bcrypt.hash(
                 password,
                 parseInt(process.env.SALT_ROUNDS)
             );
 
-            if (userType === "mentee") {
+            // create User
+            if (user_type === "mentee") {
                 console.log("Creating mentee");
 
-                const parentEmail = req.body.parentEmail || null;
+                const parent_email = req.body.parent_email || undefined;
+
+                try {
+                    if (isParentEmailRequired(dob)) {
+                        checkEmail(parent_email);
+                    }
+                } catch (error) {
+                    const errorObj = new Error(error.message || error);
+                    errorObj.statusCode = 400;
+                    throw errorObj;
+                }
 
                 const createdUser = await menteeData.createMentee(
-                    firstName,
-                    lastName,
+                    first_name,
+                    last_name,
                     dob,
                     email,
-                    pwdHash,
-                    parentEmail
+                    summary,
+                    pwd_hash,
+                    {
+                        parent_email,
+                        profile_image,
+                    }
                 );
 
                 req.session.user = {
                     email,
                     userId: createdUser._id,
-                    userType,
+                    userType: user_type,
                 };
-            } else if (userType == "mentor") {
+            } else if (user_type == "mentor") {
                 console.log("Creating mentor");
 
                 const createdUser = await mentorData.createMentor(
-                    firstName,
-                    lastName,
+                    first_name,
+                    last_name,
                     dob,
                     email,
-                    pwdHash
+                    summary,
+                    pwd_hash,
+                    { profile_image }
                 );
                 req.session.user = {
                     email,
                     userId: createdUser._id,
-                    userType,
+                    userType: user_type,
                 };
             } else {
                 const errorObj = new Error(
                     "Please select one of mentee/mentor."
                 );
-                errorObj.name = "UserError";
+                errorObj.statusCode = 400;
                 throw errorObj;
             }
 
+            // redirect
             res.redirect("/dashboard");
         } catch (error) {
-            let errorMessage = error.message;
-            let statusCode = 500;
+            console.error(error);
+            let errorMessage =
+                error.message || "Unexpected error occurred. Try again.";
+            let statusCode = error.statusCode || 400;
 
-            if (error.name === "Unauthorized") {
-                statusCode = 401;
-            } else if (error.name === "UserError") {
-                statusCode = 400;
-            } else {
-                console.log(error);
-                errorMessage = "Unexpected error occurred. Try again.";
-            }
-
-            res.status(statusCode).render("users/signup-page", {
+            res.status(statusCode).render("auth/signup-page", {
                 pageTitle: "Sign Up",
                 headerOptions: req.headerOptions,
                 error: errorMessage,
@@ -260,7 +292,6 @@ router.route("/profile/:userType/:userId").get(async (req, res) => {
     }
 });
 
-// router.route("/test").put(multer().single("profile_image"), async (req, res, next) => {
-//     console.dir(req.body, { depth: null });
-//     console.log(Object.keys(req.file));
-// });
+router.route("/test").get(async (req, res) => {
+    res.render("test");
+});

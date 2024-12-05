@@ -6,58 +6,64 @@ import {
     checkEmail,
     checkStringParams,
 } from "../helpers.js";
+import { isParentEmailRequired } from "../helpers/mentees.js";
 
 export const createMentee = async (
     first_name,
     last_name,
     dob,
     email,
+    summary,
     pwd_hash,
-    parent_email = null,
-    profile_image = null,
-    summary = null,
-    skills = null
+    options = {}
 ) => {
-    checkStringParams(first_name);
-    checkStringParams(last_name);
-    // checkDate(dob);
-    await checkEmail(email, "mentee");
-    checkStringParams(pwd_hash);
+    first_name = checkStringParams(first_name);
+    last_name = checkStringParams(last_name);
+    summary = checkStringParams(summary);
+    // TODO: Implement a proper date check
+    // dob = checkValidDate(dob)
 
-    // TODO: These must be optional params
-    // checkStringParams(parent_email);
-    // checkStringParams(profile_image);
-    // checkStringParams(summary);
-    // skills = checkArrayOfStrings(skills);
-
-    first_name = first_name.trim();
-    last_name = last_name.trim();
-    dob = dob.trim();
-    email = email.trim();
-    pwd_hash = pwd_hash.trim();
-
-    // parent_email = parent_email.trim();
-    // profile_image = profile_image.trim();
-    summary = summary.trim();
-
-    let newMentee = {
+    let newMenteeObj = {
         first_name: first_name,
         last_name: last_name,
         dob: dob,
-        email: email,
         pwd_hash: pwd_hash,
-        parent_email: parent_email,
-        profile_image: profile_image,
-        created_at: new Date(),
         summary: summary,
-        skills: skills,
-        reviews: [],
-        badges: [],
     };
+
+    email = checkEmail(email).toLowerCase();
+    const menteeExists = await getMenteeByEmail(email).catch((error) => {
+        console.log("User doesn't exist.");
+    });
+    if (menteeExists) {
+        const errObj = new Error("User already exists!");
+        errObj.statusCode = 400;
+        throw errObj;
+    } else {
+        newMenteeObj.email = email;
+    }
+
+    // optional params
+    let { parent_email, profile_image, skills } = options;
+
+    if (isParentEmailRequired(dob)) {
+        checkStringParams(parent_email);
+        parent_email = checkEmail(parent_email).toLowerCase();
+        newMenteeObj.parent_email = parent_email;
+    }
+
+    if (profile_image !== undefined) {
+        newMenteeObj.profile_image = profile_image;
+    }
+
+    if (skills !== undefined) {
+        skills = checkArrayOfStrings(skills);
+        newMenteeObj.skills = skills;
+    }
 
     const menteeCollection = await mentees();
 
-    const result = await menteeCollection.insertOne(newMentee);
+    const result = await menteeCollection.insertOne(newMenteeObj);
 
     if (!result.acknowledged || !result.insertedId)
         throw "Could not create the mentee.";
@@ -110,9 +116,7 @@ export const getMenteeById = async (id) => {
 };
 
 export const getMenteeByEmail = async (email) => {
-    checkStringParams(email);
-
-    email = email.trim();
+    email = checkStringParams(email).toLowerCase();
 
     const menteeCollection = await mentees();
 
@@ -169,7 +173,7 @@ export const updateMentee = async (
 
         checkStringParams(first_name, "First Name");
         checkStringParams(last_name, "Last Name");
-//         checkStringParams(email, "Email");
+        //         checkStringParams(email, "Email");
         await checkEmail(email, "mentee");
 
         // if (dob) checkDate(dob, "Date of Birth");
