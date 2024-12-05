@@ -21,9 +21,10 @@
   "homepage": "https://github.com/rohhn/CS546_TeamProject#readme",
   "dependencies": {
     "@google-cloud/local-auth": "^2.1.0",
+    "@types/node": "^22.10.1",
     "axios": "^1.7.7",
     "bcrypt": "^5.1.1",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.4.7",
     "env": "^0.0.2",
     "express": "^4.21.1",
     "express-handlebars": "^8.0.1",
@@ -35,7 +36,8 @@
     "mongodb": "^6.10.0",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.16",
-    "nodemon": "^3.1.7"
+    "nodemon": "^3.1.7",
+    "tsc": "^2.0.4"
   },
   "prettier": {
     "tabWidth": 4

@@ -6,14 +6,11 @@ import * as replies from "../data/replies.js";
 
 export const getForums = async (subject_id) => {
     let forumCollection = await forums();
-    let posts = forumCollection.findOne(
-        { _id: ObjectId.createFromHexString(subject_id) },
-        { projection: { posts: 1 } }
-    );
-    if (!posts) {
+    let forum = await forumCollection.findOne({ _id: ObjectId.createFromHexString(subject_id) });
+    if (!forum) {
         throw "Error, no posts in this forum, sorry";
     }
-    return posts.posts;
+    return{ title: forum.title, posts: forum.posts || []};
 };
 
 export const makePost = async (subject_id, authorID, title, content) => {
@@ -32,21 +29,20 @@ export const makePost = async (subject_id, authorID, title, content) => {
         replies: [],
     };
 
-    let updatedInformation = await forumCollection.fineOneAndUpdate(
+    let updatedForum = await forumCollection.findOneAndUpdate(
         { _id: ObjectId.createFromHexString(subject_id) },
-        { $push: { posts: newPost } }
+        { $push: { posts: newPost }},
+        { returnDocument: "after"}
     );
-    if (!updatedInformation) {
+    let newForum=await forumCollection;
+    if (!updatedForum) {
         throw "Error, unable to make new post";
     }
-    let updatedForum = await forumCollection.findOne({
-        _id: ObjectId.createFromHexString(subject_id),
-    });
-    if (!updatedForum) {
-        throw "Error, unable to get subject forum";
-    }
-    return await getForums(subject_id);
-};
+
+    return {
+        title: updatedForum.title,
+        posts: newForum.posts || [],
+    };};
 
 export const editPost = async (id, newContent, authorID) => {
     helper.postVerify(newContent);

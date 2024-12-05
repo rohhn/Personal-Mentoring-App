@@ -41,7 +41,7 @@
                     <p>{{content}}</p>
                     <p><strong>Posted At:</strong> {{created_at}}</p>
 
-                    <form action="/forum/{{../subject}}/{{_id}}/replies" method="POST" class="reply-form">
+                    <form action="/forum/{{../subject_id}}/{{_id}}" method="POST" class="reply-form">
                         <label for="updatedContent">Edit Post</label>
                         <textarea id="updatedContent" name="updatedContent" rows="5" required></textarea>
                         <input type="hidden" name="authorID" value="{{authorID}}">
@@ -53,7 +53,7 @@
                         <button type="submit">Delete Post</button>
                     </form>
 
-                    <form action="/forum/{{../_id}}/{{_id}}/replies" method="POST" class="reply-form">
+                    <form action="/forum/{{../subject_id}}/{{post_id}}" method="POST" class="reply-form">
                         <label for="replyAuthorID">Author ID:</label>
                         <input type="text" id="replyAuthorID" name="authorID" required>
 
