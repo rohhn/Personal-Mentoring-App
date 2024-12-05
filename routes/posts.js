@@ -47,10 +47,24 @@ router
 
 router
     .route("/:subject_id/:post_id")
+    .get(async (req, res) => {
+        try {
+            let post = await postData.getPost(req.params.post_id);
+            res.render("forum/post", {
+                subject_id: req.params.subject_id,
+                post_id: post._id,
+                title: post.title,
+                content: post.content,
+                author: post.author,
+            });
+        } catch (e) {
+            res.status(404).json({ error: e });
+        }
+    })
     .patch(async (req, res) => {
-        let { authorID, updatedContent } = req.body;
+        let { authorID, updatedContent, updatedTitle } = req.body;
 
-        if (!authorID || !updatedContent) {
+        if (!authorID && !updatedContent  && !updatedTitle) {
             return res.status(400).json({
                 error: "Missing required fields: authorID or updatedContent.",
             });
@@ -60,10 +74,11 @@ router
             let updatedPost = await postData.editPost(
                 req.params.post_id,
                 authorID,
-                updatedContent
+                updatedContent,
+                updatedTitle
             );
-            res.status(200).json({ success: true, updatedPost });
-            } 
+            res.redirect(`/${req.params.subject_id}`);
+        } 
         catch (e) {
             res.status(404).json({ error: e });
         }
@@ -77,13 +92,14 @@ router
                 .status(400)
                 .json({ error: "Missing required field: authorID." });
         }
-
         try {
+            
             let updatedPosts = await postData.deletePost(
-                req.params.post_id,
+                req.params._id,
                 authorID
             );
-            res.status(200).json({ success: true, posts: updatedPosts });
+
+            res.redirect(`/${req.params.subject_id}`);
         } catch (e) {
             res.status(404).json({ error: e });
         }
