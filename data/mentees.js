@@ -17,6 +17,7 @@ export const createMentee = async (
     pwd_hash,
     options = {}
 ) => {
+<<<<<<< HEAD
     first_name = checkStringParams(first_name);
     last_name = checkStringParams(last_name);
     summary = checkStringParams(summary);
@@ -24,6 +25,31 @@ export const createMentee = async (
     // dob = checkValidDate(dob)
 
     let newMenteeObj = {
+=======
+    checkStringParams(first_name);
+    checkStringParams(last_name);
+    checkDate(dob);
+    await checkEmail(email, "mentee");
+    checkStringParams(pwd_hash);
+
+    // TODO: These must be optional params
+    // checkStringParams(parent_email);
+    // checkStringParams(profile_image);
+    // checkStringParams(summary);
+    // skills = checkArrayOfStrings(skills);
+
+    first_name = first_name.trim();
+    last_name = last_name.trim();
+    dob = dob.trim();
+    email = email.trim();
+    pwd_hash = pwd_hash.trim();
+
+    // parent_email = parent_email.trim();
+    // profile_image = profile_image.trim();
+    // summary = summary.trim();
+
+    let newMentee = {
+>>>>>>> 850ed94 (Tentative-documentation-for-apis)
         first_name: first_name,
         last_name: last_name,
         dob: dob,
