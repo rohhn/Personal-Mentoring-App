@@ -8,11 +8,19 @@
                 today.getFullYear() -
                 birthday.getFullYear() -
                 (today.getMonth() < birthday.getMonth() ||
-                    (today.getMonth() === birthday.getMonth() && today.getDate() < birthday.getDate()));
+                    (today.getMonth() === birthday.getMonth() &&
+                        today.getDate() < birthday.getDate()));
             return age;
         }
 
         return;
+    };
+
+    const removeParentEmailInput = () => {
+        const parentsEmailDiv = document.getElementById("parent-email-div");
+        if (parentsEmailDiv) {
+            parentsEmailDiv.remove();
+        }
     };
 
     const addParentEmailInput = () => {
@@ -37,8 +45,10 @@
         formElement.insertBefore(parentsEmailDiv, formElement.lastElementChild);
     };
 
-    const dobInputChanged = (event) => {
-        const user_type = document.querySelector('input[name="user_type"]:checked').value;
+    const showOrHideParentEmailInput = (event) => {
+        const user_type = document.querySelector(
+            'input[name="user_type"]:checked'
+        ).value;
 
         if (!user_type) {
             throw Error("User type is invalid.");
@@ -46,19 +56,25 @@
 
         if (user_type === "mentee") {
             const dob = document.getElementById("dob-input").value;
+            if (dob) {
+                const age = calculateAge(dob);
 
-            const age = calculateAge(dob);
-
-            if (typeof age !== "undefined") {
-                if (age < 16) {
-                    addParentEmailInput();
-                } else {
-                    const parentsEmailDiv = document.getElementById("parent-email-div");
-                    if (parentsEmailDiv) {
-                        parentsEmailDiv.innerHTML = "";
+                if (typeof age !== "undefined") {
+                    if (age < 16) {
+                        const parentElementDiv =
+                            document.getElementById("parent-email-div");
+                        if (!parentElementDiv) {
+                            addParentEmailInput();
+                        }
+                    } else {
+                        removeParentEmailInput();
                     }
                 }
+            } else {
+                removeParentEmailInput();
             }
+        } else {
+            removeParentEmailInput();
         }
     };
 
@@ -66,5 +82,13 @@
     const formMaxDate = new Date().toISOString().substring(0, 10);
     dobInputElement.setAttribute("max", formMaxDate);
 
-    dobInputElement.addEventListener("change", dobInputChanged);
+    dobInputElement.addEventListener("change", showOrHideParentEmailInput);
+
+    const userTypeInputElement = document.querySelectorAll(
+        'input[name="user_type"]'
+    );
+
+    userTypeInputElement.forEach((element) => {
+        element.addEventListener("change", showOrHideParentEmailInput);
+    });
 })();

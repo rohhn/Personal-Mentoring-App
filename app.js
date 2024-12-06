@@ -9,6 +9,7 @@ import exphbs from "express-handlebars";
 import constructorMethod from "./routes/index.js";
 import { loginMiddleware, makeHeaderOptions } from "./middleware/auth.js";
 import { privateRouteMiddleware, rootMiddleware } from "./middleware/root.js";
+import { allowMenteesOnly, allowMentorsOnly } from "./middleware/users.js";
 import { Cookie } from "express-session";
 
 const rewriteUnsupportedBrowserMethods = (req, res, next) => {
@@ -30,7 +31,10 @@ const handlebarsInstance = exphbs.create({
     // Specify helpers which are only registered on this instance.
     helpers: {
         asJSON: (obj, spacing) => {
-            if (typeof spacing === "number") return new Handlebars.SafeString(JSON.stringify(obj, null, spacing));
+            if (typeof spacing === "number")
+                return new Handlebars.SafeString(
+                    JSON.stringify(obj, null, spacing)
+                );
 
             return new Handlebars.SafeString(JSON.stringify(obj));
         },
@@ -41,10 +45,10 @@ const handlebarsInstance = exphbs.create({
 app.use(
     session({
         name: "PersonalMentoringApp",
-        secret: process.env.EXPRESS_SESSION_SECRET,
+        secret: process.env.EXPRESS_SESSION_SECRET || "fallback",
         saveUninitialized: false,
         resave: false,
-        cookie: { maxAge: 60000 },
+        cookie: { maxAge: 60 * 1000 * 60 },
     })
 );
 
@@ -60,6 +64,7 @@ app.use(makeHeaderOptions);
 app.use("/dashboard", privateRouteMiddleware);
 app.use("/login", loginMiddleware);
 app.use("/signup", loginMiddleware);
+app.use("/sessions/book", allowMenteesOnly);
 
 app.engine("handlebars", handlebarsInstance.engine);
 app.set("view engine", "handlebars");

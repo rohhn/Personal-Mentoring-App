@@ -5,14 +5,17 @@ import { mentees, mentors } from '../config/mongoCollections.js';
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'your-email@gmail.com',
-        pass: 'your-email-password'  
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
     }
 });
 
-export const parentsSessionData = async (mentorId, menteeId, subjectArea, time, duration, meetingLink) => {
-    if (!mentorId || !menteeId || !subjectArea || !time || !duration || !meetingLink) {
+export const parentsSessionData = async (mentorId, menteeId, subjectArea, time, end_time, meetingLink) => {
+    if (!mentorId || !menteeId || !subjectArea || !time || !end_time || !meetingLink) {
         throw new Error('Missing required session fields');
+    }
+    if (!ObjectId.isValid(mentorId) || !ObjectId.isValid(menteeId)) {
+        throw new Error('Invalid mentor or mentee ID');
     }
 
     const mentorCollection = await mentors();
@@ -25,27 +28,20 @@ export const parentsSessionData = async (mentorId, menteeId, subjectArea, time, 
     if (!mentee) throw new Error('Mentee not found');
 
     const newSession = {
-        _id: new ObjectId(),
         mentor_id: mentorId,
         mentee_id: menteeId,
         subject_area: subjectArea,
         time,
-        duration,
+        end_time,
         status: 'scheduled',
         meeting_link: meetingLink,
         created_at: new Date().toISOString()
     };
 
-    const mentorUpdate = await mentorCollection.updateOne(
-        { _id: new ObjectId(mentorId) },
-        { $push: { sessions: newSession } }
-    );
-
-    if (mentorUpdate.modifiedCount === 0) throw new Error('Failed to add session for mentor');
 
     if (mentee.parent_email) {
         const mailOptions = {
-            from: 'your-email@gmail.com',
+            from: process.env.EMAIL_USER,
             to: mentee.parent_email,
             subject: 'New Mentorship Session Scheduled',
             text: `Dear Parent,
@@ -58,13 +54,12 @@ Best regards,
 Mentorship Team`
         };
 
-        await transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                console.error('Error sending email:', error);
-            } else {
-                console.log('Email sent:', info.response);
-            }
-        });
+        try {
+            await transporter.sendMail(mailOptions);
+            console.log('Email sent successfully');
+        } catch (error) {
+            console.error('Error sending email:', error.message);
+        }
     }
 
     return newSession;

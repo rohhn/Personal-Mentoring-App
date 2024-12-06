@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const addSkill = (srcElement) => {
         const newSkillInput = document.getElementById("new-skill-input");
 
-        if (newSkillInput.value !== "") {
+        if (newSkillInput.value.trim() !== "") {
             const newSkillItem = document.createElement("li");
             "list-group-item border-0 p-1 px-2 me-2 badge rounded-pill text-bg-info bg-transparent"
                 .split(" ")
@@ -15,16 +15,18 @@ document.addEventListener("DOMContentLoaded", () => {
                     newSkillItem.classList.add(element);
                 });
 
-            newSkillItem.innerHTML = newSkillInput.value;
-            newSkillItem.setAttribute("data-skill", newSkillInput.value);
+            newSkillItem.innerHTML = newSkillInput.value.trim();
+            newSkillItem.setAttribute("data-skill", newSkillInput.value.trim());
 
             const removeBtn = document.createElement("button");
-            "btn-close btn-sm ms-1 remove-skill-btn".split(" ").forEach((element) => {
-                removeBtn.classList.add(element);
-            });
+            "btn-close btn-sm ms-1 remove-skill-btn"
+                .split(" ")
+                .forEach((element) => {
+                    removeBtn.classList.add(element);
+                });
             removeBtn.setAttribute("type", "button");
             removeBtn.setAttribute("aria-label", "close");
-            removeBtn.setAttribute("data-skill", newSkillInput.value);
+            removeBtn.setAttribute("data-skill", newSkillInput.value.trim());
             removeBtn.setAttribute("data-action", "remove-skill");
 
             newSkillItem.appendChild(removeBtn);
@@ -53,13 +55,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const updateUser = async (formData) => {
         try {
-            const response = await fetch(`${window.location.origin}/${formData.user_type}/${formData.user_id}`, {
-                method: "PUT",
-                body: JSON.stringify(formData),
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
+            const response = await fetch(
+                `${window.location.origin}/${formData.get(
+                    "user_type"
+                )}/${formData.get("user_id")}`,
+                {
+                    method: "PUT",
+                    body: formData,
+                }
+            );
             return response.json();
         } catch (e) {
             console.error(e);
@@ -76,30 +80,26 @@ document.addEventListener("DOMContentLoaded", () => {
     if (updateUserForm) {
         updateUserForm.addEventListener("submit", async (event) => {
             event.preventDefault();
-            const data = new FormData(updateUserForm);
+            const formData = new FormData(updateUserForm);
 
             const skillsList = document.getElementById("skills-list");
             const newSkillsList = [];
             for (let index = 0; index < skillsList.children.length; index++) {
-                newSkillsList.push(skillsList.children[index].getAttribute("data-skill"));
+                newSkillsList.push(
+                    skillsList.children[index].getAttribute("data-skill")
+                );
             }
 
-            // data.append("skills", JSON.stringify(newSkillsList));
+            formData.append("skills", JSON.stringify(newSkillsList)); // add skills to the formdata
 
-            if (data.has("profile_image")) {
-                // TODO: Make a separate function to handle profile image uploads.
-                data.delete("profile_image");
-            }
+            const response = await updateUser(formData);
 
-            const payload = {};
-            data.forEach((value, key) => (payload[key] = value));
-            payload.skills = newSkillsList;
-
-            const completed = await updateUser(payload);
-            if (completed) {
-                window.location.href = `${window.location.origin}/${payload.user_type}/${payload.user_id}`;
+            if (response.success) {
+                window.location.href = `${
+                    window.location.origin
+                }/${formData.get("user_type")}/${formData.get("user_id")}`;
             } else {
-                console.log("error");
+                console.log("error updating profile.");
             }
         });
     }

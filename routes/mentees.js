@@ -1,11 +1,18 @@
 import express from "express";
-
-
 import { ObjectId } from "mongodb";
 import multer from "multer";
 import { mentees } from "../config/mongoCollections.js";
-import { menteeData, mentorData } from "../data/index.js";
-import { checkArrayOfStrings, checkDate, checkStringParams, checkEmail } from "../helpers.js";
+import { menteeData } from "../data/index.js";
+import {
+    checkArrayOfStrings,
+    checkDate,
+    checkEmail,
+    checkStringParams,
+    formatDate,
+} from "../helpers.js";
+import { fileUpload } from "../middleware/common.js";
+import { extractProfileImage } from "../helpers/common.js";
+
 const router = express.Router();
 
 router
@@ -31,7 +38,6 @@ router
             checkStringParams(newMentee.profile_image);
             checkStringParams(newMentee.summary);
             newMentee.skills = checkArrayOfStrings(newMentee.skills);
-
         } catch (e) {
             return res.status(400).json({ error: e });
         }
@@ -65,37 +71,39 @@ router
             checkStringParams(menteeId);
             if (!ObjectId.isValid(menteeId)) {
                 const errorObj = new Error("Invalid ID.");
-                errorObj.name = "InvalidID";
+                errorObj.statusCode = 400;
                 throw errorObj;
             }
 
-            let mentee = await menteeData.getMenteeById(menteeId).catch((error) => {
-                console.log(error);
-                const errorObj = new Error("User not found!");
-                errorObj.name = "NotFound";
-                throw errorObj;
-            });
+            let mentee = await menteeData
+                .getMenteeById(menteeId)
+                .catch((error) => {
+                    console.log(error);
+                    const errorObj = new Error("User not found!");
+                    errorObj.statusCode = 404;
+                    throw errorObj;
+                });
 
             mentee.userType = "mentee";
 
-            res.render("mentees/profile", {
+            // set custom flag for isOwner for edit profile tag
+            let isOwner = false;
+            if (req.session.user) {
+                isOwner = req.session.user.userId === mentee._id;
+            }
+            res.render("users/mentees/profile", {
                 pageTitle: `${mentee.first_name}'s Profile`,
                 headerOptions: req.headerOptions,
                 profileInfo: mentee,
-                isOwner: req.session.user.userId === mentee._id,
+                isOwner,
             });
         } catch (error) {
-            let statusCode = 400;
-            let errorMessage = error.message;
+            let statusCode = error.statusCode || 400;
+            let errorMessage = error.message || "Something went wrong!";
 
-            if (error.name === "NotFound") {
-                statusCode = 404;
-            } else {
-                console.log(error);
-                errorMessage = "User not found!";
-            }
+            console.error(errorMessage);
 
-            res.redirect("/dashboard");
+            res.status(statusCode).redirect("/dashboard");
         }
     })
     .delete(async (req, res) => {
@@ -115,7 +123,9 @@ router
         try {
             const menteeCollection = await mentees();
 
-            const mentor = await menteeCollection.findOne({ _id: new ObjectId(menteeId) });
+            const mentor = await menteeCollection.findOne({
+                _id: new ObjectId(menteeId),
+            });
 
             if (!mentor) {
                 throw `Mentor with the id ${menteeId} does not exist.`;
@@ -130,75 +140,70 @@ router
             return res.status(404).json({ error: e });
         }
     })
-    .put(multer().none(), async (req, res, next) => {
-        //multer().single("profile_image") - middleware for image/file upload
-
-        console.log(req.body);
-        let menteeId = req.params.menteeId.trim();
-
-        if (req.session.user.userId !== menteeId) {
-            res.redirect("/dashboard");
-        }
-
+    .put(fileUpload.any(), async (req, res) => {
         try {
-            checkStringParams(menteeId);
-            if (!ObjectId.isValid(menteeId)) {
-                const errorObj = new Error("Invalid ID.");
-                errorObj.name = "InvalidID";
-                throw errorObj;
+            const menteeId = req.params.menteeId.trim();
+            if (!menteeId) throw new Error("Mentee ID is required.");
+
+            if (req.session.user.userId !== menteeId) {
+                errObj = new Error("Forbidden!");
+                errorObj.statusCode = 403;
+                throw errObj;
             }
 
-            const updatedMentee = req.body;
-            console.dir(req.body, { depth: null });
+            const {
+                first_name,
+                last_name,
+                dob,
+                email,
+                parent_email,
+                summary,
+                skills,
+            } = req.body;
+            // const dob = formatDate(req.body.dob);
 
-            checkStringParams(updatedMentee.first_name);
-            checkStringParams(updatedMentee.last_name);
-            // checkDate(updatedMentee.dob);
-            checkStringParams(updatedMentee.email);
-            // checkStringParams(updatedMentee.pwd_hash);
-            checkStringParams(updatedMentee.parent_email, true);
-            // checkStringParams(updatedMentee.profile_image);
-            checkStringParams(updatedMentee.summary);
-            updatedMentee.skills = checkArrayOfStrings(updatedMentee.skills);
-            console.log(updatedMentee.skills);
+            if (!first_name || !last_name || !email) {
+                errorObj = new Error(
+                    "First name, last name, and email are required."
+                );
+                errorObj.statusCode = 400;
+            }
 
-            // const profileImage = req.file;
+            let skillsArray = [];
+            if (skills) {
+                if (typeof skills === "string") {
+                    skillsArray = JSON.parse(skills);
+                } else if (Array.isArray(skills)) {
+                    skillsArray = skills;
+                } else {
+                    errorObj = new Error(
+                        "Invalid format for skills. Must be a string or an array of strings."
+                    );
+                    errObj.statusCode = 400;
+                }
+            }
 
-            const mentee = await menteeData
-                .updateMentee(
-                    menteeId,
-                    updatedMentee.first_name,
-                    updatedMentee.last_name,
-                    updatedMentee.dob,
-                    updatedMentee.email,
-                    updatedMentee.parent_email,
-                    // profileImage.buffer,
-                    updatedMentee.summary,
-                    updatedMentee.skills
-                )
-                .catch((error) => {
-                    console.log(error);
-                    const errorObj = new Error("Couldn't update user!");
-                    errorObj.name = "ServerError";
-                    throw errorObj;
-                });
+            let profileImageBase64 = extractProfileImage(req);
 
-            // res.redirect(303, `/profile/mentee/${menteeId}`);
-            return res.status(200).json(true);
+            const updatedMentee = await menteeData.updateMentee(
+                menteeId,
+                first_name,
+                last_name,
+                dob,
+                email,
+                parent_email || null,
+                profileImageBase64,
+                summary || null,
+                skillsArray
+            );
+
+            return res.status(200).json({ success: true });
         } catch (error) {
-            let statusCode = 400;
-            let errorMessage = error.message;
-
-            if (error.name === "NotFound") {
-                statusCode = 404;
-            } else {
-                console.log(error);
-                errorMessage = "User not found!";
-            }
-
-            res.status(statusCode).json(false);
-            // res.status(statusCode).redirect(`/profile/mentee/${menteeId}`);
-
+            console.error(error);
+            const statusCode = error.statusCode || 400;
+            return res
+                .status(statusCode)
+                .json({ success: false, error: error.message });
         }
     });
 
@@ -226,11 +231,17 @@ router.route("/:menteeId/edit").get(async (req, res) => {
 
         mentee.userType = "mentee";
 
-        res.render("mentees/edit-profile", {
+        // set custom flag for isOwner for edit profile tag
+        let isOwner = false;
+        if (req.session.user) {
+            isOwner = req.session.user.userId === mentee._id;
+        }
+
+        res.render("users/mentees/edit-profile", {
             pageTitle: `${mentee.first_name}'s Profile`,
             headerOptions: req.headerOptions,
             profileInfo: mentee,
-            isOwner: req.session.user.userId === mentee._id,
+            isOwner,
         });
     } catch (error) {
         let statusCode = 400;

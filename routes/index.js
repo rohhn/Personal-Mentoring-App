@@ -1,10 +1,13 @@
-import { badgesRoutes } from "./badges.js";
-import { parentEmailRoutes } from "./parent.js";
-import { ratingsRoutes } from "./rating.js";
 import { menteeRoutes } from "./mentees.js";
 import { mentorRoutes } from "./mentors.js";
+import { parentEmailRoutes } from "./parent.js";
+import { ratingsRoutes } from "./rating.js";
 import { rootRoutes } from "./root.js";
 import { sessionRoutes } from './sessions.js';
+import { subjectRoutes } from "./subject_areas.js";
+import { postRoutes } from "./posts.js";
+
+
 
 const constructorMethod = (app) => {
     app.use("/", rootRoutes);
@@ -12,7 +15,10 @@ const constructorMethod = (app) => {
     app.use("/mentor", mentorRoutes);
     app.use("/ratings", ratingsRoutes);
     app.use('/sessions', sessionRoutes);
-    // app.use('/sessions', parentEmailRoutes); //yet to implemented
+    app.use('/subjects', subjectRoutes);
+    app.use('/parentEmailNotify',parentEmailRoutes);
+    app.use('/forum', postRoutes)
+
 
     app.use("*", (req, res) => {
         res.status(404).json({ error: "Not found" });

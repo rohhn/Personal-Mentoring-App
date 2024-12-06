@@ -4,3 +4,19 @@ export const profileMiddleware = (req, res, next) => {
 
     next();
 };
+
+export const allowMenteesOnly = (req, res, next) => {
+    if (req.session.userType !== "mentee") {
+        res.redirect("/dashboard");
+    }
+
+    next();
+};
+
+export const allowMentorsOnly = (req, res, next) => {
+    if (req.session.userType !== "mentor") {
+        res.redirect("/dashboard");
+    }
+
+    next();
+};
