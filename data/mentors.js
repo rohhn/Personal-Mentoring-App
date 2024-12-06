@@ -16,6 +16,7 @@ import {
 } from "../helpers.js";
 
 
+
 export const createMentor = async (
     first_name,
     last_name,
@@ -73,6 +74,8 @@ export const createMentor = async (
     const mentor = await getMentorById(newId);
 
     mentor._id = mentor._id.toString();
+
+    delete mentor.pwd_hash;
 
     delete mentor.pwd_hash;
 
@@ -185,6 +188,13 @@ export const updateMentor = async (
   checkStringParams(last_name);
   // checkDate(dob);
   await checkEmail(email, "mentor");
+  // checkStringParams(pwd_hash);
+  // checkStringParams(profile_image);
+  // checkStringParams(summary);
+  // checkBoolean(approved);
+  // education = checkEducation(education);
+  // experience = checkExperience(experience);
+  // subject_areas = checkArrayOfStrings(subject_areas);
   // checkStringParams(pwd_hash);
   // checkStringParams(profile_image);
   // checkStringParams(summary);

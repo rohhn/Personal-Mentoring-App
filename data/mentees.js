@@ -20,7 +20,7 @@ export const createMentee = async (
 
     checkStringParams(first_name);
     checkStringParams(last_name);
-    // checkDate(dob);
+    checkDate(dob);
     await checkEmail(email, "mentee");
     checkStringParams(pwd_hash);
 
