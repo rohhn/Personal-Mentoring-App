@@ -41,19 +41,17 @@
                     <p>{{content}}</p>
                     <p><strong>Posted At:</strong> {{created_at}}</p>
 
-                    <form action="/forum/{{../subject_id}}/{{_id}}" method="POST" class="reply-form">
-                        <label for="updatedContent">Edit Post</label>
-                        <textarea id="updatedContent" name="updatedContent" rows="5" required></textarea>
-                        <input type="hidden" name="authorID" value="{{authorID}}">
-                        <button type="submit">Update Post</button>
-                    </form>
+                    <a href="/forum/{{../subject_id}}/{{_id}}">
+                        <button type="button">Edit</button>
+                    </a>
 
-                    <form action="/forum/{{../_id}}/{{_id}}" method="DELETE" class="delete-post">
+                    <form action="/forum/{{../subject_id}}/{{_id}}" method="POST" class="delete-post">
+                        <input type="hidden" name="_method" value="DELETE">
                         <input type="hidden" name="authorID" value="{{author}}">
                         <button type="submit">Delete Post</button>
                     </form>
 
-                    <form action="/forum/{{../subject_id}}/{{post_id}}" method="POST" class="reply-form">
+                    <form action="/forum/{{../subject_id}}/{{post_id}}/replies" method="POST" class="reply-form">
                         <label for="replyAuthorID">Author ID:</label>
                         <input type="text" id="replyAuthorID" name="authorID" required>
 

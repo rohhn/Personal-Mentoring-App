@@ -42,9 +42,22 @@ export const makePost = async (subject_id, authorID, title, content) => {
     return {
         title: updatedForum.title,
         posts: newForum.posts || [],
-    };};
+    };
+};
 
-export const editPost = async (id, newContent, authorID) => {
+export const getPost = async (postId) => {
+    let forumCollection = await forums();
+    let forum = await forumCollection.findOne({ "posts._id": ObjectId.createFromHexString(postId) });
+    if (!forum) throw "Post not found1";
+
+    const post = forum.posts.find((p) => p._id.equals(ObjectId.createFromHexString(postId)));
+    if (!post) throw "Post not found2";
+    return post;
+};
+
+
+export const editPost = async (id, newContent, authorID, newTitle) => {
+    helper.postVerify(newContent);
     helper.postVerify(newContent);
     let forumCollection = await forums();
     let specPost = await forumCollection.findOne({
@@ -63,6 +76,7 @@ export const editPost = async (id, newContent, authorID) => {
     let updatedInformation = await forumCollection.fineOneAndUpdate(
         { "posts._id": ObjectId.createFromHexString(id) },
         { $set: { "posts.$.content": newContent } },
+        { $set: { "posts.$.title": newTitle } },        
         { returnDocument: "after" }
     );
     if (!updatedInformation) {
@@ -77,31 +91,47 @@ export const editPost = async (id, newContent, authorID) => {
     return updatedForum.posts;
 };
 
-export const deletePost = async (id, authorID) => {
+export const deletePost = async (subject_id, post_id, authorID) => {
+    if (!subject_id || !post_id || !authorID) {
+        throw "Error, Subject ID, Post ID, and Author ID are required.";
+      }
+  
     let forumCollection = await forums();
-    let specPost = await forumCollection.findOne({
-        "posts._id": ObjectId.createFromHexString(id),
-    });
-    if (!specPost) {
-        throw "Error, unable to find that form or post";
+
+    try{
+        let specForum = await forumCollection.findOne({
+            _id: ObjectId.createFromHexString(subject_id),
+            "posts._id": ObjectId.createFromHexString(post_id),
+        });
+
+        if (!specForum) {
+            throw "Error, Unable to find the forum or post.";
+        }
+
+        let post = specForum.posts.find((p) => p._id.equals(ObjectId.createFromHexString(post_id)));
+
+        if (!post) {
+            throw "Error, Post not found.";
+        }
+
+        if (post.author !== authorID) {
+            throw "Error, Unauthorized action. You cannot delete this post.";
+        }
+
+        let deletedInformation = await forumCollection.updateOne(
+            { _id: ObjectId.createFromHexString(subject_id) },
+            { $pull: { posts: { _id: ObjectId.createFromHexString(post_id) } } },
+            // { returnDocument: "after" }
+        );
+        if (!deletedInformation) {
+            throw "Error, Unable to delete the post.";
+        }
+
+        return { message: "Post deleted successfully.", updatedPosts: specForum.posts };
     }
-    let post = specPost.posts.find((post) => post._id.toString() == id);
-    if (!post) {
-        throw "Error, post not found";
+    catch(e)
+    {
+        throw `Error, unable to delete post: ${e}`;
     }
-    if (post.author !== authorID) {
-        throw "Error, you cannot edit this post";
-    }
-    let deletedInformation = await forumCollection.fineOneAndUpdate(
-        { _id: specPost._id },
-        { $pull: { posts: { _id: ObjectId.createFromHexString(id) } } }
-    );
-    if (!deletedInformation) {
-        throw "Error, unable to delete post";
-    }
-    let updatedForum = await forumCollection.findOne({ _id: specPost._id });
-    if (!updatedForum) {
-        throw "Error, unable to get the forum after the delete";
-    }
-    return updatedForum.posts;
 };
+

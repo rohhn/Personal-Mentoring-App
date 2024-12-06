@@ -47,23 +47,44 @@ router
 
 router
     .route("/:subject_id/:post_id")
+    .get(async (req, res) => {
+        try {
+            let post = await postData.getPost(req.params.post_id);
+            res.render("forum/post", {
+                subject_id: req.params.subject_id,
+                post_id: post._id,
+                title: post.title,
+                content: post.content,
+                author: post.author,
+            });
+        } catch (e) {
+            res.status(404).json({ error: e });
+        }
+    })
     .patch(async (req, res) => {
-        let { authorID, updatedContent } = req.body;
+        let { authorID, updatedContent, updatedTitle } = req.body;
 
-        if (!authorID || !updatedContent) {
+        if (!authorID && !updatedContent  && !updatedTitle) {
             return res.status(400).json({
                 error: "Missing required fields: authorID or updatedContent.",
             });
         }
 
+        if (!req.session || !req.session.user) {
+            return res.status(401).json({ error: "Unauthorized: User must be logged in to edit a post." });
+        }
+
+        let { _id: userId } = req.session.user;
+
         try {
             let updatedPost = await postData.editPost(
                 req.params.post_id,
                 authorID,
-                updatedContent
+                updatedContent,
+                updatedTitle
             );
-            res.status(200).json({ success: true, updatedPost });
-            } 
+            res.redirect(`/${req.params.subject_id}`);
+        } 
         catch (e) {
             res.status(404).json({ error: e });
         }
@@ -71,23 +92,35 @@ router
 
     .delete(async (req, res) => {
         let { authorID } = req.body;
-
+    
         if (!authorID) {
             return res
                 .status(400)
                 .json({ error: "Missing required field: authorID." });
         }
 
+        if(!req.session || !req.session.user)
+        {
+            res.status(401).json({ error: "Unauthorized: User must be logged in to delete a post." });
+        }
+
+        let { _id: userId } = req.session.user;
+        let { subject_id, post_id } = req.params;
+
+    
         try {
-            let updatedPosts = await postData.deletePost(
+            const updatedPosts = await postData.deletePost(
+                req.params.subject_id,
                 req.params.post_id,
-                authorID
+                userId
             );
-            res.status(200).json({ success: true, posts: updatedPosts });
+    
+            res.redirect(`/forum/${req.params.subject_id}`);
         } catch (e) {
             res.status(404).json({ error: e });
         }
     });
+    
 
 router
     .route("/:subject_id/:post_id/replies")
