@@ -91,30 +91,47 @@ export const editPost = async (id, newContent, authorID, newTitle) => {
     return updatedForum.posts;
 };
 
-export const deletePost = async (id, authorID) => {
+export const deletePost = async (subject_id, post_id, authorID) => {
+    if (!subject_id || !post_id || !authorID) {
+        throw "Error, Subject ID, Post ID, and Author ID are required.";
+      }
+  
     let forumCollection = await forums();
-    
-    let specPost = await forumCollection.findOne({
-        "posts._id": ObjectId.createFromHexString(id),
-    });
-    if (!specPost) {
-        throw "Error, unable to find that form or post";
+
+    try{
+        let specForum = await forumCollection.findOne({
+            _id: ObjectId.createFromHexString(subject_id),
+            "posts._id": ObjectId.createFromHexString(post_id),
+        });
+
+        if (!specForum) {
+            throw "Error, Unable to find the forum or post.";
+        }
+
+        let post = specForum.posts.find((p) => p._id.equals(ObjectId.createFromHexString(post_id)));
+
+        if (!post) {
+            throw "Error, Post not found.";
+        }
+
+        if (post.author !== authorID) {
+            throw "Error, Unauthorized action. You cannot delete this post.";
+        }
+
+        let deletedInformation = await forumCollection.updateOne(
+            { _id: ObjectId.createFromHexString(subject_id) },
+            { $pull: { posts: { _id: ObjectId.createFromHexString(post_id) } } },
+            // { returnDocument: "after" }
+        );
+        if (!deletedInformation) {
+            throw "Error, Unable to delete the post.";
+        }
+
+        return { message: "Post deleted successfully.", updatedPosts: specForum.posts };
     }
-    let post = forum.posts.find((p) => p._id.equals(ObjectId.createFromHexString(postId)));
-    if (!post) {
-        throw "Error, post not found";
+    catch(e)
+    {
+        throw `Error, unable to delete post: ${e}`;
     }
-    if (post.author !== authorID) {
-        throw "Error, you cannot edit this post";
-    }
-    let deletedInformation = await forumCollection.fineOneAndUpdate(
-        { _id: specPost._id },
-        { $pull: { posts: { _id: ObjectId.createFromHexString(id) } } },
-        { returnDocument: "after" }
-    );
-    if (!deletedInformation) {
-        throw "Error, unable to delete post";
-    }
-    
-    return deletedInformation.posts;
 };
+

@@ -70,6 +70,12 @@ router
             });
         }
 
+        if (!req.session || !req.session.user) {
+            return res.status(401).json({ error: "Unauthorized: User must be logged in to edit a post." });
+        }
+
+        let { _id: userId } = req.session.user;
+
         try {
             let updatedPost = await postData.editPost(
                 req.params.post_id,
@@ -86,24 +92,35 @@ router
 
     .delete(async (req, res) => {
         let { authorID } = req.body;
-
+    
         if (!authorID) {
             return res
                 .status(400)
                 .json({ error: "Missing required field: authorID." });
         }
-        try {
-            
-            let updatedPosts = await postData.deletePost(
-                req.params._id,
-                authorID
-            );
 
-            res.redirect(`/${req.params.subject_id}`);
+        if(!req.session || !req.session.user)
+        {
+            res.status(401).json({ error: "Unauthorized: User must be logged in to delete a post." });
+        }
+
+        let { _id: userId } = req.session.user;
+        let { subject_id, post_id } = req.params;
+
+    
+        try {
+            const updatedPosts = await postData.deletePost(
+                req.params.subject_id,
+                req.params.post_id,
+                userId
+            );
+    
+            res.redirect(`/forum/${req.params.subject_id}`);
         } catch (e) {
             res.status(404).json({ error: e });
         }
     });
+    
 
 router
     .route("/:subject_id/:post_id/replies")

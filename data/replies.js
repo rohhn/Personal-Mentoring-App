@@ -1,6 +1,7 @@
 import { forums } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
 import * as helper from "../helpers.js";
+import * as post from "./posts.js";
 
 
 export const makeReply = async (postId, authorID, content) => {
