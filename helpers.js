@@ -3,9 +3,8 @@ import fs from "fs";
 import { google } from "googleapis";
 import path from "path";
 import { mentees, mentors } from "./config/mongoCollections.js";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 dotenv.config();
-
 
 export const postVerify = async (content) => {
     if (content == "") {
@@ -50,13 +49,16 @@ export const checkStringParams = (param, allowEmpty = false) => {
     if (!param && !allowEmpty) {
         throw `The input is an empty paramter.`;
     }
+
     if (typeof param !== "string") {
         throw `The input is not a string: ${param}.`;
+    } else {
+        if (param.trim() === "" && !allowEmpty) {
+            throw `The input is an empty string: ${param}.`;
+        }
     }
 
-    if (param.trim() === "" && !allowEmpty) {
-        throw `The input is an empty string: ${param}.`;
-    }
+    return param.trim();
 };
 
 export const checkBoolean = (param) => {
@@ -123,7 +125,6 @@ export const checkTimestamp = (inputDate) => {
     if (!dateRegex.test(inputDate)) {
         throw `The Input Timestamp is not in ISO format. : ${inputDate}`;
     }
-
 
     let [year, month, day] = inputDate.split("T")[0].split("-").map(Number);
 
@@ -262,7 +263,7 @@ export const validateAvailability = (availability) => {
     return availability;
 };
 
-export const checkEmail = async (email, user) => {
+export const checkEmail = (email, user) => {
     checkStringParams(email, "email");
 
     let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -271,19 +272,7 @@ export const checkEmail = async (email, user) => {
         throw `Please Enter a Valid Email Id.`;
     }
 
-    let collection = undefined;
-
-    if (user === "mentee") {
-        collection = await mentees();
-    } else if (user === "mentor") {
-        collection = await mentors();
-    }
-
-    const emailId = await collection.findOne({ email: email });
-
-    if (emailId) {
-        throw `This email already Exists. Please Provide another email.`;
-    }
+    return email;
 };
 
 const keyFilePath = process.env.KEYFILECONTENT;

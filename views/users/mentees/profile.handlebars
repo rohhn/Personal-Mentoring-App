@@ -79,6 +79,15 @@
                             </div>
                         </div>
                         <hr />
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h6 class="mb-0">Personal Summary</h6>
+                            </div>
+                            <div class="col-sm-9 text-secondary">
+                                {{profileInfo.summary}}
+                            </div>
+                        </div>
+                        <hr />
                         {{#if profileInfo.parent_email}}
                             <div class="row">
                                 <div class="col-sm-3">
@@ -135,4 +144,4 @@
     </div>
 </main>
 
-{{> ratings_generator}}
+{{> common/ratings_generator}}
