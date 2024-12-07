@@ -17,18 +17,10 @@ export const createMentee = async (
     pwd_hash,
     options = {}
 ) => {
-<<<<<<< HEAD
-    first_name = checkStringParams(first_name);
-    last_name = checkStringParams(last_name);
-    summary = checkStringParams(summary);
-    // TODO: Implement a proper date check
-    // dob = checkValidDate(dob)
 
-    let newMenteeObj = {
-=======
     checkStringParams(first_name);
     checkStringParams(last_name);
-    checkDate(dob);
+    // checkDate(dob);
     await checkEmail(email, "mentee");
     checkStringParams(pwd_hash);
 
@@ -49,7 +41,6 @@ export const createMentee = async (
     // summary = summary.trim();
 
     let newMentee = {
->>>>>>> 850ed94 (Tentative-documentation-for-apis)
         first_name: first_name,
         last_name: last_name,
         dob: dob,
