@@ -270,17 +270,17 @@ Method: `POST`
 Description: Adds Availability to mentor
 
 Request Payload:
-```
+```json
 {
     "av": [
-       {
+        {
             "day": "Monday",
             "start_time": "14:00",
             "end_time": "16:00",
             "booked_slots": [
-            "2024-11-13T14:30:00Z",
-            "2024-11-13T15:00:00Z"
-        ]  
+                "2024-11-13T14:30:00Z",
+                "2024-11-13T15:00:00Z"
+            ]  
         },
         {
             "day": "Tuesday",

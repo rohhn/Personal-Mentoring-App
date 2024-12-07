@@ -15,26 +15,36 @@
             </div>
         </div>
     </section>
-    <p>You are a {{userData.userType}}</p>
+    
     <section class="mb-4">
 
         <div class="row">
             <div
                 id="upcoming-sessions-section"
-                class="col col-sm-12 col-md-8 bg-light text-dark rounded p-2"
+                class="col col-sm-12 col-md-8 text-bg-dark text-light rounded p-2"
             >
                 <div class="d-flex justify-content-between mb-4">
                     <h2 class="mb-0">Upcoming sessions</h2>
                     <div class="d-flex flex-col gap-2">
-                        <a class="btn btn-primary mb-0">My sessions</a>
+                        <a class="btn btn-primary mb-0" href="/sessions/{{userData.userType}}/{{userData._id}}">My sessions</a>
+
                         {{! must only show for mentees }}
+                        {{#if (isEqual userData.userType "mentee")}}
                         <a
                             class="btn btn-primary mb-0"
                             href="/sessions/book"
                         >Book a session</a>
+                        {{/if}}
+                        
                         {{! END must only show for mentees }}
 
                         {{! must only show for mentors }}
+                        {{#if (isEqual userData.userType "mentor")}}
+                        <a
+                            class="btn btn-primary mb-0"
+                            href="/{{userData.userType}}/availability/{{userData._id}}"
+                        >Manage Availability</a>
+                        {{/if}}
 
                         {{! END must only show for mentors }}
                     </div>
@@ -54,7 +64,7 @@
                 </div>
             </div>
             <div id="profile-card" class="col col-sm-12 col-md-4">
-                <div class="card">
+                <div class="card text-bg-dark">
                     <div class="card-body">
                         <div class="d-flex flex-column align-items-end mb-4">
                             <a
@@ -223,7 +233,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="card mt-3">
+                <div class="card mt-3 text-bg-dark">
                     {{#if profileInfo.badges}}
                         <h5>Badges</h5>
                         <div class="d-flex flex-row">

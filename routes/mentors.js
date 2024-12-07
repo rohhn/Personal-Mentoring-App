@@ -230,52 +230,77 @@ router
         }
     });
 
-router.route("/availability/:mentorId").post(async (req, res) => {
-    let mentorId = req.params.mentorId.trim();
+router
+    .route("/availability/:mentorId")
+    .get(async (req, res) => {
+        const mentorId = req.params.mentorId;
 
-    try {
-        checkStringParams(mentorId);
-        if (!ObjectId.isValid(mentorId)) {
-            throw "Invalid object ID.";
+        if (req.session.user.userId != mentorId) {
+            return res.redirect("/dashboard");
         }
-    } catch (e) {
-        return res.status(400).json({ error: e });
-    }
 
-    mentorId = mentorId.trim();
+        // TODO: Get existing availability and pass it on
+        const dayofWeek = [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+        ];
 
-    try {
-        const mentorCollection = await mentors();
-
-        const mentor = await mentorCollection.findOne({
-            _id: new ObjectId(mentorId),
+        return res.render("users/mentors/manage-availability", {
+            dayofWeek,
+            headerOptions: req.headerOptions,
         });
+    })
+    .post(async (req, res) => {
+        let mentorId = req.params.mentorId.trim();
 
-        if (!mentor) {
-            throw `Mentor with the id ${mentorId} does not exist.`;
+        try {
+            checkStringParams(mentorId);
+            if (!ObjectId.isValid(mentorId)) {
+                throw "Invalid object ID.";
+            }
+        } catch (e) {
+            return res.status(400).json({ error: e });
         }
-    } catch (e) {
-        return res.status(404).json({ error: e });
-    }
 
-    let availability = req.body;
+        mentorId = mentorId.trim();
 
-    try {
-        availability = validateAvailability(availability);
-    } catch (e) {
-        return res.status(400).json({ error: e });
-    }
-    try {
-        let avail = await mentorData.toAddAvailability(
-            mentorId,
-            availability.av
-        );
-        return res.status(200).json(avail);
-    } catch (e) {
-        console.log(e);
-        return res.status(500).json({ error: e });
-    }
-});
+        try {
+            const mentorCollection = await mentors();
+
+            const mentor = await mentorCollection.findOne({
+                _id: new ObjectId(mentorId),
+            });
+
+            if (!mentor) {
+                throw `Mentor with the id ${mentorId} does not exist.`;
+            }
+        } catch (e) {
+            return res.status(404).json({ error: e });
+        }
+
+        let availability = req.body;
+
+        try {
+            availability = validateAvailability(availability);
+        } catch (e) {
+            return res.status(400).json({ error: e });
+        }
+        try {
+            let avail = await mentorData.toAddAvailability(
+                mentorId,
+                availability.av
+            );
+            return res.status(200).json(avail);
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({ error: e });
+        }
+    });
 
 router.route("/:mentorId/edit").get(async (req, res) => {
     let mentorId = req.params.mentorId.trim();
@@ -304,8 +329,7 @@ router.route("/:mentorId/edit").get(async (req, res) => {
         // set custom flag for isOwner for edit profile tag
         let isOwner = false;
         if (req.session.user) {
-            isOwner = req.session.user.userId === mentor._id;
-        }
+            isOwner = req.session.user.userId === mentor._id;       }
 
         res.render("users/mentors/edit-profile", {
             pageTitle: `${mentor.first_name}'s Profile`,

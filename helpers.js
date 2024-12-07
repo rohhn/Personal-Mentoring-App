@@ -239,7 +239,7 @@ export const validateAvailability = (availability) => {
     // console.log(keys);
     for (let i in availability) {
         if (
-            !Object.keys(availability[i]).includes("days") ||
+            !Object.keys(availability[i]).includes("day") ||
             !Object.keys(availability[i]).includes("start_time") ||
             !Object.keys(availability[i]).includes("end_time")
         ) {

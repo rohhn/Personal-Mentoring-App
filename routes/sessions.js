@@ -2,7 +2,7 @@ import express from "express";
 
 import { ObjectId } from "mongodb";
 import { mentees, mentors, sessions } from "../config/mongoCollections.js";
-import {checkStringParams, checkTimestamp } from "../helpers.js";
+import { checkStringParams, checkTimestamp } from "../helpers.js";
 
 import { sessionsData } from "../data/index.js";
 
@@ -11,35 +11,38 @@ const router = express.Router();
 router.route("/").post(async (req, res) => {
     let newSession = req.body;
 
-        try{
-            checkStringParams(newSession.mentor_id);
-            checkStringParams(newSession.mentee_id);
-            checkStringParams(newSession.subject_area);
-            checkTimestamp(newSession.start_time);
-            checkTimestamp(newSession.end_time);
+    try {
+        checkStringParams(newSession.mentor_id);
+        checkStringParams(newSession.mentee_id);
+        checkStringParams(newSession.subject_area);
+        checkTimestamp(newSession.start_time);
+        checkTimestamp(newSession.end_time);
 
-            newSession.mentor_id = newSession.mentor_id.trim();
-            newSession.mentee_id = newSession.mentee_id.trim();
-            newSession.subject_area = newSession.subject_area.trim();
-            newSession.start_time = newSession.start_time.trim();
-            newSession.end_time = newSession.end_time.trim();
-            // console.log(newSession.start_time);
-        }catch(e){
-            return res.status(400).json({error: e});
-        }
-
-        // TODO: Check if mentor, mentee and subject_areas exist?
-        try{
-            let session = await sessionsData.createSession(newSession.mentor_id, newSession.mentee_id, newSession.subject_area, newSession.start_time, newSession.end_time);
-            return res.status(200).json(session);
-        }catch(e){
-            console.log(e);
-            return res.status(500).json({error: e});
-        }
-       
-        
+        newSession.mentor_id = newSession.mentor_id.trim();
+        newSession.mentee_id = newSession.mentee_id.trim();
+        newSession.subject_area = newSession.subject_area.trim();
+        newSession.start_time = newSession.start_time.trim();
+        newSession.end_time = newSession.end_time.trim();
+        // console.log(newSession.start_time);
+    } catch (e) {
+        return res.status(400).json({ error: e });
     }
-);
+
+    // TODO: Check if mentor, mentee and subject_areas exist?
+    try {
+        let session = await sessionsData.createSession(
+            newSession.mentor_id,
+            newSession.mentee_id,
+            newSession.subject_area,
+            newSession.start_time,
+            newSession.end_time
+        );
+        return res.status(200).json(session);
+    } catch (e) {
+        console.log(e);
+        return res.status(500).json({ error: e });
+    }
+});
 
 router.route("/mentee/:menteeId").get(async (req, res) => {
     let menteeId = req.params.menteeId.trim();
@@ -114,7 +117,11 @@ router.route("/mentor/:mentorId").get(async (req, res) => {
 
     try {
         let sessionsByMentor = await sessionsData.getSessionsByMentor(mentorId);
-        return res.status(200).json(sessionsByMentor);
+        // return res.status(200).json(sessionsByMentor);
+        return res.render("users/mentors/sessions", {
+            sessions: sessionsByMentor,
+            headerOptions: req.headerOptions,
+        });
     } catch (e) {
         console.log(e);
         return res.status(404).json({ error: e });
@@ -156,7 +163,7 @@ router
 
         let reschedSession = req.body;
 
-        try{
+        try {
             checkTimestamp(reschedSession.start_time);
             checkTimestamp(reschedSession.end_time);
             checkStringParams(reschedSession.status);
@@ -212,10 +219,12 @@ router
             const hoursLeft = timeDifference / (1000 * 60 * 60);
 
             if (hoursLeft < 24) {
-                throw `Cannot delete the session. Only ${hoursLeft.toFixed(1)} hours left until the session starts.`;
+                throw `Cannot delete the session. Only ${hoursLeft.toFixed(
+                    1
+                )} hours left until the session starts.`;
             }
-        }catch(e){
-            return res.status(404).json({error: e});
+        } catch (e) {
+            return res.status(404).json({ error: e });
         }
 
         try {

@@ -5,6 +5,7 @@ const app = express();
 
 import session from "express-session";
 import exphbs from "express-handlebars";
+import Handlebars from "handlebars";
 
 import constructorMethod from "./routes/index.js";
 import { loginMiddleware, makeHeaderOptions } from "./middleware/auth.js";
@@ -37,6 +38,9 @@ const handlebarsInstance = exphbs.create({
                 );
 
             return new Handlebars.SafeString(JSON.stringify(obj));
+        },
+        isEqual: (a, b) => {
+            return a === b;
         },
         partialsDir: ["views/partials/"],
     },

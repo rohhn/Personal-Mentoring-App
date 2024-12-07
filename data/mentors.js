@@ -180,19 +180,6 @@ export const updateMentor = async (
         throw `${id} is not a valid ObjectID.`;
     }
 
-<<<<<<< HEAD
-    checkStringParams(first_name);
-    checkStringParams(last_name);
-    checkDate(dob);
-    // await checkEmail(email, "mentor");
-    checkStringParams(pwd_hash);
-    checkStringParams(profile_image);
-    checkStringParams(summary);
-    checkBoolean(approved);
-    education = checkEducation(education);
-    experience = checkExperience(experience);
-    subject_areas = checkArrayOfStrings(subject_areas);
-=======
   checkStringParams(first_name);
   checkStringParams(last_name);
   checkDate(dob);
@@ -204,7 +191,6 @@ export const updateMentor = async (
   // education = checkEducation(education);
   // experience = checkExperience(experience);
   // subject_areas = checkArrayOfStrings(subject_areas);
->>>>>>> 850ed94 (Tentative-documentation-for-apis)
 
     first_name = first_name.trim();
     last_name = last_name.trim();
@@ -264,20 +250,10 @@ export const toAddAvailability = async (id, availability) => {
         let start_time = availability[i].start_time;
         let end_time = availability[i].end_time;
 
-<<<<<<< HEAD
-        console.log(day);
-
-        let av = await addAvailability(calendarId, day, start_time, end_time);
-
-        // console.log(av);
-    }
-};
-=======
     console.log(av);
 
   }
 }
->>>>>>> 850ed94 (Tentative-documentation-for-apis)
 
 export const updateSubjectAreaToMentor = async (id, subjectId) => {
     checkStringParams(id);

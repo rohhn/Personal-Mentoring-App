@@ -12,9 +12,9 @@ export const makeHeaderOptions = (req, res, next) => {
 
     // mock sign-in
     // req.session.user = {
-    //     email: "mentee1@example.com",
-    //     userId: "673d8f2c7d727af137770199",
-    //     userType: "mentee",
+    //     email: "rohan@mentor.com",
+    //     userId: "67515fa1c5f36059aefefcbf",
+    //     userType: "mentor",
     // };
 
     const headerOptions = {};
