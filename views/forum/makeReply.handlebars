@@ -1,0 +1,28 @@
+<body>
+    <div class="reply-container">
+        <h1>Add a Reply</h1>
+        <h2>Replying to Post: {{postTitle}}</h2>
+        <form action="/forum/{{subject_id}}/{{post_id}}/reply" method="POST">
+            <label for="authorName">Your Name:</label>
+            <input 
+                type="text" 
+                id="authorName" 
+                name="authorName" 
+                placeholder="Enter your name" 
+                value="{{authorName}}" 
+                required 
+            >
+
+            <label for="content">Your Reply:</label>
+            <textarea 
+                id="content" 
+                name="content" 
+                rows="5" 
+                placeholder="Write your reply here..." 
+                required
+            ></textarea>
+
+            <button type="submit">Submit Reply</button>
+        </form>
+    </div>
+</body>

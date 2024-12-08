@@ -1,0 +1,19 @@
+<body>
+    <div class="edit-reply-container">
+        <h1>Edit Reply</h1>
+        <form action="/forum/{{subject_id}}/{{post_id}}/{{reply_id}}/edit" method="POST">
+            <input type="hidden" name="_method" value="PATCH">
+
+            <label for="updatedContent">Reply Content:</label>
+            <textarea 
+                id="updatedContent" 
+                name="updatedContent" 
+                rows="5" 
+                placeholder="Edit your reply here..." 
+                required 
+                aria-label="Edit your reply">{{content}}</textarea>
+
+            <button type="submit" aria-label="Update Reply">Update Reply</button>
+        </form>
+    </div>
+</body>

@@ -156,12 +156,12 @@ router
 
             res.redirect(`/forum/${req.params.subject_id}`);
         } catch (e) {
-            if (e.message == "Error: Unauthorized action. You cannot delete this post.") {
+            if (e == "Error: Unauthorized action. You cannot delete this post.") {
                 return res.status(403).render("error", {
                     errorTitle: "Unauthorized",
                     errorMessage: e.message,
                 });
-            } else if (e.message == "Error: Forum or post not found.") {
+            } else if (e == "Error: Forum or post not found.") {
                 return res.status(404).render("error", {
                     errorTitle: "Not Found",
                     errorMessage: e.message,
@@ -176,94 +176,181 @@ router
         }
     });
 
-
-
 router
-    .route("/:subject_id/:post_id/:reply_id")
+    .route("/:subject_id/:post_id/reply")
     .get(async (req, res) => {
-        try {
-            let replies = await repliesData.getReplies(req.params.post_id, req.params.reply_id);
-            res.status(200).json({ replies });
-        } catch (e) {
-            res.status(404).json({ error: e });
+        if (!req.session || !req.session.user) {
+            return res.redirect('/login');
         }
-    })
-
-router
-    .route("/:subject_id/:post_id/replies")
-    .post(async (req, res) => {
-        let { authorID, content } = req.body;
-
-        if (!authorID || !content) {
-            return res
-                .status(400)
-                .json({
-                    error: "Missing required fields: authorID or content.",
-                });
-        }
-
         try {
-            let newReply = await repliesData.makeReply(
-                req.params.post_id,
-                authorID,
-                content
-            );
-            res.render("forum/forum", {
+            let post = await postData.getPost(req.params.post_id);
+
+            res.render("forum/makeReply", {
                 subject_id: req.params.subject_id,
-                title: forum.title,
-                posts: forum.posts || [],
+                post_id: req.params.post_id,
+                postTitle: post.title,
+                authorName: req.session.user.userName || "",
+            });
+        } catch (e) {
+            res.status(404).render("error", {
+                errorTitle: "Post Not Found",
+                errorMessage: e.message || "The requested post could not be found.",
             });
         }
+    })
+    .post(async (req, res) => {
+        if (!req.session || !req.session.user) {
+            return res.redirect('/login');
+        }
+        let { authorName, content } = req.body;
+
+        if (!authorName || !content) {
+            return res.status(400).render("error", {
+                errorTitle: "Bad Request",
+                errorMessage: "Missing required fields: authorName or content.",
+            });
+        }
+
+        try {
+            const newReply = await repliesData.makeReply(
+                req.params.post_id,
+                req.session.user.userId,
+                content
+            );
+            res.redirect(`/forum/${req.params.subject_id}`);
+        }
         catch (e) {
-            res.status(500).json({ error: e });
+            res.status(500).render("error", {
+                errorTitle: "Internal Server Error",
+                errorMessage: e.message || "An error occurred while creating the reply.",
+            });
         }
     })
 
 router
-    .route(("/:subject_id/:post_id/replies/:reply_id"))
-    .patch(async (req, res) => {
-        let { authorID, updatedContent } = req.body;
+    .route("/:subject_id/:post_id/:reply_id/edit")
+    .get(async (req, res) => {
 
-        if (!authorID || !updatedContent) {
-            return res
-                .status(400)
-                .json({
-                    error: "Missing required fields: authorID or updatedContent.",
-                });
+        try {
+            const reply = await repliesData.getReply(
+                req.params.post_id,
+                req.params.reply_id
+            );
+
+            res.render("forum/editReply", {
+                subject_id: req.params.subject_id,
+                post_id: req.params.post_id,
+                reply_id: req.params.reply_id,
+                authorName: reply.authorName,
+                content: reply.content,
+            });
+        } catch (e) {
+            res.status(404).render("error", {
+                errorTitle: "Reply Not Found",
+                errorMessage: e.message || "The requested reply could not be found.",
+            });
         }
+    })
+
+    .patch(async (req, res) => {
+        if (!req.session || !req.session.user) {
+            return res.redirect('/login');
+        }
+
+        let { updatedContent } = req.body;
+
+        if (!updatedContent || updatedContent.trim().length === 0) {
+            return res.status(400).render("error", {
+                errorTitle: "Bad Request",
+                errorMessage: "Missing or invalid content for the reply.",
+            });
+        }
+
 
         try {
             let updatedReply = await repliesData.editReply(
                 req.params.post_id,
                 req.params.reply_id,
-                authorID,
+                req.session.user.userId,
                 updatedContent
             );
-            res.redirect(`/${req.params.subject_id}`);
+
+            res.redirect(`/forum/${req.params.subject_id}`);
         } catch (e) {
-            res.status(404).json({ error: e });
+            if (e.message.includes("Unauthorized")) {
+                res.status(403).render("error", {
+                    errorTitle: "Unauthorized",
+                    errorMessage: e.message,
+                });
+            } else if (e.message.includes("not found")) {
+                res.status(404).render("error", {
+                    errorTitle: "Reply Not Found",
+                    errorMessage: e.message,
+                });
+            } else if (e.message.includes("Could not edit reply")) {
+                res.status(404).render("error", {
+                    errorTitle: "Reply Not Found",
+                    errorMessage: "Unable to locate or edit the reply.",
+                });
+            } else {
+                res.status(500).render("error", {
+                    errorTitle: "Internal Server Error",
+                    errorMessage: "An error occurred while updating the reply.",
+                });
+            }
         }
-    })
+    });
 
+
+
+router
+    .route("/:subject_id/:post_id/:reply_id")
     .delete(async (req, res) => {
-        let { authorID } = req.body;
-
-        if (!authorID) {
-            return res
-                .status(400)
-                .json({ error: "Missing required field: authorID." });
+        if (!req.session || !req.session.user) {
+            return res.status(401).render("error", {
+                errorTitle: "Unauthorized",
+                errorMessage: "You must be logged in to delete a reply.",
+            });
         }
 
         try {
-            let updatedPost = await repliesData.deleteReply(
+            let result = await repliesData.deleteReply(
                 req.params.post_id,
                 req.params.reply_id,
-                authorID
+                req.session.user.userId
             );
-            res.redirect(`/${req.params.subject_id}`);
+
+            if (!result) {
+                console.log("Reply not found or unauthorized.");
+                return res.status(404).render("error", {
+                    errorTitle: "Reply Not Found",
+                    errorMessage: "Unable to locate or delete the reply.",
+                });
+            }
+
+            console.log("Reply deleted successfully. Redirecting to forum:", req.params.subject_id);
+            res.redirect(`/forum/${req.params.subject_id}`);
         } catch (e) {
-            res.status(404).json({ error: e });
+            console.error("Error deleting reply:", e.message || e);
+
+            if (e.message.includes("not authorized")) {
+                res.status(403).render("error", {
+                    errorTitle: "Unauthorized",
+                    errorMessage: e.message,
+                });
+            } else if (e.message.includes("does not exist") || e.message.includes("not found")) {
+                res.status(404).render("error", {
+                    errorTitle: "Reply Not Found",
+                    errorMessage: e.message,
+                });
+            } else {
+                res.status(500).render("error", {
+                    errorTitle: "Internal Server Error",
+                    errorMessage: "An error occurred while deleting the reply.",
+                });
+            }
         }
     });
+
 
 export { router as postRoutes };
