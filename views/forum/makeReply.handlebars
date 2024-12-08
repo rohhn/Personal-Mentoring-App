@@ -3,13 +3,13 @@
         <h1>Add a Reply</h1>
         <h2>Replying to Post: {{postTitle}}</h2>
         <form action="/forum/{{subject_id}}/{{post_id}}/reply" method="POST">
-            <label for="authorName">Your Name:</label>
+            <label for="replyAuthorName">Your Name:</label>
             <input 
                 type="text" 
-                id="authorName" 
-                name="authorName" 
+                id="replyAuthorName" 
+                name="replyAuthorName" 
                 placeholder="Enter your name" 
-                value="{{authorName}}" 
+                value="{{replyAuthorName}}" 
                 required 
             >
 

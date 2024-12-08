@@ -4,15 +4,17 @@ import * as helper from "../helpers.js";
 import * as post from "./posts.js";
 
 
-export const makeReply = async (post_id, sessionUserId, content) => {
+export const makeReply = async (post_id, sessionUserId, replyAuthorName, content) => {
     try {
         helper.postVerify(content);
+        helper.postVerify(replyAuthorName);
 
         let forumCollection = await forums();
 
         let newReply = {
             _id: new ObjectId(),
             authorId: sessionUserId,
+            replyAuthorName: replyAuthorName.trim(),
             content: content.trim(),
             created_at: new Date(),
         };

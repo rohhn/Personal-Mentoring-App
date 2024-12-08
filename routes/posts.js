@@ -12,10 +12,22 @@ router
         }
         try {
             let forum = await postData.getForums(req.params.subject_id);
+
+            forum.posts.forEach((post) => {
+                if (post.replies && Array.isArray(post.replies)) {
+                    post.replies.forEach((reply) => {
+                        if (!reply.replyAuthorName) {
+                            reply.replyAuthorName = reply.replyAuthorName || "Unknown Author";
+                        }
+                    });
+                }
+            });
+            
             res.render("forum/forum", {
                 subject_id: req.params.subject_id,
                 title: forum.title,
                 posts: forum.posts || [],
+                replies: forum.posts.replies || [],
             });
         } catch (e) {
             res.status(500).render("error", {
@@ -189,7 +201,7 @@ router
                 subject_id: req.params.subject_id,
                 post_id: req.params.post_id,
                 postTitle: post.title,
-                authorName: req.session.user.userName || "",
+                replyAuthorName: req.session.user.userName || "",
             });
         } catch (e) {
             res.status(404).render("error", {
@@ -202,9 +214,9 @@ router
         if (!req.session || !req.session.user) {
             return res.redirect('/login');
         }
-        let { authorName, content } = req.body;
+        let { replyAuthorName, content } = req.body;
 
-        if (!authorName || !content) {
+        if (!replyAuthorName || !content) {
             return res.status(400).render("error", {
                 errorTitle: "Bad Request",
                 errorMessage: "Missing required fields: authorName or content.",
@@ -215,6 +227,7 @@ router
             const newReply = await repliesData.makeReply(
                 req.params.post_id,
                 req.session.user.userId,
+                replyAuthorName,
                 content
             );
             res.redirect(`/forum/${req.params.subject_id}`);
@@ -230,9 +243,11 @@ router
 router
     .route("/:subject_id/:post_id/:reply_id/edit")
     .get(async (req, res) => {
-
+        if (!req.session || !req.session.user) {
+            return res.redirect('/login');
+        }
         try {
-            const reply = await repliesData.getReply(
+            let reply = await repliesData.getReply(
                 req.params.post_id,
                 req.params.reply_id
             );
@@ -241,7 +256,7 @@ router
                 subject_id: req.params.subject_id,
                 post_id: req.params.post_id,
                 reply_id: req.params.reply_id,
-                authorName: reply.authorName,
+                replyAuthorName: reply.replyAuthorName,
                 content: reply.content,
             });
         } catch (e) {
@@ -321,18 +336,14 @@ router
             );
 
             if (!result) {
-                console.log("Reply not found or unauthorized.");
                 return res.status(404).render("error", {
                     errorTitle: "Reply Not Found",
                     errorMessage: "Unable to locate or delete the reply.",
                 });
             }
 
-            console.log("Reply deleted successfully. Redirecting to forum:", req.params.subject_id);
             res.redirect(`/forum/${req.params.subject_id}`);
         } catch (e) {
-            console.error("Error deleting reply:", e.message || e);
-
             if (e.message.includes("not authorized")) {
                 res.status(403).render("error", {
                     errorTitle: "Unauthorized",
