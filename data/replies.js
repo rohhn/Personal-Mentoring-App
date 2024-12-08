@@ -4,77 +4,76 @@ import * as helper from "../helpers.js";
 import * as post from "./posts.js";
 
 
-export const makeReply = async (postId, authorID, content) => {
+export const makeReply = async (post_id, authorID, content) => {
+    let forumCollection = await forums();
+
     helper.postVerify(content);
 
-    let forumCollection = await forums();
     let newReply = {
         _id: new ObjectId(),
         author: authorID,
         content: content.trim(),
-        created_at: new Date()
+        created_at: new Date(),
     };
 
-    let updateInfo = await forumCollection.findOneAndUpdate(
-        { "posts._id": ObjectId.createFromHexString(postId) },
-        { $push: { "posts.$.replies": newReply } },
-        { returnDocument: "after" }
+    let updatedInfo = await forumCollection.updateOne(
+        { "posts._id": ObjectId.createFromHexString(post_id) },
+        { $push: { "posts.$.replies": newReply } }
     );
 
-    if (!updateInfo.value) throw "Error, unable to add reply.";
+    if (updatedInfo.modifiedCount === 0) throw "Could not add reply.";
 
-    return updateInfo.value;
+    return newReply;
 };
 
-export const getReplies = async (postId) => {
+export const getReply = async (post_id, replyId) => {
     let forumCollection = await forums();
-    let forum = await forumCollection.findOne({ "posts._id": ObjectId.createFromHexString(postId) });
+    let forum = await forumCollection.findOne({ "posts._id": ObjectId.createFromHexString(post_id) });
+    if (!forum) throw "Post not found.";
 
-    if (!forum) throw "Error, post not found.";
+    let post = forum.posts.find((p) => p._id.equals(ObjectId.createFromHexString(post_id)));
+    if (!post) throw "Post not found.";
 
-    let post = forum.posts.find(post => post._id.toString() === postId);
-    if (!post) throw "Error, post not found.";
+    let reply = post.replies.find((r) => r._id.equals(ObjectId.createFromHexString(replyId)));
+    if (!reply) throw "Reply not found.";
 
-    return post.replies || [];
+    return reply;
 };
 
-export const editReply = async (postId, replyId, authorID, updatedContent) => {
+
+export const editReply = async (post_id, replyId, authorID, updatedContent) => {
+    let forumCollection = await forums();
+
     helper.postVerify(updatedContent);
 
-    let forumCollection = await forums();
-    let updateInfo = await forumCollection.findOneAndUpdate(
+    let updateInfo = await forumCollection.updateOne(
         {
-            "posts._id": ObjectId.createFromHexString(postId),
+            "posts._id": ObjectId.createFromHexString(post_id),
             "posts.replies._id": ObjectId.createFromHexString(replyId),
-            "posts.replies.author": authorID
+            "posts.replies.author": authorID,
         },
-        { $set: { "posts.$.replies.$[replyElement].content": updatedContent.trim() } },
-        {
-            arrayFilters: [{ "replyElement._id": ObjectId.createFromHexString(replyId) }],
-            returnDocument: "after"
-        }
+        { $set: { "posts.$.replies.$[replyElem].content": updatedContent.trim() } },
+        { arrayFilters: [{ "replyElem._id": ObjectId.createFromHexString(replyId) }] }
     );
 
-    if (!updateInfo.value) throw "Error, unable to edit reply. Ensure you are the original author.";
+    if (updateInfo.modifiedCount === 0) throw "Could not edit reply.";
 
-    return updateInfo.value;
+    return await getReply(post_id, replyId);
 };
 
-export const deleteReply = async (postId, replyId, authorID) => {
+export const deleteReply = async (post_id, replyId, authorID) => {
     let forumCollection = await forums();
-    let updateInfo = await forumCollection.findOneAndUpdate(
+
+    let updateInfo = await forumCollection.updateOne(
         {
-            "posts._id": ObjectId.createFromHexString(postId),
+            "posts._id": ObjectId.createFromHexString(post_id),
             "posts.replies._id": ObjectId.createFromHexString(replyId),
-            "posts.replies.author": authorID
+            "posts.replies.author": authorID,
         },
-        {
-            $pull: { "posts.$.replies": { _id: ObjectId.createFromHexString(replyId) } }
-        },
-        { returnDocument: "after" }
+        { $pull: { "posts.$.replies": { _id: ObjectId.createFromHexString(replyId) } } }
     );
 
-    if (!updateInfo.value) throw "Error, unable to delete reply. Ensure you are the original author.";
+    if (updateInfo.modifiedCount === 0) throw "Could not delete reply.";
 
-    return updateInfo.value;
+    return { message: "Reply deleted successfully." };
 };

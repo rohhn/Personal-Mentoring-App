@@ -6,7 +6,7 @@ import { mentees, mentors } from "./config/mongoCollections.js";
 import dotenv from "dotenv";
 dotenv.config();
 
-export const postVerify = async (content) => {
+export const postVerify = (content) => {
     if (content == "") {
         throw "Error, please enter something";
     }
@@ -24,6 +24,7 @@ export const postVerify = async (content) => {
         throw "Error, post body cannot be just empty spaces";
     }
 };
+
 
 export const formatDate = (dateStr) => {
     const date = new Date(dateStr);
