@@ -29,7 +29,7 @@ export const createMentor = async (
     last_name = checkStringParams(last_name);
     summary = checkStringParams(summary);
     // TODO: Implement a proper date check
-    dob = checkDate(dob);
+    checkDate(dob);
 
     dob = new Date(dob.trim());
 
@@ -184,7 +184,7 @@ export const updateMentor = async (
 
   checkStringParams(first_name);
   checkStringParams(last_name);
-  dob = checkDate(dob.trim());
+  checkDate(dob.trim());
   await checkEmail(email, "mentor");
 
 

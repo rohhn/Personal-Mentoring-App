@@ -118,7 +118,7 @@ export const checkDate = (inputDate) => {
     //     throw `Date cannot be in the future.`;
     // }
 
-    return date;
+    // return date;
 };
 
 export const checkTimestamp = (inputDate) => {
@@ -143,7 +143,7 @@ export const checkTimestamp = (inputDate) => {
         date.getDate() !== day
     ) {
         throw `Invalid Timestamp.`;
-    }x
+    }
 };
 
 export const checkYears = (years) => {

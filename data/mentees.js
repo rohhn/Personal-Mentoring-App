@@ -21,7 +21,7 @@ export const createMentee = async (
     last_name = checkStringParams(last_name);
     summary = checkStringParams(summary);
     // TODO: Implement a proper date check
-    dob = checkDate(dob)
+    checkDate(dob)
 
     let newMenteeObj = {
         first_name: first_name,
@@ -177,7 +177,7 @@ export const updateMentee = async (
         //         checkStringParams(email, "Email");
         await checkEmail(email, "mentee");
 
-        // if (dob) checkDate(dob, "Date of Birth");
+        if (dob) checkDate(dob, "Date of Birth");
         if (parent_email) checkStringParams(parent_email, "Parent Email");
         if (summary) checkStringParams(summary, "Summary");
         if (skills) skills = checkArrayOfStrings(skills);
