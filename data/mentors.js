@@ -29,7 +29,9 @@ export const createMentor = async (
     last_name = checkStringParams(last_name);
     summary = checkStringParams(summary);
     // TODO: Implement a proper date check
-    // dob = checkDate(dob);
+    dob = checkDate(dob);
+
+    dob = new Date(dob.trim());
 
     let newMentorObj = {
         first_name,
@@ -182,8 +184,10 @@ export const updateMentor = async (
 
   checkStringParams(first_name);
   checkStringParams(last_name);
-  checkDate(dob);
+  dob = checkDate(dob.trim());
   await checkEmail(email, "mentor");
+
+
   // checkStringParams(pwd_hash);
   // checkStringParams(profile_image);
   // checkStringParams(summary);
@@ -194,7 +198,7 @@ export const updateMentor = async (
 
     first_name = first_name.trim();
     last_name = last_name.trim();
-    dob = dob.trim();
+    dob = new Date(dob.trim());
     pwd_hash = pwd_hash.trim();
     profile_image = profile_image.trim();
     summary = summary.trim();
@@ -286,6 +290,8 @@ export const updateSubjectAreaToMentor = async (id, subjectId) => {
         subject_areas: subject_areas,
     };
 
+    const mentorCollection = await mentors();
+
     const result = await mentorCollection.findOneAndUpdate(
         { _id: new ObjectId(id) },
         { $set: updateDoc },
@@ -329,6 +335,8 @@ export const updateSubjectAreaToMentorByName = async (id, subjectName) => {
     let updateDoc = {
         subject_areas: subject_areas,
     };
+
+    const mentorCollection = await mentors();
 
     const result = await mentorCollection.findOneAndUpdate(
         { _id: new ObjectId(id) },
@@ -376,6 +384,8 @@ export const removeSubjectAreaFromMentor = async (id, subjectId) => {
         subject_areas: subject_areas,
     };
 
+    const mentorCollection = await mentors();
+
     const result = await mentorCollection.findOneAndUpdate(
         { _id: new ObjectId(id) },
         { $set: updateDoc },
@@ -419,6 +429,8 @@ export const removeSubjectAreaToMentorByName = async (id, subjectName) => {
     let updateDoc = {
         subject_areas: subject_areas,
     };
+
+    const mentorCollection = await mentors();
 
     const result = await mentorCollection.findOneAndUpdate(
         { _id: new ObjectId(id) },

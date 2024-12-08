@@ -4,7 +4,7 @@ import {
     checkArrayOfStrings,
     checkDate,
     checkEmail,
-    checkStringParams,
+    checkStringParams
 } from "../helpers.js";
 import { isParentEmailRequired } from "../helpers/mentees.js";
 
@@ -21,12 +21,12 @@ export const createMentee = async (
     last_name = checkStringParams(last_name);
     summary = checkStringParams(summary);
     // TODO: Implement a proper date check
-    // dob = checkValidDate(dob)
+    dob = checkDate(dob)
 
     let newMenteeObj = {
         first_name: first_name,
         last_name: last_name,
-        dob: dob,
+        dob: new Date(dob.trim()),
         pwd_hash: pwd_hash,
         summary: summary,
     };
@@ -42,6 +42,7 @@ export const createMentee = async (
     } else {
         newMenteeObj.email = email;
     }
+
 
     // optional params
     let { parent_email, profile_image, skills } = options;
@@ -184,7 +185,7 @@ export const updateMentee = async (
         const menteeUpdate = {
             first_name: first_name.trim(),
             last_name: last_name.trim(),
-            dob: dob ? dob.trim() : null,
+            dob: dob ? new Date(dob.trim()) : null,
             email: email.trim(),
             parent_email: parent_email ? parent_email.trim() : null,
             summary: summary ? summary.trim() : null,
