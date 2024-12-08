@@ -499,6 +499,7 @@ Description: Get a list of all sessions for a mentee - Will add the option for M
 
 Request Payload:
 ```json
+{"timeline": "upcoming  | previous | all"}
 ```
 
 Expected Response:
@@ -527,6 +528,7 @@ Description: Get a list of all sessions for a mentor - Will add the option for M
 
 Request Payload:
 ```json
+{"timeline": "upcoming  | previous | all"}
 ```
 
 Expected Response:
