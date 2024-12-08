@@ -678,3 +678,200 @@ Expected Response:
     "description": "New Description1
 }
 ```
+
+##Posts API
+
+Route: `/forum/:subject_id`
+
+Method: GET
+
+Description: Gets all posts and replies in a forum
+
+Request Payload:
+```
+
+```
+
+Expected Response:
+```
+    {
+        "_id": "post_id",
+        "author": "author_id",
+        "title": "Post Title",
+        "content": "Post content",
+        "created_at": "Timestamp",
+        "replies": []
+    }
+```
+
+Route: `/forum/:subject_id`
+
+Method: POST
+
+Description: Create a new post.
+
+Request Payload:
+```
+{
+    "author": "author_id",
+    "title": "Post Title",
+    "content": "Post content"
+}
+```
+
+Expected Response:
+```
+{
+    "_id": "post_id",
+    "author": "author_id",
+    "title": "Post Title",
+    "content": "Post content",
+    "created_at": "Timestamp",
+    "replies": []
+}
+```
+
+Route: `/forum/:subject_id/:post_id`
+
+Method: GET
+
+Description: Fetch a specific post by its ID.
+
+Request Payload: 
+```
+
+```
+
+Expected Response:
+```
+{
+    "_id": "post_id",
+    "author": "author_id",
+    "title": "Post Title",
+    "content": "Post content",
+    "created_at": "Timestamp",
+    "replies": []
+}
+```
+
+Method: PATCH
+
+Description: Update a post
+
+Request Payload:
+```
+{
+    "title": "Updated Post Title",
+    "content": "Updated Post Content"
+}
+
+    Expected Response:
+```
+{
+    "_id": "post_id",
+    "author": "author_id",
+    "title": "Updated Post Title",
+    "content": "Updated Post Content",
+    "created_at": "Timestamp",
+    "replies": []
+}
+```
+
+Method: DELETE
+
+Description: Delete a specific post.
+
+Request Payload: 
+```
+
+```
+
+Expected Response:
+```
+{ "_id": "post_id", "deleted": "true" }
+```
+```
+
+##Replies API
+
+Route: `/forum/:subject_id/:post_id/reply`
+
+Method: POST
+
+Description: Create a reply to a post
+
+Request Payload:
+```
+{
+    "author": "author_id",
+    "content": "Reply content"
+}
+```
+
+Expected Result:
+```
+{
+    "_id": "reply_id",
+    "author": "author_id",
+    "content": "Reply content",
+    "created_at": "Timestamp"
+}
+```
+
+Route: `forum/subject_id/post_id/reply_id/edit`
+
+Method: GET
+
+Description: Gets a specific repsly by its ID
+
+Request Payload:
+```
+
+```
+
+Expected output:
+```
+{
+    "_id": "reply_id",
+    "author": "author_id",
+    "content": "Reply content",
+    "created_at": "Timestamp"
+}
+```
+
+Method: PATCH
+
+Description: Update a reply
+
+Request Payload:
+```
+{
+    "content": "Updated Reply Content"
+}
+```
+
+Expected Output:
+```
+{
+    "_id": "reply_id",
+    "author": "author_id",
+    "content": "Updated Reply Content",
+    "created_at": "Timestamp"
+}
+```
+
+Route: `forum/post_id/reply_id`
+
+Method: DELETE
+
+Description: Deletes a specific reply based on its ID
+
+Request Payload:
+```
+
+```
+
+Expected Output:
+```
+{ "_id": "reply_id", "deleted": "true" }
+```
