@@ -90,15 +90,21 @@ export const checkObject = (param) => {
 
 export const checkDate = (inputDate) => {
     checkStringParams(inputDate);
-    let dateRegex = /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/\d{4}$/;
+    // let dateRegex = /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/\d{4}$/;
+
+    let dateRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
+
+    // console.log(inputDate);
 
     if (!dateRegex.test(inputDate)) {
-        throw `The Input Date is not in mm/dd/yyyy format. : ${inputDate}`;
+        throw `The Input Date is not in yyyy-mm-dd format. : ${inputDate}`;
     }
 
-    let [month, day, year] = inputDate.split("/").map(Number);
+    let [year, month, day] = inputDate.split("-").map(Number);
 
     let date = new Date(year, month - 1, day);
+
+    // console.log(date);
 
     // console.log(day);
     // console.log(month - 1);
@@ -109,7 +115,7 @@ export const checkDate = (inputDate) => {
         date.getMonth() !== month - 1 ||
         date.getDate() !== day
     ) {
-        throw `Invalid Date.`;
+        throw `Invalid Date. - ${date}`;
     }
 
     // let today = new Date();

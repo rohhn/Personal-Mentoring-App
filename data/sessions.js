@@ -323,6 +323,7 @@ export const getSessionsByMentee = async (menteeId) => {
         throw `No Sessions scheduled.`;
     }
 
+
     return sessionsByMentee;
 }
 
