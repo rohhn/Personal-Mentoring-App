@@ -1,9 +1,10 @@
 import { ObjectId } from "mongodb";
 import { sessions, mentees, mentors } from "../config/mongoCollections.js";
-import { mentorData, subjectData, parentsData } from "./index.js";
+import { mentorData, subjectData, parentsData, menteeData } from "./index.js";
 import { checkDate, checkNumber, checkStringParams, checkAvailability, bookSession, updateSessionOnCalendar, deleteSessionFromCalendar, checkTimestamp } from "../helpers.js";
 import axios from "axios";
 import dotenv from 'dotenv';
+import moment from 'moment';
 dotenv.config();
 
 
@@ -166,8 +167,25 @@ export const createSession = async (
 
   
     session._id = session._id.toString();
+
+    let mentorName = `${mentor.first_name} ${mentor.last_name}`;
+    let menteeName = `${mentee.first_name} ${mentee.last_name}`;
+
+    let subjectName = subject.name;
+
+    let returnSession = {
+        _id: session._id,
+        menteeName: menteeName,
+        mentorName: mentorName,
+        subject_area: subjectName,
+        start_time: session.start_time,
+        end_time: session.end_time,
+        status: session.status,
+        eventId: session.eventId,
+        created_at: session.created_at
+    }
   
-    return session;
+    return returnSession;
 }
 
 export const rescheduleSession = async (id, start_time, end_time, status) => {
@@ -201,6 +219,8 @@ export const rescheduleSession = async (id, start_time, end_time, status) => {
 
     let mentor = await mentorData.getMentorById(session.mentor_id);
 
+    let mentee = await menteeData.getMenteeById(session.mentee_id);
+
     let calendarId = mentor.calendarId;
 
     let isAvailable = await checkAvailability(calendarId, start_time, end_time);
@@ -223,9 +243,25 @@ export const rescheduleSession = async (id, start_time, end_time, status) => {
     }
   
     result._id = result._id.toString();
-  
-    return result;
 
+    let mentorName = `${mentor.first_name} ${mentor.last_name}`;
+    let menteeName = `${mentee.first_name} ${mentee.last_name}`;
+
+    let subjectName = subject.name;
+
+    let returnSession = {
+        _id: result._id,
+        mentee_name: menteeName,
+        mentor_name: mentorName,
+        subject_area: subjectName,
+        start_time: result.start_time,
+        end_time: result.end_time,
+        status: result.status,
+        eventId: result.eventId,
+        created_at: result.created_at
+    }
+  
+    return returnSession;
 }
 
 export const deleteSession = async (id) => {
@@ -296,8 +332,9 @@ export const getSessionById = async (id) => {
     return session;
 }
 
-export const getSessionsByMentee = async (menteeId) => {
+export const getSessionsByMentee = async (menteeId, timeline) => {
     checkStringParams(menteeId);
+    checkStringParams(timeline);
 
     menteeId = menteeId.trim();
 
@@ -313,6 +350,10 @@ export const getSessionsByMentee = async (menteeId) => {
         throw `Mentee with the id ${menteeId} does not exist.`;
     }
 
+    if(timeline !== 'all' || timeline !== 'previous' || timeline !== 'upcoming'){
+        throw `Invalid value for timeline.`;
+    }
+
 
     const sessionCollection = await sessions();
 
@@ -323,13 +364,60 @@ export const getSessionsByMentee = async (menteeId) => {
         throw `No Sessions scheduled.`;
     }
 
+    let filteredSessions = [];
+    const now = moment();
 
-    return sessionsByMentee;
+    if (timeline === 'upcoming') {
+        // Sessions with start_time in the future
+        filteredSessions = sessionsByMentee.filter(session =>
+            moment(session.start_time).isAfter(now)
+        );
+    } else if (timeline === 'previous') {
+        // Sessions with start_time in the past
+        filteredSessions = sessionsByMentee.filter(session =>
+            moment(session.start_time).isBefore(now)
+        );
+    } else if (timeline === 'all') {
+        // Get all sessions
+        filteredSessions = sessionsByMentee;
+    }
+
+    let returnList = [];
+
+    for (let i = 0; i < filteredSessions.length; i++) {
+        let sessionObj = filteredSessions[i];
+        let mentor = await mentorData.getMentorById(sessionObj.mentee_id);
+
+        let mentorName = `${mentor.first_name} ${mentor.last_name}`;
+        let menteeName = `${mentee.first_name} ${mentee.last_name}`;
+
+        let subject = await subjectData.getSubjectById(sessionObj.subject_area);
+
+        let subjectName = subject.name;
+
+        let returnSession = {
+            _id: result._id,
+            mentee_name: menteeName,
+            mentor_name: mentorName,
+            subject_area: subjectName,
+            start_time: sessionObj.start_time,
+            end_time: sessionObj.end_time,
+            status: sessionObj.status,
+            eventId: sessionObj.eventId,
+            created_at: sessionObj.created_at
+        }
+
+        returnList.push(returnSession);
+    }
+    
+
+    return returnList;
 }
 
 
 export const getSessionsByMentor = async (mentorId) => {
     checkStringParams(mentorId);
+    checkStringParams(timeline);
 
     mentorId = mentorId.trim();
 
@@ -345,6 +433,9 @@ export const getSessionsByMentor = async (mentorId) => {
         throw `Mentor with the id ${mentorId} does not exist.`;
     }
 
+    if(timeline !== 'all' || timeline !== 'previous' || timeline !== 'upcoming'){
+        throw `Invalid value for timeline.`;
+    }
 
     const sessionCollection = await sessions();
 
@@ -355,5 +446,52 @@ export const getSessionsByMentor = async (mentorId) => {
         throw `No Sessions scheduled.`;
     }
 
-    return sessionsByMentor;
+    let filteredSessions = [];
+    const now = moment();
+
+    if (timeline === 'upcoming') {
+        // Sessions with start_time in the future
+        filteredSessions = sessionsByMentor.filter(session =>
+            moment(session.start_time).isAfter(now)
+        );
+    } else if (timeline === 'previous') {
+        // Sessions with start_time in the past
+        filteredSessions = sessionsByMentor.filter(session =>
+            moment(session.start_time).isBefore(now)
+        );
+    } else if (timeline === 'all') {
+        // Get all sessions
+        filteredSessions = sessionsByMentor;
+    }
+
+    let returnList = [];
+
+    for (let i = 0; i < filteredSessions.length; i++) {
+        let sessionObj = filteredSessions[i];
+        let mentee = await menteeData.getMentorById(sessionObj.mentee_id);
+
+        let mentorName = `${mentor.first_name} ${mentor.last_name}`;
+        let menteeName = `${mentee.first_name} ${mentee.last_name}`;
+
+        let subject = await subjectData.getSubjectById(sessionObj.subject_area);
+
+        let subjectName = subject.name;
+
+        let returnSession = {
+            _id: result._id,
+            mentee_name: menteeName,
+            mentor_name: mentorName,
+            subject_area: subjectName,
+            start_time: sessionObj.start_time,
+            end_time: sessionObj.end_time,
+            status: sessionObj.status,
+            eventId: sessionObj.eventId,
+            created_at: sessionObj.created_at
+        }
+
+        returnList.push(returnSession);
+    }
+    
+
+    return returnList;
 }

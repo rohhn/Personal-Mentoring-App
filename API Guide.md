@@ -436,7 +436,7 @@ Request Payload:
 
 Expected Response:
 ```JSON
-{ "_id": menteeId, "deleted": "true" }
+{ "_id": "menteeId", "deleted": "true" }
 ```
 
 
@@ -479,9 +479,9 @@ Expected Response:
 ```json
 {
     "_id": "12345",
-    "mentor_id": "mentor_id_ref",
-    "mentee_id": "mentee_id_ref",
-    "subject_area": "subject_area_ref",
+    "mentee_name": "FirstName LastName",
+    "mentor_name": "FirstName LastName",
+    "subject_area": "subject_name",
     "start_time": "2024-12-01T17:00:00Z",
     "end_time": "2024-12-01T17:30:00Z",  
     "status": "scheduled | completed",
@@ -506,9 +506,9 @@ Expected Response:
 [
 {
     "_id": "12345",
-    "mentor_id": "mentor_id_ref",
-    "mentee_id": "mentee_id_ref",
-    "subject_area": "subject_area_ref",
+    "mentee_name": "FirstName LastName",
+    "mentor_name": "FirstName LastName",
+    "subject_area": "subject_name",
     "start_time": "2024-12-01T17:00:00Z",
     "end_time": "2024-12-01T17:30:00Z",  
     "status": "scheduled | completed",
@@ -519,7 +519,7 @@ Expected Response:
 ]
 ```
 
-Route: `/sessioms/mentor/:mentorId`
+Route: `/sessions/mentor/:mentorId`
 
 Method: `POST`
 
@@ -566,9 +566,9 @@ Expected Response:
 ```json
 {
     "_id": "12345",
-    "mentor_id": "mentor_id_ref",
-    "mentee_id": "mentee_id_ref",
-    "subject_area": "subject_area_ref",
+    "mentee_name": "FirstName LastName",
+    "mentor_name": "FirstName LastName",
+    "subject_area": "subject_name",
     "start_time": "2024-12-01T17:00:00Z",
     "end_time": "2024-12-01T17:30:00Z",  
     "status": "scheduled | completed",
@@ -594,19 +594,8 @@ Request Payload:
 ```
 
 Expected Response:
-```json
-{
-    "_id": "12345",
-    "mentor_id": "mentor_id_ref",
-    "mentee_id": "mentee_id_ref",
-    "subject_area": "subject_area_ref",
-    "start_time": "2024-12-01T17:00:00Z",
-    "end_time": "2024-12-01T17:30:00Z",  
-    "status": "scheduled | completed",
-    "eventId":"calendar_event_id",
-    "meeting_link": "meeting URL",
-    "created_at": "2024-11-05T14:00:00Z"
-}
+```
+`'Session_id' has been successfully deleted!`
 ```
 
 ## Subject Area API
@@ -628,9 +617,9 @@ Request Payload:
 Expected Response:
 ```json
 {
-    "_id": "12345"
+    "_id": "12345",
     "name": "Data Science",
-    "description": "New Description1
+    "description": "New Description1"
 }
 ```
 
@@ -646,11 +635,11 @@ Request Payload:
 ```
 
 Expected Response:
-```
+```json
 [{
-    "_id": "12345"
+    "_id": "12345",
     "name": "Data Science",
-    "description": "New Description1
+    "description": "New Description1"
 }]
 ```
 

@@ -46,14 +46,20 @@ router.route("/").post(async (req, res) => {
 
 router.route("/mentee/:menteeId").get(async (req, res) => {
     let menteeId = req.params.menteeId.trim();
+    let timeline = req.body.timeline.trim();
 
     try {
         checkStringParams(menteeId);
+        checkStringParams(timeline);
 
         menteeId = menteeId.trim();
 
         if (!ObjectId.isValid(menteeId)) {
             throw "Invalid object ID.";
+        }
+
+        if(timeline !== 'all' || timeline !== 'previous' || timeline !== 'upcoming'){
+            throw `Invalid value for timeline.`;
         }
     } catch (e) {
         return res.status(400).json({ error: e });
@@ -87,13 +93,21 @@ router.route("/mentee/:menteeId").get(async (req, res) => {
 router.route("/mentor/:mentorId").get(async (req, res) => {
     let mentorId = req.params.mentorId.trim();
 
+    let timeline = req.body.timeline.trim();
+
     try {
         checkStringParams(mentorId);
+        checkStringParams(timeline);
+
 
         mentorId = mentorId.trim();
 
         if (!ObjectId.isValid(mentorId)) {
             throw "Invalid object ID.";
+        }
+
+        if(timeline !== 'all' || timeline !== 'previous' || timeline !== 'upcoming'){
+            throw `Invalid value for timeline.`;
         }
     } catch (e) {
         return res.status(400).json({ error: e });
