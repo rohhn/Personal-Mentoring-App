@@ -111,6 +111,10 @@ export const getMenteeById = async (id) => {
         throw `Mentee with the id ${id} does not exist.`;
     }
 
+    if (mentee.dob && mentee.dob instanceof Date) {
+        mentee.dob = mentee.dob.toISOString().split('T')[0]; 
+    }
+
     mentee._id = mentee._id.toString();
     return mentee;
 };
@@ -124,6 +128,10 @@ export const getMenteeByEmail = async (email) => {
 
     if (!mentee) {
         throw `Mentee with the email ${email} does not exist.`;
+    }
+
+    if (mentee.dob && mentee.dob instanceof Date) {
+        mentee.dob = mentee.dob.toISOString().split('T')[0]; 
     }
 
     mentee._id = mentee._id.toString();
@@ -207,6 +215,9 @@ export const updateMentee = async (
             throw new Error(
                 `Could not update the mentee. No document found with ID: ${id}`
             );
+        }
+        if (result.dob && result.dob instanceof Date) {
+            result.dob = result.dob.toISOString().split('T')[0]; 
         }
 
         return result;

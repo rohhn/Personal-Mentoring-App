@@ -123,6 +123,11 @@ export const getMentorById = async (id) => {
     }
 
     mentor._id = mentor._id.toString();
+
+    if (mentor.dob && mentor.dob instanceof Date) {
+        mentor.dob = mentor.dob.toISOString().split('T')[0]; 
+    }
+
     return mentor;
 };
 
@@ -137,6 +142,10 @@ export const getMentorByEmail = async (email) => {
 
     if (!mentor) {
         throw `Mentor with the email ${email} does not exist.`;
+    }   
+
+    if (mentor.dob && mentor.dob instanceof Date) {
+        mentor.dob = mentor.dob.toISOString().split('T')[0]; 
     }
 
     mentor._id = mentor._id.toString();
@@ -235,6 +244,10 @@ export const updateMentor = async (
     }
 
     result._id = result._id.toString();
+
+    if (result.dob && result.dob instanceof Date) {
+        result.dob = result.dob.toISOString().split('T')[0]; 
+    }
 
     return result;
 };
