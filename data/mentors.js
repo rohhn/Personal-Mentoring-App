@@ -68,8 +68,6 @@ export const createMentor = async (
     const calendarId = await createCalendarForMentor();
     newMentorObj.calendarId = calendarId;
 
-    console.log(calendarId);
-
     const mentorCollection = await mentors();
 
     const result = await mentorCollection.insertOne(newMentorObj);

@@ -171,7 +171,6 @@ router
 
             // create User
             if (user_type === "mentee") {
-                console.log("Creating mentee");
 
                 const parent_email = req.body.parent_email || undefined;
 
@@ -204,7 +203,6 @@ router
                     userType: user_type,
                 };
             } else if (user_type == "mentor") {
-                console.log("Creating mentor");
 
                 const createdUser = await mentorData.createMentor(
                     first_name,
@@ -265,13 +263,11 @@ router.route("/dashboard").get(async (req, res) => {
                 errorObj.name = "ServerError";
                 throw errorObj;
             });
-            console.log("got user data");
 
             sessions = await sessionsData.getSessionsByMentee(
                 userId,
                 "upcoming"
             );
-            console.log("sessions", sessions);
         } else if (userType == "mentor") {
             console.log("mentor dashboard");
             userData = await mentorData.getMentorById(userId).catch((error) => {

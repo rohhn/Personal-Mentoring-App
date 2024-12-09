@@ -174,7 +174,6 @@
             data: JSON.stringify(payload),
             contentType: "application/json",
             success: (response) => {
-                console.log(response);
                 window.location.href = `${window.location.origin}/dashboard`;
             },
             error: (XMLHttpRequest, textStatus, errorThrown) => {
@@ -248,7 +247,7 @@
             month,
             hour: startHour,
             minute: startMin,
-        }).toISOString({keepOffset:true});
+        }).toISOString({ keepOffset: true });
 
         const [endHour, endMin] = $.map(
             formValues.end_time.split(":"),
@@ -262,14 +261,12 @@
             month,
             hour: endHour,
             minute: endMin,
-        }).toISOString({keepOffset:true});
+        }).toISOString({ keepOffset: true });
 
-        console.log("formValues", formValues);
         bookSession(formValues);
     }
 
     function updateAvailabilityDiv(selectedDate, response) {
-        console.log(response);
         let dayAvl = [];
         if (response.availability) {
             dayAvl = response.availability.filter(
@@ -299,7 +296,6 @@
                 );
             }
         } else {
-            console.log("No availability");
             avlDiv.append(
                 `<p class="pt-5 text-center fs-6 fw-lighter fst-italic">No availability.</p>`
             );
@@ -373,13 +369,11 @@
             url: apiUrl,
             contentType: "application/json",
             success: (response) => {
-                console.log(response);
                 const availability = response.availability;
                 const dayAvl = availability.filter(
                     (avlInfo) =>
                         avlInfo.day.toLowerCase() === dayOfWeek.toLowerCase()
                 );
-                console.log(dayAvl);
                 return dayAvl;
             },
             error: (XMLHttpRequest, textStatus, errorThrown) => {
@@ -389,129 +383,6 @@
             },
         });
     }
-
-    // Event handler for clicking the new event button
-    function new_event(event) {
-        // if a date isn't selected then do nothing
-        if ($(".active-date").length === 0) return;
-        // remove red error input on click
-        $("input").click(function () {
-            $(this).removeClass("error-input");
-        });
-        // empty inputs and hide events
-        $("#dialog input[type=text]").val("");
-        $("#dialog input[type=number]").val("");
-        $(".events-container").hide(250);
-        $("#dialog").show(250);
-        // Event handler for cancel button
-        $("#cancel-button").click(function () {
-            $("#name").removeClass("error-input");
-            $("#count").removeClass("error-input");
-            $("#dialog").hide(250);
-            $(".events-container").show(250);
-        });
-        // Event handler for ok button
-        $("#ok-button")
-            .unbind()
-            .click({ date: event.data.date }, function () {
-                var date = event.data.date;
-                var name = $("#name").val().trim();
-                var count = parseInt($("#count").val().trim());
-                var day = parseInt($(".active-date").html());
-                // Basic form validation
-                if (name.length === 0) {
-                    $("#name").addClass("error-input");
-                } else if (isNaN(count)) {
-                    $("#count").addClass("error-input");
-                } else {
-                    $("#dialog").hide(250);
-                    console.log("new event");
-                    new_event_json(name, count, date, day);
-                    date.setDate(day);
-                    init_calendar(date);
-                }
-            });
-    }
-
-    // Adds a json event to event_data
-    function new_event_json(name, count, date, day) {
-        var event = {
-            occasion: name,
-            invited_count: count,
-            year: date.getFullYear(),
-            month: date.getMonth() + 1,
-            day: day,
-        };
-        event_data["events"].push(event);
-    }
-
-    // Display all events of the selected date in card views
-    function show_events(events, month, day) {
-        // Clear the dates container
-        $(".events-container").empty();
-        $(".events-container").show(250);
-        console.log(event_data["events"]);
-        // If there are no events for this date, notify the user
-        if (events.length === 0) {
-            var event_card = $("<div class='event-card'></div>");
-            var event_name = $(
-                "<div class='event-name'>There are no events planned for " +
-                    month +
-                    " " +
-                    day +
-                    ".</div>"
-            );
-            $(event_card).css({ "border-left": "10px solid #FF1744" });
-            $(event_card).append(event_name);
-            $(".events-container").append(event_card);
-        } else {
-            // Go through and add each event as a card to the events container
-            for (var i = 0; i < events.length; i++) {
-                var event_card = $("<div class='event-card'></div>");
-                var event_name = $(
-                    "<div class='event-name'>" +
-                        events[i]["occasion"] +
-                        ":</div>"
-                );
-                var event_count = $(
-                    "<div class='event-count'>" +
-                        events[i]["invited_count"] +
-                        " Invited</div>"
-                );
-                if (events[i]["cancelled"] === true) {
-                    $(event_card).css({
-                        "border-left": "10px solid #FF1744",
-                    });
-                    event_count = $(
-                        "<div class='event-cancelled'>Cancelled</div>"
-                    );
-                }
-                $(event_card).append(event_name).append(event_count);
-                $(".events-container").append(event_card);
-            }
-        }
-    }
-
-    // Checks if a specific date has any events
-    function check_events(day, month, year) {
-        var events = [];
-        for (var i = 0; i < event_data["events"].length; i++) {
-            var event = event_data["events"][i];
-            if (
-                event["day"] === day &&
-                event["month"] === month &&
-                event["year"] === year
-            ) {
-                events.push(event);
-            }
-        }
-        return events;
-    }
-
-    // Given data for events in JSON format
-    var event_data = {
-        events: [],
-    };
 
     var mentorId = window.location.pathname.split("/").slice(-1);
 

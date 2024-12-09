@@ -133,8 +133,6 @@ export const createSession = async (
 
     let calendarId = mentor.calendarId;
 
-    // console.log(calendarId);
-
     let isAvailable = await checkAvailability(calendarId, start_time, end_time);
 
     if (!isAvailable) {
@@ -147,8 +145,6 @@ export const createSession = async (
         start_time,
         end_time
     );
-
-    // console.log(bookedSession);
 
     let meeting = await createZoomMeeting(start_time, end_time);
 
@@ -394,7 +390,7 @@ export const getSessionsByMentee = async (menteeId, timeline) => {
     } else if (timeline === "previous") {
         query.start_time = { $lt: now }; // Sessions with start_time in the past
     }
-    console.log("query", query);
+
     const filteredSessions = await sessionCollection.find(query).toArray();
     // if (!filteredSessions || filteredSessions.length === 0) {
     //     throw `No sessions found for the given timeline.`;
@@ -434,7 +430,6 @@ export const getSessionsByMentee = async (menteeId, timeline) => {
 export const getSessionsByMentor = async (mentorId, timeline = "all") => {
     checkStringParams(mentorId, "mentorId");
     checkStringParams(timeline, "timeline");
-    // console.log(timeline);
 
     mentorId = mentorId.trim();
 
