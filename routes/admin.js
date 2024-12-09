@@ -7,6 +7,8 @@ import bcrypt from "bcrypt";
 import { adminOnly } from "../middleware/users.js";
 import { admin } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
+import * as applicationData from "../data/applications.js";
+import { file } from "googleapis/build/src/apis/file/index.js";
 
 
 const router = express.Router();
@@ -168,60 +170,113 @@ router
         if (!req.session || !req.session.admin) {
             return res.redirect("/admin/login");
         }
-
+    
         try {
-            let admin = await adminData.getAdminById(req.session.admin._id);
-
+            let adminId = req.session.admin._id;
+    
+            // If query parameters indicate an update, process the update logic
+            if (req.query.update === "true") {
+                let { firstName, lastName, summary, email, password } = req.query;
+    
+                let updates = {
+                    firstName: firstName?.trim(),
+                    lastName: lastName?.trim(),
+                    summary: summary?.trim(),
+                };
+    
+                // Update password if provided
+                if (password && password.trim().length > 0) {
+                    updates.pwd_hash = await bcrypt.hash(password.trim(), parseInt(process.env.SALT_ROUNDS));
+                }
+    
+                // Process profile image if included
+                if (req.query.profile_image) {
+                    updates.profile_image = req.query.profile_image; // Assuming image is passed as a URL in query params
+                }
+    
+                // Update the admin in the database
+                await adminData.updateAdmin(adminId, updates);
+    
+                // Redirect to the dashboard after successful update
+                return res.redirect("/admin/dashboard");
+            }
+    
+            // Fetch admin details for rendering the form
+            const admin = await adminData.getAdminById(adminId);
+    
             res.render("admin/edit-dashboard", {
                 pageTitle: "Edit Admin Profile",
-                admin,
+                profileInfo: admin,
             });
-        } catch (e) {
-            console.error("Error loading admin edit page:", e);
+        } catch (error) {
+            console.error("Error handling admin edit route:", error);
+    
             res.status(500).render("error", {
                 errorTitle: "Internal Server Error",
-                errorMessage: "Unable to load the admin edit page. Please try again later.",
-            });
-        }
-    })
-    .patch(async (req, res) => {
-        try {
-            if (!req.session || !req.session.admin || !req.session.admin._id) {
-                return res.redirect("/admin/login");
-            }
-    
-            let adminId = req.session.admin._id;
-            let { firstName, lastName, password, summary } = req.body;
-    
-            let updates = {
-                firstName: firstName?.trim(),
-                lastName: lastName?.trim(),
-                summary: summary?.trim(),
-            };
-    
-            if (password && password.trim().length > 0) {
-                updates.pwd_hash = await bcrypt.hash(password.trim(), parseInt(process.env.SALT_ROUNDS));
-            }
-    
-            let profile_image = extractProfileImage(req);
-            if (profile_image) {
-                updates.profile_image = profile_image;
-            }
-    
-            let updatedAdmin = await adminData.updateAdmin(adminId, updates);
-    
-            req.session.admin = updatedAdmin;
-    
-            res.redirect("/admin/dashboard");
-        } catch (e) {
-            console.error("Error updating admin:", e);
-            res.status(400).render("admin/edit-dashboard", {
-                pageTitle: "Edit Admin Profile",
-                admin: req.body,
-                errorMessage: e.message || "Unable to update admin details. Please try again.",
+                errorMessage: "Unable to process your request. Please try again later.",
             });
         }
     });
 
+
+router
+    .route("/applications")
+    .get(async (req, res) => {
+        if (!req.session || !req.session.admin) {
+            return res.redirect("/admin/login");
+        }
+
+        try {
+            let pendingApplications = await applicationData.getPendingMentorApplications();
+            res.render("admin/applications", {
+                pageTitle: "Pending Mentor Applications",
+                applications: pendingApplications,
+            });
+        } catch (e) {
+            console.error("Error fetching applications:", e);
+            res.status(500).render("error", {
+                errorTitle: "Internal Server Error",
+                errorMessage: "Unable to load applications. Please try again later.",
+            });
+        }
+    });
+
+router.route("/applications/:id/approve")
+    .post(async (req, res) => {
+        if (!req.session || !req.session.admin) {
+            return res.redirect("/admin/login");
+        }
+
+        try {
+            let mentorId = req.params.id;
+            await applicationData.updateMentorApproval(mentorId, true);
+            res.redirect("/admin/applications");
+        } catch (e) {
+            console.error("Error approving mentor:", e);
+            res.status(500).render("error", {
+                errorTitle: "Internal Server Error",
+                errorMessage: "Unable to approve application. Please try again later.",
+            });
+        }
+    });
+
+router.route("/applications/:id/reject")
+    .post(async (req, res) => {
+        if (!req.session || !req.session.admin) {
+            return res.redirect("/admin/login");
+        }
+
+        try {
+            let mentorId = req.params.id;
+            await applicationData.updateMentorApproval(mentorId, false);
+            res.redirect("/admin/applications");
+        } catch (e) {
+            console.error("Error rejecting mentor:", e);
+            res.status(500).render("error", {
+                errorTitle: "Internal Server Error",
+                errorMessage: "Unable to reject application. Please try again later.",
+            });
+        }
+    });
 
 export { router as adminRoutes };

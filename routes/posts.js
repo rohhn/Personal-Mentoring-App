@@ -1,14 +1,17 @@
 import express from "express";
 import * as postData from "../data/posts.js";
 import * as repliesData from "../data/replies.js";
+import * as adminData from "../data/admin.js";
+
 
 const router = express.Router();
+const isAdmin = (user) => user && user.role === "admin";
 
 router
     .route("/:subject_id")
     .get(async (req, res) => {
-        if (!req.session || !req.session.user) {
-            return res.redirect('/login');
+        if (!req.session && !req.session.user) {
+            res.redirect("/login");
         }
         try {
             let forum = await postData.getForums(req.params.subject_id);
@@ -40,7 +43,7 @@ router
     .post(async (req, res) => {
         let { title, content, authorName } = req.body;
 
-        if (!req.session || !req.session.user) {
+        if (!req.session && !req.session.user) {
             return res.redirect('/login');
         }
 
@@ -56,7 +59,7 @@ router
         authorName = authorName.trim();
 
         try {
-            const newPost = await postData.makePost(
+            let newPost = await postData.makePost(
                 req.params.subject_id,
                 req.session.user.userId,
                 authorName,
@@ -84,7 +87,7 @@ router
 router
     .route("/:subject_id/:post_id")
     .get(async (req, res) => {
-        if (!req.session || !req.session.user) {
+        if (!req.session && !req.session.user) {
             return res.redirect('/login');
         }
         try {
@@ -106,7 +109,7 @@ router
     .patch(async (req, res) => {
         let { updatedContent, updatedTitle } = req.body;
 
-        if (!req.session || !req.session.user) {
+        if (!req.session && !req.session.user) {
             return res.status(401).render("error", {
                 errorTitle: "Unauthorized",
                 errorMessage: "You must be logged in to edit a post.",
@@ -121,7 +124,7 @@ router
         }
 
         try {
-            const updatedPost = await postData.editPost(
+            let updatedPost = await postData.editPost(
                 req.params.post_id,
                 req.session.user.userId,
                 updatedContent,
@@ -152,7 +155,7 @@ router
     })
 
     .delete(async (req, res) => {
-        if (!req.session || !req.session.user) {
+        if (!req.session && !req.session.user) {
             return res.status(401).render("error", {
                 errorTitle: "Unauthorized",
                 errorMessage: "You must be logged in to delete a post.",
@@ -160,7 +163,7 @@ router
         }
 
         try {
-            const result = await postData.deletePost(
+            let result = await postData.deletePost(
                 req.params.subject_id,
                 req.params.post_id,
                 req.session.user.userId
@@ -191,7 +194,7 @@ router
 router
     .route("/:subject_id/:post_id/reply")
     .get(async (req, res) => {
-        if (!req.session || !req.session.user) {
+        if (!req.session && !req.session.user) {
             return res.redirect('/login');
         }
         try {
@@ -211,7 +214,7 @@ router
         }
     })
     .post(async (req, res) => {
-        if (!req.session || !req.session.user) {
+        if (!req.session && !req.session.user) {
             return res.redirect('/login');
         }
         let { replyAuthorName, content } = req.body;
@@ -224,7 +227,7 @@ router
         }
 
         try {
-            const newReply = await repliesData.makeReply(
+            let newReply = await repliesData.makeReply(
                 req.params.post_id,
                 req.session.user.userId,
                 replyAuthorName,
@@ -243,7 +246,7 @@ router
 router
     .route("/:subject_id/:post_id/:reply_id/edit")
     .get(async (req, res) => {
-        if (!req.session || !req.session.user) {
+        if (!req.session && !req.session.user) {
             return res.redirect('/login');
         }
         try {
@@ -268,7 +271,7 @@ router
     })
 
     .patch(async (req, res) => {
-        if (!req.session || !req.session.user) {
+        if (!req.session && !req.session.user) {
             return res.redirect('/login');
         }
 
@@ -321,7 +324,7 @@ router
 router
     .route("/:subject_id/:post_id/:reply_id")
     .delete(async (req, res) => {
-        if (!req.session || !req.session.user) {
+        if (!req.session && !req.session.user) {
             return res.status(401).render("error", {
                 errorTitle: "Unauthorized",
                 errorMessage: "You must be logged in to delete a reply.",

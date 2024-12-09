@@ -87,7 +87,7 @@ export const getAdminByEmail = async (email) => {
 };
 
 export const updateAdmin = async (id, updates = {}) => {
-    let allowedUpdates = ["firstName", "lastName", "email", "pwd_hash", "profile_image"];
+    let allowedUpdates = ["firstName", "lastName", "summary", "pwd_hash", "profile_image"];
     let updateFields = {};
 
     for (let [key, value] of Object.entries(updates)) {
@@ -108,10 +108,10 @@ export const updateAdmin = async (id, updates = {}) => {
         { returnDocument: "after" }
     );
 
-    if (!updatedInfo.value) {
+    if (!updatedInfo) {
         throw new Error(`Could not update the admin.`);
     }
 
-    updatedInfo.value._id = updatedInfo.value._id.toString();
-    return updatedInfo.value;
+    updatedInfo._id = updatedInfo._id.toString();
+    return updatedInfo;
 };
