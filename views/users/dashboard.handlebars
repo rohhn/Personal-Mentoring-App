@@ -50,17 +50,21 @@
                     </div>
 
                 </div>
-                <div class="row justify-content-center">
-                    {{#each sessions}}
-                        <div class="card col-md-3 col-sm-4 m-2">
-                            <img class="card-top-img" href="" />
-                            <div class="card-body">
-                                <h5 class="card-title">{{_id}}</h5>
-                                <p class="card-text text-muted">time?</p>
-                                <a href="#" class="card-link">meeting link?</a>
+                <div class="row w-100 h-100 overflow-scroll">
+                    {{#if sessions}}
+                        {{#each sessions}}
+                            <div class="card col-md-3 col-sm-4 m-2">
+                                <img class="card-top-img" href="" />
+                                <div class="card-body">
+                                    <h5 class="card-title">{{_id}}</h5>
+                                    <p class="card-text text-muted">time?</p>
+                                    <a href="#" class="card-link">meeting link?</a>
+                                </div>
                             </div>
-                        </div>
-                    {{/each}}
+                        {{/each}}
+                    {{else}}
+                            <p class="pt-5 text-center fs-6 fw-lighter fst-italic">No upcoming sessions.</p>
+                    {{/if}}
                 </div>
             </div>
             <div id="profile-card" class="col col-sm-12 col-md-4">
