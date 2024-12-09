@@ -32,7 +32,7 @@
                         {{#if (isEqual userData.userType "mentee")}}
                         <a
                             class="btn btn-primary mb-0"
-                            href="/sessions/book"
+                            href="/sessions/booking/book"
                         >Book a session</a>
                         {{/if}}
                         
@@ -50,17 +50,21 @@
                     </div>
 
                 </div>
-                <div class="row justify-content-center">
-                    {{#each upcomingSessions}}
-                        <div class="card col-md-3 col-sm-4 m-2">
-                            <img class="card-top-img" href="" />
-                            <div class="card-body">
-                                <h5 class="card-title">{{_id}}</h5>
-                                <p class="card-text text-muted"> time?</p>
-                                <a href="#" class="card-link">meeting link?</a>
+                <div class="row w-100 h-100 overflow-scroll">
+                    {{#if sessions}}
+                        {{#each sessions}}
+                            <div class="card col-md-3 col-sm-4 m-2">
+                                <img class="card-top-img" href="" />
+                                <div class="card-body">
+                                    <h5 class="card-title">{{_id}}</h5>
+                                    <p class="card-text text-muted">time?</p>
+                                    <a href="#" class="card-link">meeting link?</a>
+                                </div>
                             </div>
-                        </div>
-                    {{/each}}
+                        {{/each}}
+                    {{else}}
+                            <p class="pt-5 text-center fs-6 fw-lighter fst-italic">No upcoming sessions.</p>
+                    {{/if}}
                 </div>
             </div>
             <div id="profile-card" class="col col-sm-12 col-md-4">
@@ -80,7 +84,8 @@
                                     src="{{userData.profile_image}}"
                                     alt="{{userData.first_name}}"
                                     class="rounded-circle"
-                                    width="150"
+                                    width="128"
+                                    height="128"
                                 />
                             {{else}}
                                 {{! <svg xmlns="http://www.w3.org/2000/svg" width="100" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#003c8a" d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z"/></svg> }}

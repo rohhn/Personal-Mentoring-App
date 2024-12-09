@@ -1,6 +1,25 @@
 $(window).on("load", () => {
     const form = $("#manage-availability-form");
 
+    const updateCurrentAvailability = (avlArray) => {
+        const currentAvailabilityDiv = $("#curr-avl-div");
+        currentAvailabilityDiv.empty();
+
+        avlArray.forEach((element) => {
+            const { day, start_time, end_time } = element;
+            const divElement = `<div id="avl-${day}" class="row px-5 w-50 mx-auto">
+                            <div class="card text-bg-dark pt-2">
+                                <div class="card-title"><h5>${day}</h5></div>
+                                <div class="card-body">
+                                    <p class="start-time">Start Time: ${start_time}</p>
+                                    <p class="end-time">End Time: ${end_time}</p>
+                                </div>
+                            </div>
+                        </div>`;
+            currentAvailabilityDiv.append(divElement);
+        });
+    };
+
     form.on("submit", (event) => {
         event.preventDefault();
 
@@ -67,6 +86,8 @@ $(window).on("load", () => {
             contentType: "application/json",
             success: (response) => {
                 console.log(response);
+                const availability = response.availability;
+                updateCurrentAvailability(availability);
             },
             error: (XMLHttpRequest, textStatus, errorThrown) => {
                 console.error("XMLHttpRequest", XMLHttpRequest);

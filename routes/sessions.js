@@ -4,7 +4,7 @@ import { ObjectId } from "mongodb";
 import { mentees, mentors, sessions } from "../config/mongoCollections.js";
 import { checkStringParams, checkTimestamp } from "../helpers.js";
 
-import { sessionsData } from "../data/index.js";
+import { mentorData, sessionsData } from "../data/index.js";
 
 const router = express.Router();
 
@@ -46,20 +46,14 @@ router.route("/").post(async (req, res) => {
 
 router.route("/mentee/:menteeId").get(async (req, res) => {
     let menteeId = req.params.menteeId.trim();
-    let timeline = req.body.timeline.trim();
 
     try {
         checkStringParams(menteeId);
-        checkStringParams(timeline);
 
         menteeId = menteeId.trim();
 
         if (!ObjectId.isValid(menteeId)) {
             throw "Invalid object ID.";
-        }
-
-        if(timeline !== 'all' & timeline !== 'previous' & timeline !== 'upcoming'){
-            throw `Invalid value for timeline.`;
         }
     } catch (e) {
         return res.status(400).json({ error: e });
@@ -82,8 +76,15 @@ router.route("/mentee/:menteeId").get(async (req, res) => {
     }
 
     try {
-        let sessionsByMentee = await sessionsData.getSessionsByMentee(menteeId, timeline);
-        return res.status(200).json(sessionsByMentee);
+        let sessionsByMentee = await sessionsData.getSessionsByMentee(
+            menteeId,
+            "all"
+        );
+        // return res.status(200).json(sessionsByMentee);
+        return res.render("users/mentees/sessions", {
+            sessions: sessionsByMentee,
+            headerOptions: req.headerOptions,
+        });
     } catch (e) {
         console.log(e);
         return res.status(404).json({ error: e });
@@ -93,27 +94,17 @@ router.route("/mentee/:menteeId").get(async (req, res) => {
 router.route("/mentor/:mentorId").get(async (req, res) => {
     let mentorId = req.params.mentorId.trim();
 
-    let timeline = req.body.timeline.trim();
-
     try {
         checkStringParams(mentorId);
-        checkStringParams(timeline);
-
 
         mentorId = mentorId.trim();
 
         if (!ObjectId.isValid(mentorId)) {
             throw "Invalid object ID.";
         }
-
-        if(timeline !== 'all' & timeline !== 'previous' & timeline !== 'upcoming'){
-            throw `Invalid value for timeline.`;
-        }
     } catch (e) {
         return res.status(400).json({ error: e });
     }
-
-    mentorId = mentorId.trim();
 
     try {
         const mentorCollection = await mentors();
@@ -130,7 +121,10 @@ router.route("/mentor/:mentorId").get(async (req, res) => {
     }
 
     try {
-        let sessionsByMentor = await sessionsData.getSessionsByMentor(mentorId, timeline);
+        let sessionsByMentor = await sessionsData.getSessionsByMentor(
+            mentorId,
+            "all"
+        );
         // return res.status(200).json(sessionsByMentor);
         return res.render("users/mentors/sessions", {
             sessions: sessionsByMentor,
@@ -274,11 +268,14 @@ router
         }
     });
 
-router.route("/book").get(async (req, res) => {
-    // return a page to book sessions.
-    // uses mentor availability
+router.route("/booking/book").get(async (req, res) => {
+    // show mentors list
 
-    res.render("");
+    const mentors = await mentorData.getAllMentors();
+    res.render("users/mentees/book-session", {
+        headerOptions: req.headerOptions,
+        mentors,
+    });
 });
 
 export { router as sessionRoutes };

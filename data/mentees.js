@@ -4,7 +4,7 @@ import {
     checkArrayOfStrings,
     checkDate,
     checkEmail,
-    checkStringParams
+    checkStringParams,
 } from "../helpers.js";
 import { isParentEmailRequired } from "../helpers/mentees.js";
 
@@ -21,7 +21,7 @@ export const createMentee = async (
     last_name = checkStringParams(last_name);
     summary = checkStringParams(summary);
     // TODO: Implement a proper date check
-    checkDate(dob)
+    checkDate(dob);
 
     let newMenteeObj = {
         first_name: first_name,
@@ -42,7 +42,6 @@ export const createMentee = async (
     } else {
         newMenteeObj.email = email;
     }
-
 
     // optional params
     let { parent_email, profile_image, skills } = options;

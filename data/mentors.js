@@ -13,8 +13,9 @@ import {
     createCalendarForMentor,
     addAvailability,
     validateAvailability,
+    getAuthClient,
 } from "../helpers.js";
-
+import { google } from "googleapis";
 
 export const createMentor = async (
     first_name,
@@ -41,7 +42,7 @@ export const createMentor = async (
         dob,
         pwd_hash,
         summary,
-        approved
+        approved,
     };
 
     email = checkEmail(email).toLowerCase();
@@ -98,6 +99,7 @@ export const getAllMentors = async () => {
     allMentors = allMentors.map((mentor) => ({
         _id: mentor._id.toString(),
         name: `${mentor.first_name} ${mentor.last_name}`,
+        summary: mentor.summary,
     }));
 
     return allMentors;
@@ -187,19 +189,18 @@ export const updateMentor = async (
         throw `${id} is not a valid ObjectID.`;
     }
 
-  checkStringParams(first_name);
-  checkStringParams(last_name);
-  checkDate(dob.trim());
-  await checkEmail(email, "mentor");
+    checkStringParams(first_name);
+    checkStringParams(last_name);
+    checkDate(dob.trim());
+    await checkEmail(email, "mentor");
 
-
-  // checkStringParams(pwd_hash);
-  // checkStringParams(profile_image);
-  // checkStringParams(summary);
-  // checkBoolean(approved);
-  // education = checkEducation(education);
-  // experience = checkExperience(experience);
-  // subject_areas = checkArrayOfStrings(subject_areas);
+    // checkStringParams(pwd_hash);
+    // checkStringParams(profile_image);
+    // checkStringParams(summary);
+    // checkBoolean(approved);
+    // education = checkEducation(education);
+    // experience = checkExperience(experience);
+    // subject_areas = checkArrayOfStrings(subject_areas);
 
     first_name = first_name.trim();
     last_name = last_name.trim();
@@ -240,7 +241,6 @@ export const updateMentor = async (
 
 export const toAddAvailability = async (id, availability) => {
     checkStringParams(id, "id");
-    console.log(availability);
     availability = validateAvailability(availability);
 
     id = id.trim();
@@ -249,43 +249,75 @@ export const toAddAvailability = async (id, availability) => {
         throw `${id} is not a valid ObjectID.`;
     }
 
-    let mentor = await getMentorById(id);
+    const mentorCollection = await mentors();
 
-    let calendarId = mentor.calendarId;
+    const mentor = await mentorCollection.findOne({ _id: new ObjectId(id) });
+    if (!mentor) {
+        throw `Mentor with ID ${id} not found.`;
+    }
 
-    console.log(availability);
+    const existingAvailability = mentor.availability || [];
 
-    for (let i in availability) {
-        let day = availability[i].day;
-        let start_time = availability[i].start_time;
-        let end_time = availability[i].end_time;
+    // Process the availability array to update or append
+    const updatedAvailability = [...existingAvailability];
 
-    // console.log(av);
-    
-  }
+    for (const newEntry of availability) {
+        const existingEntryIndex = updatedAvailability.findIndex(
+            (entry) => entry.day === newEntry.day
+        );
 
-  let updateDoc = {
-    calendarId: calendarId,
-    availability: availability
-  }
+        if (existingEntryIndex !== -1) {
+            // Update existing entry for the same day
+            updatedAvailability[existingEntryIndex].start_time =
+                newEntry.start_time;
+            updatedAvailability[existingEntryIndex].end_time =
+                newEntry.end_time;
+        } else {
+            // Append new entry for the day
+            updatedAvailability.push(newEntry);
+        }
+    }
 
-  const mentorCollection = await mentors();
-
+    // Update the database
     const result = await mentorCollection.findOneAndUpdate(
         { _id: new ObjectId(id) },
-        { $set: updateDoc },
+        { $set: { availability: updatedAvailability } },
         { returnDocument: "after" }
     );
 
     if (!result) {
-        throw `Could not Update the Mentor.`;
+        throw `Could not update the mentor's availability.`;
     }
 
-    updateDoc._id = result._id.toString();
+    // Ensure the updated availability is also reflected on Google Calendar
+    const calendarId = mentor.calendarId;
+    if (!calendarId) {
+        throw `Mentor with ID ${id} does not have a calendar associated.`;
+    }
 
-    return updateDoc;
-  
-}
+    const authClient = await getAuthClient();
+    const calendar = google.calendar({ version: "v3", auth: authClient });
+
+    // Sync availability to Google Calendar
+    for (const entry of updatedAvailability) {
+        await addAvailability(
+            calendarId,
+            entry.day,
+            entry.start_time,
+            entry.end_time
+        );
+    }
+
+    console.log(
+        "Availability updated successfully on both MongoDB and Google Calendar."
+    );
+
+    return {
+        _id: result._id.toString(),
+        availability: updatedAvailability,
+        calendarId: calendarId,
+    };
+};
 
 export const updateSubjectAreaToMentor = async (id, subjectId) => {
     checkStringParams(id);
