@@ -1,8 +1,9 @@
-import { forums, mentees, mentors } from "../config/mongoCollections.js";
+import { forums, mentees, mentors, admin } from "../config/mongoCollections.js";
 import axios from "axios";
 import * as helper from "../helpers.js";
 import { ObjectId, ReturnDocument } from "mongodb";
 import * as replies from "../data/replies.js";
+import { auth } from "googleapis/build/src/apis/abusiveexperiencereport/index.js";
 
 export const getForums = async (subject_id) => {
     let forumCollection = await forums();
@@ -24,6 +25,7 @@ export const makePost = async (subject_id, sessionUserId, authorName, title, con
     let forumCollection = await forums();
     let menteeCollection = await mentees();
     let mentorCollection = await mentors();
+    let adminCollection = await admin();
 
     let authorId = null;
 
@@ -35,10 +37,18 @@ export const makePost = async (subject_id, sessionUserId, authorName, title, con
         if (mentor) {
             authorId = mentor._id;
         }
+        else
+        {
+            let admin = await adminCollection.findOne({ _id: ObjectId.createFromHexString(sessionUserId) });
+            if(admin)
+            {
+                authorId = admin._id;
+            }
+        }
     }
 
     if (!authorId) {
-        throw "Error: User not found in either mentors or mentees collection.";
+        throw "Error: User not found in mentors, mentees. or admin collections.";
     }
 
     let newPost = {

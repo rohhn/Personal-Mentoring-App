@@ -174,7 +174,6 @@ router
         try {
             let adminId = req.session.admin._id;
     
-            // If query parameters indicate an update, process the update logic
             if (req.query.update === "true") {
                 let { firstName, lastName, summary, email, password } = req.query;
     
@@ -184,24 +183,19 @@ router
                     summary: summary?.trim(),
                 };
     
-                // Update password if provided
                 if (password && password.trim().length > 0) {
                     updates.pwd_hash = await bcrypt.hash(password.trim(), parseInt(process.env.SALT_ROUNDS));
                 }
     
-                // Process profile image if included
                 if (req.query.profile_image) {
-                    updates.profile_image = req.query.profile_image; // Assuming image is passed as a URL in query params
+                    updates.profile_image = req.query.profile_image; 
                 }
     
-                // Update the admin in the database
                 await adminData.updateAdmin(adminId, updates);
     
-                // Redirect to the dashboard after successful update
                 return res.redirect("/admin/dashboard");
             }
     
-            // Fetch admin details for rendering the form
             const admin = await adminData.getAdminById(adminId);
     
             res.render("admin/edit-dashboard", {
