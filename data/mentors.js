@@ -128,6 +128,19 @@ export const getMentorById = async (id) => {
         mentor.dob = mentor.dob.toISOString().split('T')[0]; 
     }
 
+    let subject_ids = mentor.subject_areas;
+
+    let subject_areas = [];
+
+    if (subject_ids.length > 0){
+        for(let i = 0;i < subject_ids.length; i++){
+            let subject = await subjectData.getSubjectById(subject_ids[i]);
+            subject_areas.push(subject);
+        }
+    }
+
+    mentor.subject_areas = subject_areas;
+
     return mentor;
 };
 
@@ -149,6 +162,20 @@ export const getMentorByEmail = async (email) => {
     }
 
     mentor._id = mentor._id.toString();
+
+    let subject_ids = mentor.subject_areas;
+
+    let subject_areas = [];
+
+    if (subject_ids.length > 0){
+        for(let i = 0;i < subject_ids.length; i++){
+            let subject = await subjectData.getSubjectById(subject_ids[i]);
+            subject_areas.push(subject);
+        }
+    }
+
+    mentor.subject_areas = subject_areas;
+    
     return mentor;
 };
 
