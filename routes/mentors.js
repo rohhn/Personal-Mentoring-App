@@ -252,18 +252,18 @@ router
         }
 
         const mentorInfo = await mentorData.getMentorById(mentorId);
-        // const dayofWeek = [
-        //     "Sunday",
-        //     "Monday",
-        //     "Tuesday",
-        //     "Wednesday",
-        //     "Thursday",
-        //     "Friday",
-        //     "Saturday",
-        // ];
+        const dayofWeek = [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+        ];
 
         return res.render("users/mentors/manage-availability", {
-            // dayofWeek,
+            dayofWeek,
             headerOptions: req.headerOptions,
             userId: mentorId,
             availability: mentorInfo.availability || [],
