@@ -64,11 +64,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(rewriteUnsupportedBrowserMethods);
 
+// middleware
 app.use(makeHeaderOptions);
 app.use("/dashboard", privateRouteMiddleware);
 app.use("/login", loginMiddleware);
 app.use("/signup", loginMiddleware);
-app.use("/sessions/book", allowMenteesOnly);
+app.use("/sessions/booking/*", allowMenteesOnly);
 
 app.engine("handlebars", handlebarsInstance.engine);
 app.set("view engine", "handlebars");

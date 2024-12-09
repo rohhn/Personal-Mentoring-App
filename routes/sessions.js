@@ -5,10 +5,11 @@ import { mentees, mentors, sessions } from "../config/mongoCollections.js";
 import { checkStringParams, checkTimestamp } from "../helpers.js";
 
 import { mentorData, sessionsData } from "../data/index.js";
+import { addMenteeIdtoReq } from "../middleware/sessions.js";
 
 const router = express.Router();
 
-router.route("/").post(async (req, res) => {
+router.route("/").post(addMenteeIdtoReq, async (req, res, next) => {
     let newSession = req.body;
 
     try {
@@ -28,7 +29,6 @@ router.route("/").post(async (req, res) => {
         return res.status(400).json({ error: e });
     }
 
-    // TODO: Check if mentor, mentee and subject_areas exist?
     try {
         let session = await sessionsData.createSession(
             newSession.mentor_id,

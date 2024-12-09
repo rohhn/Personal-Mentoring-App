@@ -84,7 +84,7 @@
         return (monthEnd - monthStart) / (1000 * 60 * 60 * 24);
     }
 
-    function makeBookingForm(response) {
+    function makeBookingForm(response, selectedDate) {
         // show the booking form
         // {
         //     "mentor_id": "mentor_id",
@@ -95,16 +95,14 @@
         // }
 
         const bookingForm = $(
-            `<form name="make-session" id="make-session-form"></form>`
+            `<form name="make-session" id="make-session-form" method="POST" action"/sessions"></form>`
         );
-        console.log("response.subject_areas", response.subject_areas);
         const subjectAreaOptions = $.map(
             response.subject_areas,
             function (element) {
                 return `<option value="${element._id}">${element.name}</option>`;
             }
         );
-        console.log("subjectAreaOptions", subjectAreaOptions);
 
         const subjectAreaInput = $(`<div class="form-group mb-2">
                     <div class="col-sm-3">
@@ -144,30 +142,140 @@
                     <div class="col-sm-9 text-secondary">
                         <input
                             class="form-control"
-                            name="start_time"
-                            id="start_time"
+                            name="end_time"
+                            id="end_time"
                             type="time"
                         />
                     </div>
                 </div>`);
         bookingForm.append(toTimeInput);
 
-        const submitBtn =
-            $(`<button class="btn btn-primary form-control mt-4" type="submit">
-                    Book
-                </button>`);
+        bookingForm.append(
+            `<input type='text' name='mentor_id' value='${mentorId}' hidden>`
+        );
+
+        const submitBtn = $(
+            `<button id="make-session-submit" class="btn btn-primary form-control mt-4" type="submit">Book</button>`
+        );
+
+        // submitBtn.click(handleBookSession);
         bookingForm.append(submitBtn);
+
+        bookingForm.on("submit", selectedDate, handleBookSession);
 
         return bookingForm;
     }
 
-    function updateAvailabilityDiv(selectedDay, response) {
+    function bookSession(payload) {
+        const apiUrl = `${window.location.origin}/sessions`;
+        $.ajax({
+            type: "POST",
+            url: apiUrl,
+            data: JSON.stringify(payload),
+            contentType: "application/json",
+            success: (response) => {
+                console.log(response);
+                window.location.href = `${window.location.origin}/dashboard`;
+            },
+            error: (XMLHttpRequest, textStatus, errorThrown) => {
+                console.error("XMLHttpRequest", XMLHttpRequest);
+                console.error("textStatus", textStatus);
+                console.error("errorThrown", errorThrown);
+                alert(errorThrown);
+            },
+        });
+    }
+
+    function handleBookSession(event) {
+        event.preventDefault();
+        const { year, date, month } = event.data;
+
+        const formContraints = {
+            subject_area: {
+                presence: {
+                    allowEmpty: false,
+                },
+                type: "string",
+            },
+            start_time: {
+                presence: {
+                    allowEmpty: false,
+                },
+                type: "string",
+                format: {
+                    pattern: /\d{2}:\d{2}/,
+                },
+            },
+            end_time: {
+                presence: {
+                    allowEmpty: false,
+                },
+                type: "string",
+                format: {
+                    pattern: /\d{2}:\d{2}/,
+                },
+            },
+            mentor_id: {
+                presence: {
+                    allowEmpty: false,
+                },
+                type: "string",
+            },
+        };
+
+        const validateResult = validate(event.target, formContraints, {
+            format: "flat",
+        });
+
+        if (validateResult) {
+            alert(validateResult[0]);
+            return;
+        } else {
+            console.log("form is valid.");
+        }
+
+        const formValues = validate.collectFormValues(event.target);
+
+        const { startHour, startMin } = $.map(
+            formValues.start_time.split(":"),
+            (ele) => {
+                return parseInt(ele);
+            }
+        );
+        formValues.start_time = moment({
+            date,
+            year,
+            month,
+            hour: startHour,
+            minute: startMin,
+        }).toISOString();
+
+        const { endHour, endMin } = $.map(
+            formValues.end_time.split(":"),
+            (ele) => {
+                return parseInt(ele);
+            }
+        );
+        formValues.end_time = moment({
+            date,
+            year,
+            month,
+            hour: endHour,
+            minute: endMin,
+        }).toISOString();
+
+        console.log("formValues", formValues);
+        bookSession(formValues);
+    }
+
+    function updateAvailabilityDiv(selectedDate, response) {
         console.log(response);
         let dayAvl = [];
         if (response.availability) {
             dayAvl = response.availability.filter(
                 (avlInfo) =>
-                    avlInfo.day.toLowerCase() === selectedDay.toLowerCase()
+                    avlInfo.day.toLowerCase() ===
+                    selectedDate.selectedDay.toLowerCase()
             );
         }
 
@@ -183,7 +291,13 @@
                 <p class="fs-6 ">From: ${dayAvl.start_time}</p>
                 <p class="fs-6 ">To: ${dayAvl.end_time}</p>`
             );
-            avlDiv.append(makeBookingForm(response));
+            if (response.subject_areas) {
+                avlDiv.append(makeBookingForm(response, selectedDate));
+            } else {
+                avlDiv.append(
+                    `<p class="fs-6 text-danger">Cannot book sessions with this mentor.</p>`
+                );
+            }
         } else {
             console.log("No availability");
             avlDiv.append(
@@ -209,7 +323,7 @@
             url: apiUrl,
             contentType: "application/json",
             success: (response) => {
-                updateAvailabilityDiv(selectedDay, response);
+                updateAvailabilityDiv({ ...event.data, selectedDay }, response);
             },
             error: (XMLHttpRequest, textStatus, errorThrown) => {
                 console.error("XMLHttpRequest", XMLHttpRequest);
