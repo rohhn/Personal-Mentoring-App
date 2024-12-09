@@ -458,7 +458,7 @@ Expected Response:
 
 ## Sessions API
 
-Route: `/sessioms/`
+Route: `/sessions/`
 
 Method: `POST`
 

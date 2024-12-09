@@ -268,13 +268,35 @@ router
         }
     });
 
-router.route("/booking/book").get(async (req, res) => {
+router.route("/booking/list").get(async (req, res) => {
     // show mentors list
 
     const mentors = await mentorData.getAllMentors();
-    res.render("users/mentees/book-session", {
+    res.render("users/mentees/list-mentors", {
         headerOptions: req.headerOptions,
         mentors,
+    });
+});
+
+router.route("/booking/book/:mentorId").get(async (req, res) => {
+    let mentorId = req.params.mentorId;
+
+    try {
+        mentorId = checkStringParams(mentorId);
+
+        if (!ObjectId.isValid(mentorId)) {
+            throw "Invalid object ID.";
+        }
+    } catch (e) {
+        console.log(e);
+        return res.status(400).json({ error: e });
+    }
+
+    const mentorInfo = await mentorData.getMentorById(mentorId);
+
+    res.render("users/mentees/book-session", {
+        headerOptions: req.headerOptions,
+        mentorInfo,
     });
 });
 

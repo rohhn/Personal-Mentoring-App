@@ -32,7 +32,7 @@
                         {{#if (isEqual userData.userType "mentee")}}
                         <a
                             class="btn btn-primary mb-0"
-                            href="/sessions/booking/book"
+                            href="/sessions/booking/list"
                         >Book a session</a>
                         {{/if}}
                         
@@ -40,10 +40,17 @@
 
                         {{! must only show for mentors }}
                         {{#if (isEqual userData.userType "mentor")}}
-                        <a
+                        {{#if (isEqual userData.userType "mentor")}}
+                            {{#if userData.subject_areas}}
+                                <a
                             class="btn btn-primary mb-0"
                             href="/{{userData.userType}}/availability/{{userData._id}}"
                         >Manage Availability</a>
+                            {{else}}
+                            
+                            {{/if}}
+                        {{/if}}
+                        
                         {{/if}}
 
                         {{! END must only show for mentors }}
@@ -70,6 +77,12 @@
             <div id="profile-card" class="col col-sm-12 col-md-4">
                 <div class="card text-bg-dark">
                     <div class="card-body">
+                        {{#if (isEqual userData.userType "mentor")}}
+                            {{#if userData.subject_areas}}
+                            {{else}}
+                                <p class="fw-bolder text-danger fs-6 text-center">Please complete your profile to enable all features!</p>
+                            {{/if}}
+                        {{/if}}
                         <div class="d-flex flex-column align-items-end mb-4">
                             <a
                                 class="btn btn-primary"

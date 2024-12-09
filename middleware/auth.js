@@ -10,6 +10,19 @@ export const loginMiddleware = (req, res, next) => {
 export const makeHeaderOptions = (req, res, next) => {
     // req.url = "/signup"
 
+    // mock sign-in
+    // req.session.user = {
+    //     email: "rohan@mentor.com",
+    //     userId: "67565c95261c64e042226baf",
+    //     userType: "mentor",
+    // };
+
+    req.session.user = {
+        email: "rohan@mentee.com",
+        userId: "6755fb40b8e580d6306cea02",
+        userType: "mentee",
+    };
+
     const headerOptions = {};
     if (req.session.user) {
         headerOptions.isAuthenticated = true;

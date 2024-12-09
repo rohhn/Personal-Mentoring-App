@@ -74,6 +74,8 @@ router
 router
     .route("/:mentorId")
     .get(async (req, res) => {
+        let queryParams = req.query;
+
         let mentorId = req.params.mentorId.trim();
 
         try {
@@ -100,12 +102,17 @@ router
             if (req.session.user) {
                 isOwner = req.session.user.userId === mentor._id;
             }
-            res.render("users/mentors/profile", {
-                pageTitle: `${mentor.first_name}'s Profile`,
-                headerOptions: req.headerOptions,
-                profileInfo: mentor,
-                isOwner,
-            });
+
+            if (queryParams.api) {
+                return res.json(mentor);
+            } else {
+                return res.render("users/mentors/profile", {
+                    pageTitle: `${mentor.first_name}'s Profile`,
+                    headerOptions: req.headerOptions,
+                    profileInfo: mentor,
+                    isOwner,
+                });
+            }
         } catch (error) {
             let statusCode = 400;
             let errorMessage = error.message;
@@ -117,7 +124,11 @@ router
                 errorMessage = "Mentor not found!";
             }
 
-            res.redirect("/dashboard");
+            if (queryParams.api) {
+                return res.status(statusCode).json({ error: errorMessage });
+            } else {
+                return res.redirect("/dashboard");
+            }
         }
     })
     .delete(async (req, res) => {
