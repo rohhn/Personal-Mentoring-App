@@ -58,7 +58,7 @@ router.route("/mentee/:menteeId").get(async (req, res) => {
             throw "Invalid object ID.";
         }
 
-        if(timeline !== 'all' || timeline !== 'previous' || timeline !== 'upcoming'){
+        if(timeline !== 'all' & timeline !== 'previous' & timeline !== 'upcoming'){
             throw `Invalid value for timeline.`;
         }
     } catch (e) {
@@ -82,7 +82,7 @@ router.route("/mentee/:menteeId").get(async (req, res) => {
     }
 
     try {
-        let sessionsByMentee = await sessionsData.getSessionsByMentee(menteeId);
+        let sessionsByMentee = await sessionsData.getSessionsByMentee(menteeId, timeline);
         return res.status(200).json(sessionsByMentee);
     } catch (e) {
         console.log(e);
@@ -106,7 +106,7 @@ router.route("/mentor/:mentorId").get(async (req, res) => {
             throw "Invalid object ID.";
         }
 
-        if(timeline !== 'all' || timeline !== 'previous' || timeline !== 'upcoming'){
+        if(timeline !== 'all' & timeline !== 'previous' & timeline !== 'upcoming'){
             throw `Invalid value for timeline.`;
         }
     } catch (e) {
@@ -130,7 +130,7 @@ router.route("/mentor/:mentorId").get(async (req, res) => {
     }
 
     try {
-        let sessionsByMentor = await sessionsData.getSessionsByMentor(mentorId);
+        let sessionsByMentor = await sessionsData.getSessionsByMentor(mentorId, timeline);
         // return res.status(200).json(sessionsByMentor);
         return res.render("users/mentors/sessions", {
             sessions: sessionsByMentor,

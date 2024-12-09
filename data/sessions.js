@@ -122,7 +122,9 @@ export const createSession = async (
         throw `Mentee with the id ${mentee_id} does not exist.`;
     }
 
-    let calendarId = mentor.calendarId;
+    // let calendarId = mentor.calendarId;
+
+    console.log(calendarId);
 
     let isAvailable = await checkAvailability(calendarId, start_time, end_time);
 
@@ -350,36 +352,27 @@ export const getSessionsByMentee = async (menteeId, timeline) => {
         throw `Mentee with the id ${menteeId} does not exist.`;
     }
 
-    if(timeline !== 'all' || timeline !== 'previous' || timeline !== 'upcoming'){
+    if(timeline !== 'all' & timeline !== 'previous' & timeline !== 'upcoming'){
         throw `Invalid value for timeline.`;
     }
 
 
     const sessionCollection = await sessions();
 
-    const sessionsByMentee = await sessionCollection.find({mentee_id: menteeId}).toArray();
+    let query = { mentee_id: menteeId };
 
-
-    if(!sessionsByMentee){
-        throw `No Sessions scheduled.`;
-    }
-
-    let filteredSessions = [];
-    const now = moment();
+    const now = new Date();
 
     if (timeline === 'upcoming') {
-        // Sessions with start_time in the future
-        filteredSessions = sessionsByMentee.filter(session =>
-            moment(session.start_time).isAfter(now)
-        );
+        query.start_time = { $gt: now }; // Sessions with start_time in the future
     } else if (timeline === 'previous') {
-        // Sessions with start_time in the past
-        filteredSessions = sessionsByMentee.filter(session =>
-            moment(session.start_time).isBefore(now)
-        );
-    } else if (timeline === 'all') {
-        // Get all sessions
-        filteredSessions = sessionsByMentee;
+        query.start_time = { $lt: now }; // Sessions with start_time in the past
+    }
+
+    const filteredSessions = await sessionCollection.find(query).toArray();
+
+    if (!filteredSessions || filteredSessions.length === 0) {
+        throw `No sessions found for the given timeline.`;
     }
 
     let returnList = [];
@@ -415,9 +408,10 @@ export const getSessionsByMentee = async (menteeId, timeline) => {
 }
 
 
-export const getSessionsByMentor = async (mentorId) => {
-    checkStringParams(mentorId);
-    checkStringParams(timeline);
+export const getSessionsByMentor = async (mentorId, timeline) => {
+    checkStringParams(mentorId, "mentorId");
+    checkStringParams(timeline, "timeline");
+    // console.log(timeline);
 
     mentorId = mentorId.trim();
 
@@ -433,35 +427,26 @@ export const getSessionsByMentor = async (mentorId) => {
         throw `Mentor with the id ${mentorId} does not exist.`;
     }
 
-    if(timeline !== 'all' || timeline !== 'previous' || timeline !== 'upcoming'){
+    if(timeline !== 'all' & timeline !== 'previous' & timeline !== 'upcoming'){
         throw `Invalid value for timeline.`;
     }
 
     const sessionCollection = await sessions();
 
-    const sessionsByMentor = await sessionCollection.find({mentor_id: mentorId}).toArray();
+    let query = { mentee_id: menteeId };
 
-
-    if(!sessionsByMentor){
-        throw `No Sessions scheduled.`;
-    }
-
-    let filteredSessions = [];
-    const now = moment();
+    const now = new Date();
 
     if (timeline === 'upcoming') {
-        // Sessions with start_time in the future
-        filteredSessions = sessionsByMentor.filter(session =>
-            moment(session.start_time).isAfter(now)
-        );
+        query.start_time = { $gt: now }; // Sessions with start_time in the future
     } else if (timeline === 'previous') {
-        // Sessions with start_time in the past
-        filteredSessions = sessionsByMentor.filter(session =>
-            moment(session.start_time).isBefore(now)
-        );
-    } else if (timeline === 'all') {
-        // Get all sessions
-        filteredSessions = sessionsByMentor;
+        query.start_time = { $lt: now }; // Sessions with start_time in the past
+    }
+
+    const filteredSessions = await sessionCollection.find(query).toArray();
+
+    if (!filteredSessions || filteredSessions.length === 0) {
+        throw `No sessions found for the given timeline.`;
     }
 
     let returnList = [];

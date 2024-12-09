@@ -66,6 +66,8 @@ export const createMentor = async (
     const calendarId = await createCalendarForMentor();
     newMentorObj.calendarId = calendarId;
 
+    console.log(calendarId);
+
     const mentorCollection = await mentors();
 
     const result = await mentorCollection.insertOne(newMentorObj);
@@ -238,6 +240,7 @@ export const updateMentor = async (
 
 export const toAddAvailability = async (id, availability) => {
     checkStringParams(id, "id");
+    console.log(availability);
     availability = validateAvailability(availability);
 
     id = id.trim();
@@ -257,9 +260,31 @@ export const toAddAvailability = async (id, availability) => {
         let start_time = availability[i].start_time;
         let end_time = availability[i].end_time;
 
-    console.log(av);
-
+    // console.log(av);
+    
   }
+
+  let updateDoc = {
+    calendarId: calendarId,
+    availability: availability
+  }
+
+  const mentorCollection = await mentors();
+
+    const result = await mentorCollection.findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        { $set: updateDoc },
+        { returnDocument: "after" }
+    );
+
+    if (!result) {
+        throw `Could not Update the Mentor.`;
+    }
+
+    updateDoc._id = result._id.toString();
+
+    return updateDoc;
+  
 }
 
 export const updateSubjectAreaToMentor = async (id, subjectId) => {

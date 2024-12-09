@@ -285,12 +285,15 @@ router
         }
 
         let availability = req.body;
+        
 
-        try {
-            availability = validateAvailability(availability);
-        } catch (e) {
-            return res.status(400).json({ error: e });
-        }
+        // try {
+        //     // console.log(availability.av);
+        //     availability = validateAvailability(availability);
+        // } catch (e) {
+        //     console.log(e);
+        //     return res.status(400).json({ error: e });
+        // }
         try {
             let avail = await mentorData.toAddAvailability(
                 mentorId,

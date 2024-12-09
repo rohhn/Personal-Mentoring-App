@@ -52,7 +52,7 @@ export const checkStringParams = (param, allowEmpty = false) => {
     }
 
     if (typeof param !== "string") {
-        throw `The input is not a string: ${param}.`;
+        throw `The input for ${allowEmpty} is not a string: ${param}.`;
     } else {
         if (param.trim() === "" && !allowEmpty) {
             throw `The input is an empty string: ${param}.`;
@@ -232,8 +232,15 @@ export const checkArrayOfStrings = (array) => {
     return array;
 };
 
+export const checkArray = (array) => {
+    if (!Array.isArray(array)) {
+        throw `${array} is not an array`;
+    }
+}
+
 export const validateAvailability = (availability) => {
-    checkObject(availability);
+    // checkArrayOfO(availability);
+    checkArray(availability);
     let days = [
         "Monday",
         "Tuesday",
@@ -246,7 +253,7 @@ export const validateAvailability = (availability) => {
 
     let keys = Object.keys(availability);
     // console.log(keys);
-    for (let i in availability) {
+    for (let i in availability.av) {
         if (
             !Object.keys(availability[i]).includes("day") ||
             !Object.keys(availability[i]).includes("start_time") ||
