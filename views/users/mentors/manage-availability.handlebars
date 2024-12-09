@@ -70,24 +70,27 @@
 
             </div>
             <div class="col-sm-12 col-md-8">
-                <div class="d-flex flex-column justify-content-center">
+                {{!-- <div class=""> --}}
                     <div class="text-center">
                         <h2>Current Availability</h2>
                     </div>
-                    <div class="w-50">
-                        {{#each dayofWeek}}
-                        <div class="col px-5 py-2 ">
-                            <div class="card text-bg-dark">
-                                <div class="card-title">{{this}}</div>
-                                <div class="card-body">availability?</div>
+                    <div id="curr-avl-div" class="d-flex flex-column" data-id="{{userId}}">
+                        {{#each availability}}
+                        <div id="avl-{{this.day}}" class="row px-5 w-50 mx-auto" data-day="{{this.day}}">
+                            <div class="card text-bg-dark pt-2">
+                                <div class="card-title"><h5>{{this.day}}</h5></div>
+                                <div class="card-body">
+                                    <p class="start-time">Start Time: {{this.start_time}}</p>
+                                    <p class="end-time">End Time: {{this.end_time}}</p>
+                                </div>
                             </div>
-                        </div>    
+                        </div>
                         {{/each}}
                     </div>
                     
                         
                     
-                </div>
+                {{!-- </div> --}}
 
             </div>
         </div>
