@@ -403,7 +403,7 @@ export const getSessionsByMentee = async (menteeId, timeline) => {
     let returnList = [];
     for (let i = 0; i < filteredSessions.length; i++) {
         let sessionObj = filteredSessions[i];
-        let mentor = await mentorData.getMentorById(sessionObj.mentee_id);
+        let mentor = await mentorData.getMentorById(sessionObj.mentor_id);
 
         let mentorName = `${mentor.first_name} ${mentor.last_name}`;
         let menteeName = `${mentee.first_name} ${mentee.last_name}`;
@@ -413,7 +413,7 @@ export const getSessionsByMentee = async (menteeId, timeline) => {
         let subjectName = subject.name;
 
         let returnSession = {
-            _id: result._id,
+            _id: sessionObj._id,
             mentee_name: menteeName,
             mentor_name: mentorName,
             subject_area: subjectName,
@@ -491,7 +491,7 @@ export const getSessionsByMentor = async (mentorId, timeline = "all") => {
         let subjectName = subject.name;
 
         let returnSession = {
-            _id: result._id,
+            _id: sessionObj._id,
             mentee_name: menteeName,
             mentor_name: mentorName,
             subject_area: subjectName,
