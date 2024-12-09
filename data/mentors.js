@@ -13,7 +13,9 @@ import {
     createCalendarForMentor,
     addAvailability,
     validateAvailability,
+    getAuthClient
 } from "../helpers.js";
+import { google } from "googleapis";
 
 
 export const createMentor = async (
@@ -240,7 +242,6 @@ export const updateMentor = async (
 
 export const toAddAvailability = async (id, availability) => {
     checkStringParams(id, "id");
-    console.log(availability);
     availability = validateAvailability(availability);
 
     id = id.trim();
@@ -249,43 +250,69 @@ export const toAddAvailability = async (id, availability) => {
         throw `${id} is not a valid ObjectID.`;
     }
 
-    let mentor = await getMentorById(id);
+    const mentorCollection = await mentors();
 
-    let calendarId = mentor.calendarId;
+    const mentor = await mentorCollection.findOne({ _id: new ObjectId(id) });
+    if (!mentor) {
+        throw `Mentor with ID ${id} not found.`;
+    }
 
-    console.log(availability);
+    const existingAvailability = mentor.availability || [];
 
-    for (let i in availability) {
-        let day = availability[i].day;
-        let start_time = availability[i].start_time;
-        let end_time = availability[i].end_time;
+    // Process the availability array to update or append
+    const updatedAvailability = [...existingAvailability];
 
-    // console.log(av);
-    
-  }
+    for (const newEntry of availability) {
+        const existingEntryIndex = updatedAvailability.findIndex(
+            (entry) => entry.day === newEntry.day
+        );
 
-  let updateDoc = {
-    calendarId: calendarId,
-    availability: availability
-  }
+        if (existingEntryIndex !== -1) {
+            // Update existing entry for the same day
+            updatedAvailability[existingEntryIndex].start_time = newEntry.start_time;
+            updatedAvailability[existingEntryIndex].end_time = newEntry.end_time;
+        } else {
+            // Append new entry for the day
+            updatedAvailability.push(newEntry);
+        }
+    }
 
-  const mentorCollection = await mentors();
-
+    // Update the database
     const result = await mentorCollection.findOneAndUpdate(
         { _id: new ObjectId(id) },
-        { $set: updateDoc },
+        { $set: { availability: updatedAvailability } },
         { returnDocument: "after" }
     );
 
     if (!result) {
-        throw `Could not Update the Mentor.`;
+        throw `Could not update the mentor's availability.`;
     }
 
-    updateDoc._id = result._id.toString();
+    // Ensure the updated availability is also reflected on Google Calendar
+    const calendarId = mentor.calendarId;
+    if (!calendarId) {
+        throw `Mentor with ID ${id} does not have a calendar associated.`;
+    }
 
-    return updateDoc;
-  
-}
+    const authClient = await getAuthClient();
+    const calendar = google.calendar({ version: "v3", auth: authClient });
+
+    // Sync availability to Google Calendar
+    for (const entry of updatedAvailability) {
+        await addAvailability(calendarId, entry.day, entry.start_time, entry.end_time);
+    }
+
+    console.log("Availability updated successfully on both MongoDB and Google Calendar.");
+
+    return {
+        _id: result.value._id.toString(),
+        availability: updatedAvailability,
+        calendarId: calendarId
+    };
+};
+
+
+
 
 export const updateSubjectAreaToMentor = async (id, subjectId) => {
     checkStringParams(id);
