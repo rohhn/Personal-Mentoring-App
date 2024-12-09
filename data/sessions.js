@@ -422,6 +422,7 @@ export const getSessionsByMentee = async (menteeId, timeline) => {
             status: sessionObj.status,
             eventId: sessionObj.eventId,
             created_at: sessionObj.created_at,
+            meeting_link: sessionObj.meeting_link,
         };
 
         returnList.push(returnSession);
@@ -500,6 +501,7 @@ export const getSessionsByMentor = async (mentorId, timeline = "all") => {
             status: sessionObj.status,
             eventId: sessionObj.eventId,
             created_at: sessionObj.created_at,
+            meeting_link: sessionObj.meeting_link,
         };
 
         returnList.push(returnSession);

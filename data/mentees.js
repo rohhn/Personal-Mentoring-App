@@ -20,7 +20,7 @@ export const createMentee = async (
     first_name = checkStringParams(first_name);
     last_name = checkStringParams(last_name);
     summary = checkStringParams(summary);
-    // TODO: Implement a proper date check
+    
     checkDate(dob);
 
     let newMenteeObj = {

@@ -78,7 +78,6 @@ $(window).on("load", () => {
         };
         const apiURL = window.location.href;
 
-        // TODO: Complete once API is fixed.
         $.ajax({
             type: "POST",
             url: window.location.href,
