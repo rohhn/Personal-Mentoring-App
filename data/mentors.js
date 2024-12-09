@@ -33,12 +33,15 @@ export const createMentor = async (
 
     dob = new Date(dob.trim());
 
+    let approved = false;
+
     let newMentorObj = {
         first_name,
         last_name,
         dob,
         pwd_hash,
         summary,
+        approved
     };
 
     email = checkEmail(email).toLowerCase();
