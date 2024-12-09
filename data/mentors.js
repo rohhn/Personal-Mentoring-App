@@ -17,6 +17,7 @@ import {
 } from "../helpers.js";
 import { google } from "googleapis";
 
+
 export const createMentor = async (
     first_name,
     last_name,
@@ -81,6 +82,8 @@ export const createMentor = async (
     const mentor = await getMentorById(newId);
 
     mentor._id = mentor._id.toString();
+
+    delete mentor.pwd_hash;
 
     delete mentor.pwd_hash;
 
