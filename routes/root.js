@@ -1,10 +1,16 @@
 import bcrypt from "bcrypt";
 import express from "express";
-import { menteeData, mentorData, subjectData } from "../data/index.js";
+import {
+    menteeData,
+    mentorData,
+    sessionsData,
+    subjectData,
+} from "../data/index.js";
 import { checkEmail, checkStringParams, formatDate } from "../helpers.js";
 import { isParentEmailRequired } from "../helpers/mentees.js";
 import { fileUpload } from "../middleware/common.js";
 import { extractProfileImage } from "../helpers/common.js";
+import { error } from "console";
 
 const router = express.Router();
 
@@ -249,6 +255,7 @@ router.route("/dashboard").get(async (req, res) => {
 
     try {
         let userData = {};
+        let sessions = {};
         if (userType === "mentee") {
             console.log("mentee dashboard");
 
@@ -258,6 +265,13 @@ router.route("/dashboard").get(async (req, res) => {
                 errorObj.name = "ServerError";
                 throw errorObj;
             });
+            console.log("got user data");
+
+            sessions = await sessionsData.getSessionsByMentee(
+                userId,
+                "upcoming"
+            );
+            console.log("sessions", sessions);
         } else if (userType == "mentor") {
             console.log("mentor dashboard");
             userData = await mentorData.getMentorById(userId).catch((error) => {
@@ -266,6 +280,11 @@ router.route("/dashboard").get(async (req, res) => {
                 errorObj.name = "ServerError";
                 throw errorObj;
             });
+
+            sessions = await sessionsData.getSessionsByMentor(
+                userId,
+                "upcoming"
+            );
         } else {
             res.status(500).redirect("/");
         }
@@ -276,6 +295,7 @@ router.route("/dashboard").get(async (req, res) => {
             pageTitle: "Dashboard",
             headerOptions: req.headerOptions,
             userData,
+            sessions,
         });
     } catch (error) {}
 });

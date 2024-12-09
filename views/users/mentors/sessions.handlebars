@@ -1,0 +1,27 @@
+<main class="container my-3">
+    <div class="row d-flex text-center">
+        <h2>My sessions</h2>
+    </div>
+    <div class="row pt-4 gy-2">
+        {{#if sessions}}
+            {{#each sessions}}
+                <div class="card">
+                    <div class="card-body">
+                        <div class="card-text">Mentee Name:
+                            {{this.mentee_name}}</div>
+                        <div class="card-text">Subject Area:
+                            {{this.subject_area}}</div>
+                        <div class="card-text">Start Time:
+                            {{this.start_time}}</div>
+                        <div class="card-text">End Time: {{this.end_time}}</div>
+                        <div class="card-text">Status: {{this.status}}</div>
+                        <div class="card-text">Meeting Link:
+                            {{this.meeting_link}}</div>
+                    </div>
+                </div>
+            {{/each}}
+        {{else}}
+            <p class="text-center fs-6 fw-lighter fst-italic">No sessions.</p>
+        {{/if}}
+    </div>
+</main>

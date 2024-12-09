@@ -1,0 +1,29 @@
+<main class="container my-3">
+    <div class="row d-flex text-center">
+        <h2>Book a sessions</h2>
+    </div>
+    <div class="row pt-4 gy-2">
+        {{#each mentors}}
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div class="">
+                            <div class="card-text">Mentor Name:
+                                {{this.name}}</div>
+                            <div class="card-text">{{summary}}</div>
+                            <div class="card-text">Subject Area:
+                                {{this.subject_area}}</div>
+                        </div>
+                        <div class="">
+                            <a
+                                href="/sessions/booking/book/{{this._id}}"
+                                class="btn btn-primary"
+                            >Book</a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        {{/each}}
+    </div>
+</main>

@@ -17,33 +17,16 @@ export const createMentee = async (
     pwd_hash,
     options = {}
 ) => {
-
-    checkStringParams(first_name);
-    checkStringParams(last_name);
+    first_name = checkStringParams(first_name);
+    last_name = checkStringParams(last_name);
+    summary = checkStringParams(summary);
+    
     checkDate(dob);
-    await checkEmail(email, "mentee");
-    checkStringParams(pwd_hash);
 
-    // TODO: These must be optional params
-    // checkStringParams(parent_email);
-    // checkStringParams(profile_image);
-    // checkStringParams(summary);
-    // skills = checkArrayOfStrings(skills);
-
-    first_name = first_name.trim();
-    last_name = last_name.trim();
-    dob = dob.trim();
-    email = email.trim();
-    pwd_hash = pwd_hash.trim();
-
-    // parent_email = parent_email.trim();
-    // profile_image = profile_image.trim();
-    // summary = summary.trim();
-
-    let newMentee = {
+    let newMenteeObj = {
         first_name: first_name,
         last_name: last_name,
-        dob: dob,
+        dob: new Date(dob.trim()),
         pwd_hash: pwd_hash,
         summary: summary,
     };
@@ -128,6 +111,10 @@ export const getMenteeById = async (id) => {
         throw `Mentee with the id ${id} does not exist.`;
     }
 
+    if (mentee.dob && mentee.dob instanceof Date) {
+        mentee.dob = mentee.dob.toISOString().split('T')[0]; 
+    }
+
     mentee._id = mentee._id.toString();
     return mentee;
 };
@@ -141,6 +128,10 @@ export const getMenteeByEmail = async (email) => {
 
     if (!mentee) {
         throw `Mentee with the email ${email} does not exist.`;
+    }
+
+    if (mentee.dob && mentee.dob instanceof Date) {
+        mentee.dob = mentee.dob.toISOString().split('T')[0]; 
     }
 
     mentee._id = mentee._id.toString();
@@ -193,7 +184,7 @@ export const updateMentee = async (
         //         checkStringParams(email, "Email");
         await checkEmail(email, "mentee");
 
-        // if (dob) checkDate(dob, "Date of Birth");
+        if (dob) checkDate(dob, "Date of Birth");
         if (parent_email) checkStringParams(parent_email, "Parent Email");
         if (summary) checkStringParams(summary, "Summary");
         if (skills) skills = checkArrayOfStrings(skills);
@@ -201,7 +192,7 @@ export const updateMentee = async (
         const menteeUpdate = {
             first_name: first_name.trim(),
             last_name: last_name.trim(),
-            dob: dob ? dob.trim() : null,
+            dob: dob ? new Date(dob.trim()) : null,
             email: email.trim(),
             parent_email: parent_email ? parent_email.trim() : null,
             summary: summary ? summary.trim() : null,
@@ -224,6 +215,9 @@ export const updateMentee = async (
             throw new Error(
                 `Could not update the mentee. No document found with ID: ${id}`
             );
+        }
+        if (result.dob && result.dob instanceof Date) {
+            result.dob = result.dob.toISOString().split('T')[0]; 
         }
 
         return result;

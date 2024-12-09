@@ -29,11 +29,11 @@ Method: `POST`
 Description: Enter Mentor data in Collection
 
 Request Payload:
-```
+```JSON
 ```
 
 Expected Response:
-```
+```JSON
 {
      "_id": "12345",
     "first_name": "Test",
@@ -107,7 +107,7 @@ Request Payload:
 ```
 
 Expected Response:
-```
+```JSON
 {
      "_id": "12345",
     "first_name": "Test",
@@ -177,11 +177,11 @@ Method: `DELETE`
 Description: Deletes Mentor by id
 
 Request Payload:
-```
+```JSON
 ```
 
 Expected Response:
-```
+```JSON
 {
     "_id": "mentor_id",
     "deleted": "true"
@@ -200,7 +200,7 @@ The Payload and response for this has to change
 ```
 
 Expected Response:
-```
+```JSON
 {
      "_id": "12345",
     "first_name": "Test",
@@ -270,23 +270,18 @@ Method: `POST`
 Description: Adds Availability to mentor
 
 Request Payload:
-```
+```json
 {
     "av": [
-       {
+        {
             "day": "Monday",
             "start_time": "14:00",
             "end_time": "16:00",
-            "booked_slots": [
-            "2024-11-13T14:30:00Z",
-            "2024-11-13T15:00:00Z"
-        ]  
         },
         {
             "day": "Tuesday",
             "start_time": "10:00",
             "end_time": "12:00",
-            "booked_slots": []
         }
     ]
 }
@@ -304,11 +299,47 @@ Method: `POST`
 Description: To edit mentor profile
 
 Request Payload:
-```
+```JSON
 ```
 
 Expected Response:
+```JSON
 ```
+
+Route: `/mentor/subject/:mentorId`
+
+Method: `PUT`
+
+Description: Adds subject Area to mentor
+
+Request Payload:
+```JSON
+{
+    "subjectId": "subject_area_ref"
+}
+```
+
+Expected Response:
+```JSON
+{ "success": true }
+```
+
+Route: `/mentor/subject/:mentorId`
+
+Method: `DELETE`
+
+Description: Removes subject Area to mentor
+
+Request Payload:
+```JSON
+{
+    "subjectId": "subject_area_ref"
+}
+```
+
+Expected Response:
+```JSON
+{ "success": true }
 ```
 
 ## Mentees API
@@ -344,7 +375,7 @@ Request Payload:
 ```
 
 Expected Response:
-```
+```JSON
 {
     "_id": "12345",
     "first_name": "Test",
@@ -388,8 +419,8 @@ Request Payload:
 ```
 
 Expected Response:
-```
-{ success: true }
+```JSON
+{ "success": true }
 ```
 
 
@@ -404,8 +435,8 @@ Request Payload:
 ```
 
 Expected Response:
-```
-{ _id: menteeId, deleted: "true" }
+```JSON
+{ "_id": "menteeId", "deleted": "true" }
 ```
 
 
@@ -416,25 +447,26 @@ Method: `GET`
 Description: Enter mentee in the collection
 
 Request Payload:
-```
+```json
 
 ```
 
 Expected Response:
-```
+```json
 
 ```
 
 ## Sessions API
 
-Route: `/sessioms/`
+Route: `/sessions/`
 
 Method: `POST`
 
 Description: Get a list of all mentees
 
 Request Payload:
-```{
+```json
+{
     "mentor_id": "mentor_id",
     "mentee_id": "mentor_id",
     "subject_area": "674cb8767e290b0de5ec2978",
@@ -444,12 +476,12 @@ Request Payload:
 ```
 
 Expected Response:
-```
+```json
 {
     "_id": "12345",
-    "mentor_id": "mentor_id_ref",
-    "mentee_id": "mentee_id_ref",
-    "subject_area": "subject_area_ref",
+    "mentee_name": "FirstName LastName",
+    "mentor_name": "FirstName LastName",
+    "subject_area": "subject_name",
     "start_time": "2024-12-01T17:00:00Z",
     "end_time": "2024-12-01T17:30:00Z",  
     "status": "scheduled | completed",
@@ -466,7 +498,8 @@ Method: `POST`
 Description: Get a list of all sessions for a mentee - Will add the option for Making getting upcoming sessions, past sessions or all sessions
 
 Request Payload:
-```
+```json
+{"timeline": "upcoming  | previous | all"}
 ```
 
 Expected Response:
@@ -474,9 +507,9 @@ Expected Response:
 [
 {
     "_id": "12345",
-    "mentor_id": "mentor_id_ref",
-    "mentee_id": "mentee_id_ref",
-    "subject_area": "subject_area_ref",
+    "mentee_name": "FirstName LastName",
+    "mentor_name": "FirstName LastName",
+    "subject_area": "subject_name",
     "start_time": "2024-12-01T17:00:00Z",
     "end_time": "2024-12-01T17:30:00Z",  
     "status": "scheduled | completed",
@@ -487,14 +520,15 @@ Expected Response:
 ]
 ```
 
-Route: `/sessioms/mentor/:mentorId`
+Route: `/sessions/mentor/:mentorId`
 
 Method: `POST`
 
 Description: Get a list of all sessions for a mentor - Will add the option for Making getting upcoming sessions, past sessions or all sessions
 
 Request Payload:
-```
+```json
+{"timeline": "upcoming  | previous | all"}
 ```
 
 Expected Response:
@@ -522,7 +556,8 @@ Method: `PUT`
 Description: Reschedules the session
 
 Request Payload:
-```{
+```json
+{
     "start_time": "2024-12-01T17:00:00Z",
     "end_time": "2024-12-01T17:30:00Z",
     "status": "status"
@@ -530,12 +565,12 @@ Request Payload:
 ```
 
 Expected Response:
-```
+```json
 {
     "_id": "12345",
-    "mentor_id": "mentor_id_ref",
-    "mentee_id": "mentee_id_ref",
-    "subject_area": "subject_area_ref",
+    "mentee_name": "FirstName LastName",
+    "mentor_name": "FirstName LastName",
+    "subject_area": "subject_name",
     "start_time": "2024-12-01T17:00:00Z",
     "end_time": "2024-12-01T17:30:00Z",  
     "status": "scheduled | completed",
@@ -552,7 +587,8 @@ Method: `DELETE`
 Description: Cancels/Deletes the session - Right now the session is being deleted - I'll change it to update the status
 
 Request Payload:
-```{
+```json
+{
     "start_time": "2024-12-01T17:00:00Z",
     "end_time": "2024-12-01T17:30:00Z",
     "status": "status"
@@ -561,18 +597,7 @@ Request Payload:
 
 Expected Response:
 ```
-{
-    "_id": "12345",
-    "mentor_id": "mentor_id_ref",
-    "mentee_id": "mentee_id_ref",
-    "subject_area": "subject_area_ref",
-    "start_time": "2024-12-01T17:00:00Z",
-    "end_time": "2024-12-01T17:30:00Z",  
-    "status": "scheduled | completed",
-    "eventId":"calendar_event_id",
-    "meeting_link": "meeting URL",
-    "created_at": "2024-11-05T14:00:00Z"
-}
+`'Session_id' has been successfully deleted!`
 ```
 
 ## Subject Area API
@@ -584,19 +609,19 @@ Method: `POST`
 Description: Enter a new Subject
 
 Request Payload:
-```
+```json
 {
     "name": "Data Science",
-    "description": "New Description1
+    "description": "New Description1"
 }
 ```
 
 Expected Response:
-```
+```json
 {
-    "_id": "12345"
+    "_id": "12345",
     "name": "Data Science",
-    "description": "New Description1
+    "description": "New Description1"
 }
 ```
 
@@ -607,16 +632,16 @@ Method: `GET`
 Description: Get a List of Subjects
 
 Request Payload:
-```
+```json
 
 ```
 
 Expected Response:
-```
+```json
 [{
-    "_id": "12345"
+    "_id": "12345",
     "name": "Data Science",
-    "description": "New Description1
+    "description": "New Description1"
 }]
 ```
 
@@ -627,16 +652,16 @@ Method: `GET`
 Description: Get subject by id
 
 Request Payload:
-```
+```json
 
 ```
 
 Expected Response:
-```
+```json
 {
-    "_id": "12345"
+    "_id": "12345",
     "name": "Data Science",
-    "description": "New Description1
+    "description": "New Description1"
 }
 ```
 
@@ -647,13 +672,13 @@ Method: `DELETE`
 Description: Get subject by id
 
 Request Payload:
-```
+```json
 
 ```
 
 Expected Response:
-```
-{ _id: subjectId, deleted: "true" }
+```json
+{ "_id": "subjectId", "deleted": "true" }
 ```
 
 Route: `/subjects/:subjectId`
@@ -663,18 +688,215 @@ Method: `PUT`
 Description: Update Subject
 
 Request Payload:
-```
+```json
 {
     "name": "Data Science",
-    "description": "New Description1
+    "description": "New Description1"
 }
 ```
 
 Expected Response:
-```
+```json
 {
-    "_id": "12345"
+    "_id": "12345",
     "name": "Data Science",
-    "description": "New Description1
+    "description": "New Description1"
 }
+```
+
+##Posts API
+
+Route: `/forum/:subject_id`
+
+Method: GET
+
+Description: Gets all posts and replies in a forum
+
+Request Payload:
+```json
+
+```
+
+Expected Response:
+```json
+    {
+        "_id": "post_id",
+        "author": "author_id",
+        "title": "Post Title",
+        "content": "Post content",
+        "created_at": "Timestamp",
+        "replies": []
+    }
+```
+
+Route: `/forum/:subject_id`
+
+Method: POST
+
+Description: Create a new post.
+
+Request Payload:
+```json
+{
+    "author": "author_id",
+    "title": "Post Title",
+    "content": "Post content"
+}
+```
+
+Expected Response:
+```json
+{
+    "_id": "post_id",
+    "author": "author_id",
+    "title": "Post Title",
+    "content": "Post content",
+    "created_at": "Timestamp",
+    "replies": []
+}
+```
+
+Route: `/forum/:subject_id/:post_id`
+
+Method: GET
+
+Description: Fetch a specific post by its ID.
+
+Request Payload: 
+```
+
+```
+
+Expected Response:
+```json
+{
+    "_id": "post_id",
+    "author": "author_id",
+    "title": "Post Title",
+    "content": "Post content",
+    "created_at": "Timestamp",
+    "replies": []
+}
+```
+
+Method: PATCH
+
+Description: Update a post
+
+Request Payload:
+```json
+{
+    "title": "Updated Post Title",
+    "content": "Updated Post Content"
+}
+
+    Expected Response:
+```json
+{
+    "_id": "post_id",
+    "author": "author_id",
+    "title": "Updated Post Title",
+    "content": "Updated Post Content",
+    "created_at": "Timestamp",
+    "replies": []
+}
+```
+
+Method: DELETE
+
+Description: Delete a specific post.
+
+Request Payload: 
+```json
+
+```
+
+Expected Response:
+```json
+{ "_id": "post_id", "deleted": "true" }
+```
+```
+
+##Replies API
+
+Route: `/forum/:subject_id/:post_id/reply`
+
+Method: POST
+
+Description: Create a reply to a post
+
+Request Payload:
+```json
+{
+    "author": "author_id",
+    "content": "Reply content"
+}
+```
+
+Expected Result:
+```json
+{
+    "_id": "reply_id",
+    "author": "author_id",
+    "content": "Reply content",
+    "created_at": "Timestamp"
+}
+```
+
+Route: `forum/subject_id/post_id/reply_id/edit`
+
+Method: GET
+
+Description: Gets a specific repsly by its ID
+
+Request Payload:
+```
+
+```
+
+Expected output:
+```json
+{
+    "_id": "reply_id",
+    "author": "author_id",
+    "content": "Reply content",
+    "created_at": "Timestamp"
+}
+```
+
+Method: PATCH
+
+Description: Update a reply
+
+Request Payload:
+```json
+{
+    "content": "Updated Reply Content"
+}
+```
+
+Expected Output:
+```json
+{
+    "_id": "reply_id",
+    "author": "author_id",
+    "content": "Updated Reply Content",
+    "created_at": "Timestamp"
+}
+```
+
+Route: `forum/post_id/reply_id`
+
+Method: DELETE
+
+Description: Deletes a specific reply based on its ID
+
+Request Payload:
+```json
+
+```
+
+Expected Output:
+```json
+{ "_id": "reply_id", "deleted": "true" }
 ```

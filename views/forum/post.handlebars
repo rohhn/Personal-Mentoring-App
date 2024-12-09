@@ -1,13 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Post</title>
-    <link rel="stylesheet" href="/styles/main.css">
-</head>
-
 <body>
     <header>
         <h1>Edit Post</h1>
@@ -18,10 +8,10 @@
             <input type="hidden" name="authorID" value="{{author}}">
             
             <label for="title">Title:</label>
-            <input type="text" id="title" name="title" value="{{title}}" required>
+            <input type="text" id="title" name="updatedTitle" value="{{title}}">
             
             <label for="content">Content:</label>
-            <textarea id="content" name="updatedContent" rows="5" required>{{content}}</textarea>
+            <textarea id="content" name="updatedContent" rows="5">{{content}}</textarea>
             
             <button type="submit">Update Post</button>
         </form>
@@ -30,5 +20,3 @@
         <p>&copy; {{currentYear}} Forum Application</p>
     </footer>
 </body>
-
-</html>

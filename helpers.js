@@ -4,9 +4,10 @@ import { google } from "googleapis";
 import path from "path";
 import { mentees, mentors } from "./config/mongoCollections.js";
 import dotenv from "dotenv";
+import moment from "moment";
 dotenv.config();
 
-export const postVerify = async (content) => {
+export const postVerify = (content) => {
     if (content == "") {
         throw "Error, please enter something";
     }
@@ -24,6 +25,7 @@ export const postVerify = async (content) => {
         throw "Error, post body cannot be just empty spaces";
     }
 };
+
 
 export const formatDate = (dateStr) => {
     const date = new Date(dateStr);
@@ -51,7 +53,7 @@ export const checkStringParams = (param, allowEmpty = false) => {
     }
 
     if (typeof param !== "string") {
-        throw `The input is not a string: ${param}.`;
+        throw `The input for ${allowEmpty} is not a string: ${param}.`;
     } else {
         if (param.trim() === "" && !allowEmpty) {
             throw `The input is an empty string: ${param}.`;
@@ -89,15 +91,21 @@ export const checkObject = (param) => {
 
 export const checkDate = (inputDate) => {
     checkStringParams(inputDate);
-    let dateRegex = /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/\d{4}$/;
+    // let dateRegex = /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/\d{4}$/;
+
+    let dateRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
+
+    // console.log(inputDate);
 
     if (!dateRegex.test(inputDate)) {
-        throw `The Input Date is not in mm/dd/yyyy format. : ${inputDate}`;
+        throw `The Input Date is not in yyyy-mm-dd format. : ${inputDate}`;
     }
 
-    let [month, day, year] = inputDate.split("/").map(Number);
+    let [year, month, day] = inputDate.split("-").map(Number);
 
     let date = new Date(year, month - 1, day);
+
+    // console.log(date);
 
     // console.log(day);
     // console.log(month - 1);
@@ -108,38 +116,24 @@ export const checkDate = (inputDate) => {
         date.getMonth() !== month - 1 ||
         date.getDate() !== day
     ) {
-        throw `Invalid Date.`;
+        throw `Invalid Date. - ${date}`;
     }
 
-    let today = new Date();
+    // let today = new Date();
 
-    if (date > today) {
-        throw `Date cannot be in the future.`;
-    }
+    // if (date > today) {
+    //     throw `Date cannot be in the future.`;
+    // }
+
+    // return date;
 };
 
 export const checkTimestamp = (inputDate) => {
     checkStringParams(inputDate);
-    let dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
+    const date = moment(inputDate, moment.ISO_8601, true);
 
-    if (!dateRegex.test(inputDate)) {
-        throw `The Input Timestamp is not in ISO format. : ${inputDate}`;
-    }
-
-    let [year, month, day] = inputDate.split("T")[0].split("-").map(Number);
-
-    let date = new Date(year, month - 1, day);
-
-    // console.log(day);
-    // console.log(month - 1);
-    // console.log(year);
-
-    if (
-        date.getFullYear() !== year ||
-        date.getMonth() !== month - 1 ||
-        date.getDate() !== day
-    ) {
-        throw `Invalid Timestamp.`;
+    if (!date.isValid()) {
+        throw `The Input Timestamp is not in ISO format or is invalid: ${inputDate}`;
     }
 };
 
@@ -223,8 +217,15 @@ export const checkArrayOfStrings = (array) => {
     return array;
 };
 
+export const checkArray = (array) => {
+    if (!Array.isArray(array)) {
+        throw `${array} is not an array`;
+    }
+}
+
 export const validateAvailability = (availability) => {
-    checkObject(availability);
+    // checkArrayOfO(availability);
+    checkArray(availability);
     let days = [
         "Monday",
         "Tuesday",
@@ -237,9 +238,9 @@ export const validateAvailability = (availability) => {
 
     let keys = Object.keys(availability);
     // console.log(keys);
-    for (let i in availability) {
+    for (let i in availability.av) {
         if (
-            !Object.keys(availability[i]).includes("days") ||
+            !Object.keys(availability[i]).includes("day") ||
             !Object.keys(availability[i]).includes("start_time") ||
             !Object.keys(availability[i]).includes("end_time")
         ) {

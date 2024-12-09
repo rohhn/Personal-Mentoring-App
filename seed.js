@@ -15,6 +15,7 @@ const seedDatabase = async () => {
         const mentorCollection = await collections.mentors();
         const sessionsCollection = await collections.sessions();
         const subject_areasCollection = await collections.subject_areas();
+        const forumCollection = await collections.forums();
 
         // example on how to insert
         // const mentor1 = await mentorCollection.insertOne(document)
@@ -163,15 +164,17 @@ const seedDatabase = async () => {
                 posts: [
                     {
                         _id: new ObjectId(),
-                        author: mentorIds[i % mentorIds.length], // Reference to mentor _id
+                        authorName: testMentor1, // Reference to mentor _id
                         content: `This is post content for forum ${i + 1}`,
                         created_at: new Date().toISOString(),
+                        replies: []
                     },
                     {
                         _id: new ObjectId(),
-                        author: menteeIds[i % menteeIds.length], // Reference to mentee _id
+                        authorName: testMentee1, // Reference to mentee _id
                         content: `This is post content from mentee for forum ${i + 1}`,
                         created_at: new Date().toISOString(),
+                        replies: []
                     },
                 ],
             };

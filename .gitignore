@@ -1,6 +1,7 @@
 package-lock.json
 # local db folder
 db/
+test.js
 
 ### VisualStudioCode template
 .vscode/*

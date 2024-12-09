@@ -1,6 +1,6 @@
 import express from "express";
 import { ObjectId } from "mongodb";
-import { mentors } from "../config/mongoCollections.js";
+import { mentors, subject_areas } from "../config/mongoCollections.js";
 import {
     checkArrayOfStrings,
     checkBoolean,
@@ -12,6 +12,7 @@ import {
     validateAvailability,
 } from "../helpers.js";
 import { mentorData } from "../data/index.js";
+import { error } from "console";
 
 const router = express.Router();
 
@@ -73,6 +74,8 @@ router
 router
     .route("/:mentorId")
     .get(async (req, res) => {
+        let queryParams = req.query;
+
         let mentorId = req.params.mentorId.trim();
 
         try {
@@ -99,12 +102,17 @@ router
             if (req.session.user) {
                 isOwner = req.session.user.userId === mentor._id;
             }
-            res.render("users/mentors/profile", {
-                pageTitle: `${mentor.first_name}'s Profile`,
-                headerOptions: req.headerOptions,
-                profileInfo: mentor,
-                isOwner,
-            });
+
+            if (queryParams.api) {
+                return res.json(mentor);
+            } else {
+                return res.render("users/mentors/profile", {
+                    pageTitle: `${mentor.first_name}'s Profile`,
+                    headerOptions: req.headerOptions,
+                    profileInfo: mentor,
+                    isOwner,
+                });
+            }
         } catch (error) {
             let statusCode = 400;
             let errorMessage = error.message;
@@ -116,7 +124,11 @@ router
                 errorMessage = "Mentor not found!";
             }
 
-            res.redirect("/dashboard");
+            if (queryParams.api) {
+                return res.status(statusCode).json({ error: errorMessage });
+            } else {
+                return res.redirect("/dashboard");
+            }
         }
     })
     .delete(async (req, res) => {
@@ -230,52 +242,81 @@ router
         }
     });
 
-router.route("/availability/:mentorId").post(async (req, res) => {
-    let mentorId = req.params.mentorId.trim();
+router
+    .route("/availability/:mentorId")
+    .get(async (req, res) => {
+        const mentorId = req.params.mentorId;
 
-    try {
-        checkStringParams(mentorId);
-        if (!ObjectId.isValid(mentorId)) {
-            throw "Invalid object ID.";
+        if (req.session.user.userId != mentorId) {
+            return res.redirect("/dashboard");
         }
-    } catch (e) {
-        return res.status(400).json({ error: e });
-    }
 
-    mentorId = mentorId.trim();
+        const mentorInfo = await mentorData.getMentorById(mentorId);
+        const dayofWeek = [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+        ];
 
-    try {
-        const mentorCollection = await mentors();
-
-        const mentor = await mentorCollection.findOne({
-            _id: new ObjectId(mentorId),
+        return res.render("users/mentors/manage-availability", {
+            dayofWeek,
+            headerOptions: req.headerOptions,
+            userId: mentorId,
+            availability: mentorInfo.availability || [],
         });
+    })
+    .post(async (req, res) => {
+        let mentorId = req.params.mentorId.trim();
 
-        if (!mentor) {
-            throw `Mentor with the id ${mentorId} does not exist.`;
+        try {
+            checkStringParams(mentorId);
+            if (!ObjectId.isValid(mentorId)) {
+                throw "Invalid object ID.";
+            }
+        } catch (e) {
+            return res.status(400).json({ error: e });
         }
-    } catch (e) {
-        return res.status(404).json({ error: e });
-    }
 
-    let availability = req.body;
+        mentorId = mentorId.trim();
 
-    try {
-        availability = validateAvailability(availability);
-    } catch (e) {
-        return res.status(400).json({ error: e });
-    }
-    try {
-        let avail = await mentorData.toAddAvailability(
-            mentorId,
-            availability.av
-        );
-        return res.status(200).json(avail);
-    } catch (e) {
-        console.log(e);
-        return res.status(500).json({ error: e });
-    }
-});
+        try {
+            const mentorCollection = await mentors();
+
+            const mentor = await mentorCollection.findOne({
+                _id: new ObjectId(mentorId),
+            });
+
+            if (!mentor) {
+                throw `Mentor with the id ${mentorId} does not exist.`;
+            }
+        } catch (e) {
+            return res.status(404).json({ error: e });
+        }
+
+        let availability = req.body;
+
+        // try {
+        //     // console.log(availability.av);
+        //     availability = validateAvailability(availability);
+        // } catch (e) {
+        //     console.log(e);
+        //     return res.status(400).json({ error: e });
+        // }
+        try {
+            let avail = await mentorData.toAddAvailability(
+                mentorId,
+                availability.av
+            );
+            return res.status(200).json(avail);
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({ error: e });
+        }
+    });
 
 router.route("/:mentorId/edit").get(async (req, res) => {
     let mentorId = req.params.mentorId.trim();
@@ -327,5 +368,146 @@ router.route("/:mentorId/edit").get(async (req, res) => {
         res.redirect("/dashboard");
     }
 });
+
+router
+    .route("/subject/:mentorId")
+    .put(async (req, res) => {
+        let mentorId = req.params.mentorId.trim();
+
+        try {
+            checkStringParams(mentorId);
+            if (!ObjectId.isValid(mentorId)) {
+                throw "Invalid object ID.";
+            }
+        } catch (e) {
+            console.log(e);
+            return res.status(400).json({ error: e });
+        }
+
+        mentorId = mentorId.trim();
+
+        try {
+            const mentorCollection = await mentors();
+
+            const mentor = await mentorCollection.findOne({
+                _id: new ObjectId(mentorId),
+            });
+
+            if (!mentor) {
+                throw `Mentor with the id ${mentorId} does not exist.`;
+            }
+        } catch (e) {
+            console.log(e);
+            return res.status(404).json({ error: e });
+        }
+
+        let subjectId = req.body.subjectId.trim();
+
+        try {
+            checkStringParams(subjectId);
+
+            if (!ObjectId.isValid(subjectId.trim())) {
+                throw "Invalid object ID.";
+            }
+        } catch (e) {
+            console.log(e);
+            return res.status(400).json({ error: e });
+        }
+
+        subjectId = subjectId.trim();
+
+        try {
+            const subjectAreasCollection = await subject_areas();
+
+            const subject = await subjectAreasCollection.findOne({
+                _id: new ObjectId(subjectId),
+            });
+            // console.log(subject);
+            if (!subject) {
+                throw `Subject area with the id ${subjectId} does not exist.`;
+            }
+        } catch (e) {
+            console.log(e);
+            return res.status(404).json({ error: e });
+        }
+
+        try {
+            let updateSubject = await mentorData.updateSubjectAreaToMentor(
+                mentorId,
+                subjectId
+            );
+            return res.status(200).json({ success: true });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({ error: e });
+        }
+    })
+    .delete(async (req, res) => {
+        let mentorId = req.params.mentorId.trim();
+
+        try {
+            checkStringParams(mentorId);
+            if (!ObjectId.isValid(mentorId)) {
+                throw "Invalid object ID.";
+            }
+        } catch (e) {
+            return res.status(400).json({ error: e });
+        }
+
+        mentorId = mentorId.trim();
+
+        try {
+            const mentorCollection = await mentors();
+
+            const mentor = await mentorCollection.findOne({
+                _id: new ObjectId(mentorId),
+            });
+
+            if (!mentor) {
+                throw `Mentor with the id ${mentorId} does not exist.`;
+            }
+        } catch (e) {
+            return res.status(404).json({ error: e });
+        }
+
+        let subjectId = req.body.subjectId.trim();
+
+        try {
+            checkStringParams(subjectId);
+
+            if (!ObjectId.isValid(subjectId.trim())) {
+                throw "Invalid object ID.";
+            }
+        } catch (e) {
+            return res.status(400).json({ error: e });
+        }
+
+        subjectId = subjectId.trim();
+
+        try {
+            const subjectAreasCollection = await subject_areas();
+
+            const subject = await subjectAreasCollection.findOne({
+                _id: new ObjectId(subjectId),
+            });
+            // console.log(subject);
+            if (!subject) {
+                throw `Subject area with the id ${subjectId} does not exist.`;
+            }
+        } catch (e) {
+            console.log(e);
+            return res.status(404).json({ error: e });
+        }
+
+        try {
+            let updateSubject = await mentorData.removeSubjectAreaFromMentor(
+                mentorId,
+                subjectId
+            );
+            return res.status(200).json({ success: true });
+        } catch (e) {
+            return res.status(500).json({ error: e });
+        }
+    });
 
 export { router as mentorRoutes };

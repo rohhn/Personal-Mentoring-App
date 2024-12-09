@@ -1,0 +1,75 @@
+<main class="container my-3">
+    <div class="row d-flex text-center">
+        <h2>Book a session with
+            {{mentorInfo.first_name}}
+            {{mentorInfo.last_name}}</h2>
+    </div>
+    <div class="row row-cols-2 mt-4">
+        <div class="col-sm-12 col-md-4">
+            <div class="content">
+                <div class="calendar">
+                    <div
+                        id="year-header"
+                        class="d-flex bg-primary p-2 text-center justify-content-between"
+                    >
+                        <span class="" id="prev"><i
+                                class="fa-solid fa-chevron-left"
+                            ></i></span>
+                        <span class="year" id="label"></span>
+                        <span class="" id="next"><i
+                                class="fa-solid fa-chevron-right"
+                            ></i></span>
+                    </div>
+                    <table
+                        id="months-table"
+                        class="w-100 text-center my-1 bg-text-dark"
+                    >
+                        <tbody>
+                            <tr class="months-row">
+                                <td class="month">Jan</td>
+                                <td class="month">Feb</td>
+                                <td class="month">Mar</td>
+                                <td class="month">Apr</td>
+                                <td class="month">May</td>
+                                <td class="month">Jun</td>
+                                <td class="month">Jul</td>
+                                <td class="month">Aug</td>
+                                <td class="month">Sep</td>
+                                <td class="month">Oct</td>
+                                <td class="month">Nov</td>
+                                <td class="month">Dec</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <table id="days-table" class="text-center my-1 w-100">
+                        <td class="day">Sun</td>
+                        <td class="day">Mon</td>
+                        <td class="day">Tue</td>
+                        <td class="day">Wed</td>
+                        <td class="day">Thu</td>
+                        <td class="day">Fri</td>
+                        <td class="day">Sat</td>
+                    </table>
+                    <div class="frame">
+                        <table class="text-center my-1 w-100">
+                            <tbody class="tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 col-md-8">
+            <div id="mentor-deets">
+                <p>Name: {{mentorInfo.first_name}} {{mentorInfo.last_name}}</p>
+                <p>Summary: {{mentorInfo.summary}}</p>
+            </div>
+            <div id="availability-div">
+            </div>
+        </div>
+    </div>
+
+</main>
+
+{{> users/book_session}}
