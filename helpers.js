@@ -4,6 +4,7 @@ import { google } from "googleapis";
 import path from "path";
 import { mentees, mentors } from "./config/mongoCollections.js";
 import dotenv from "dotenv";
+import moment from "moment";
 dotenv.config();
 
 export const postVerify = (content) => {
@@ -129,26 +130,10 @@ export const checkDate = (inputDate) => {
 
 export const checkTimestamp = (inputDate) => {
     checkStringParams(inputDate);
-    let dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
+    const date = moment(inputDate, moment.ISO_8601, true);
 
-    if (!dateRegex.test(inputDate)) {
-        throw `The Input Timestamp is not in ISO format. : ${inputDate}`;
-    }
-
-    let [year, month, day] = inputDate.split("T")[0].split("-").map(Number);
-
-    let date = new Date(year, month - 1, day);
-
-    // console.log(day);
-    // console.log(month - 1);
-    // console.log(year);
-
-    if (
-        date.getFullYear() !== year ||
-        date.getMonth() !== month - 1 ||
-        date.getDate() !== day
-    ) {
-        throw `Invalid Timestamp.`;
+    if (!date.isValid()) {
+        throw `The Input Timestamp is not in ISO format or is invalid: ${inputDate}`;
     }
 };
 

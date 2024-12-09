@@ -131,9 +131,9 @@ export const createSession = async (
         throw `Mentee with the id ${mentee_id} does not exist.`;
     }
 
-    // let calendarId = mentor.calendarId;
+    let calendarId = mentor.calendarId;
 
-    console.log(calendarId);
+    // console.log(calendarId);
 
     let isAvailable = await checkAvailability(calendarId, start_time, end_time);
 
