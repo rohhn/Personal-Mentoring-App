@@ -371,9 +371,9 @@ export const getSessionsByMentee = async (menteeId, timeline) => {
 
     const filteredSessions = await sessionCollection.find(query).toArray();
 
-    if (!filteredSessions || filteredSessions.length === 0) {
-        throw `No sessions found for the given timeline.`;
-    }
+    // if (!filteredSessions || filteredSessions.length === 0) {
+    //     throw `No sessions found for the given timeline.`;
+    // }
 
     let returnList = [];
 
@@ -445,9 +445,9 @@ export const getSessionsByMentor = async (mentorId, timeline) => {
 
     const filteredSessions = await sessionCollection.find(query).toArray();
 
-    if (!filteredSessions || filteredSessions.length === 0) {
-        throw `No sessions found for the given timeline.`;
-    }
+    // if (!filteredSessions || filteredSessions.length === 0) {
+    //     throw `No sessions found for the given timeline.`;
+    // }
 
     let returnList = [];
 
