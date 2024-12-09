@@ -235,22 +235,22 @@
         }
 
         const formValues = validate.collectFormValues(event.target);
-
-        const { startHour, startMin } = $.map(
+        const [startHour, startMin] = $.map(
             formValues.start_time.split(":"),
             (ele) => {
                 return parseInt(ele);
             }
         );
+
         formValues.start_time = moment({
             date,
             year,
             month,
             hour: startHour,
             minute: startMin,
-        }).toISOString();
+        }).toISOString({keepOffset:true});
 
-        const { endHour, endMin } = $.map(
+        const [endHour, endMin] = $.map(
             formValues.end_time.split(":"),
             (ele) => {
                 return parseInt(ele);
@@ -262,7 +262,7 @@
             month,
             hour: endHour,
             minute: endMin,
-        }).toISOString();
+        }).toISOString({keepOffset:true});
 
         console.log("formValues", formValues);
         bookSession(formValues);

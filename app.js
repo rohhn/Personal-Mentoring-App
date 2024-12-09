@@ -69,6 +69,8 @@ app.use(makeHeaderOptions);
 app.use("/dashboard", privateRouteMiddleware);
 app.use("/login", loginMiddleware);
 app.use("/signup", loginMiddleware);
+app.use("/sessions/*", privateRouteMiddleware);
+app.use("/mentor/availability/*", privateRouteMiddleware);
 app.use("/sessions/booking/*", allowMenteesOnly);
 
 app.engine("handlebars", handlebarsInstance.engine);
