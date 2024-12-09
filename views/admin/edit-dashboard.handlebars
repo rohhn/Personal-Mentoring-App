@@ -1,0 +1,39 @@
+<main class="container">
+    <h1 class="text-center mb-5">{{pageTitle}}</h1>
+
+    <form id="edit-admin-form" method="POST" enctype="multipart/form-data" action="/admin/dashboard/edit">
+        <input type="hidden" name="_method" value="PATCH" />
+        <div class="form-group mb-3">
+            <label for="firstName">First Name</label>
+            <input id="firstName" name="firstName" class="form-control" type="text" value="{{admin.firstName}}" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="lastName">Last Name</label>
+            <input id="lastName" name="lastName" class="form-control" type="text" value="{{admin.lastName}}" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="summary">Professional Summary</label>
+            <textarea id="summary" name="summary" class="form-control" rows="4">{{admin.summary}}</textarea>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="profile_image">Profile Image</label>
+            <input id="profile_image" name="profile_image" class="form-control" type="file"
+                accept="image/png, image/jpg, image/jpeg" />
+            {{#if admin.profile_image}}
+            <small style="color: white;">Current Image: <a href="{{admin.profile_image}}"
+                    target="_blank">View</a></small>
+            {{/if}}
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="password">New Password (leave blank to keep existing password)</label>
+            <input id="password" name="password" class="form-control" type="password"
+                placeholder="Enter new password (optional)" />
+        </div>
+
+        <button type="submit" class="btn btn-success mt-4">Update Profile</button>
+    </form>
+</main>

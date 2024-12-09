@@ -6,7 +6,8 @@ import * as ratingData from "./ratings.js";
 import * as subjectData from "./subject_areas.js";
 import * as sessionsData from "./sessions.js";
 import * as postData from "./posts.js";
+import * as adminData from "./admin.js";
 
 
-export { badgesData, menteeData, mentorData, parentsData, ratingData , sessionsData, subjectData, postData};
+export { badgesData, menteeData, mentorData, parentsData, ratingData , sessionsData, subjectData, postData, adminData};
 
