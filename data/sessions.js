@@ -93,6 +93,13 @@ export const createSession = async (
     start_time = new Date(start_time.trim()).toISOString();
     end_time = new Date(end_time.trim()).toISOString();
 
+    // console.log(start_time);
+    // console.log(end_time);
+
+    if(end_time < start_time){
+        throw "Please enter a valid time range.";
+    }
+
     if (!ObjectId.isValid(mentor_id)) {
         throw `${mentor_id} is not a valid ObjectID.`;
     }
@@ -163,8 +170,8 @@ export const createSession = async (
         mentor_id: mentor_id,
         mentee_id: mentee_id,
         subject_area: subject_area,
-        start_time: start_time,
-        end_time: end_time,
+        start_time: new Date(start_time),
+        end_time: new Date(end_time),
         eventId: bookedSession.id,
         status: "scheduled",
         meeting_link: meeting.join_url,
@@ -206,7 +213,7 @@ export const createSession = async (
     return returnSession;
 };
 
-export const rescheduleSession = async (id, start_time, end_time, status) => {
+export const rescheduleSession = async (id, start_time, end_time) => {
     checkStringParams(id);
     if (!ObjectId.isValid(id)) {
         throw "Invalid object ID.";
@@ -214,7 +221,6 @@ export const rescheduleSession = async (id, start_time, end_time, status) => {
 
     checkTimestamp(start_time);
     checkTimestamp(end_time);
-    checkStringParams(status);
 
     start_time = new Date(start_time.trim()).toISOString();
     start_time = new Date(end_time.trim()).toISOString();
@@ -222,7 +228,6 @@ export const rescheduleSession = async (id, start_time, end_time, status) => {
     let reschedSession = {
         start_time: start_time,
         end_time: end_time,
-        status: status,
     };
 
     const sessionCollection = await sessions();
