@@ -93,6 +93,13 @@ export const createSession = async (
     start_time = new Date(start_time.trim()).toISOString();
     end_time = new Date(end_time.trim()).toISOString();
 
+    // console.log(start_time);
+    // console.log(end_time);
+
+    if(end_time < start_time){
+        throw "Please enter a valid time range.";
+    }
+
     if (!ObjectId.isValid(mentor_id)) {
         throw `${mentor_id} is not a valid ObjectID.`;
     }
@@ -167,8 +174,8 @@ export const createSession = async (
         mentor_id: mentor_id,
         mentee_id: mentee_id,
         subject_area: subject_area,
-        start_time: start_time,
-        end_time: end_time,
+        start_time: new Date(start_time),
+        end_time: new Date(end_time),
         eventId: bookedSession.id,
         status: "scheduled",
         meeting_link: meeting.join_url,
