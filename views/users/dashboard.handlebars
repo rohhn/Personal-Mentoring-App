@@ -57,21 +57,42 @@
                     </div>
 
                 </div>
-                <div class="row w-100 h-100 overflow-scroll">
+                <div class="row px-2 overflow-scroll">
+                    <div class="col">
                     {{#if sessions}}
                         {{#each sessions}}
-                            <div class="card col-md-3 col-sm-4 m-2">
-                                <img class="card-top-img" href="" />
-                                <div class="card-body">
-                                    <h5 class="card-title">{{_id}}</h5>
-                                    <p class="card-text text-muted">time?</p>
-                                    <a href="#" class="card-link">meeting link?</a>
+                            <div class="card m-2">
+                                <div class="card-body d-flex justify-content-between">
+                                    <div class="p-1">
+                                        <h5 class="card-title">
+                                        {{#if (isEqual userData.userType "mentor") }}
+                                            {{this.mentee_name}}
+                                        {{else}}
+                                            {{this.mentor_name}}
+                                        {{/if}}
+                                    </h5>
+                                    <p class="card-text mb-0">
+                                        {{this.subject_area}}
+                                    </p>
+                                    <p class="card-text text-muted mb-0">
+                                        <span>From: {{#formatDateTime this.start_time}}{{/formatDateTime}}</span> | <span>To: {{#formatDateTime this.end_time}}{{/formatDateTime}}</span>
+                                    </p>
+                                    <a href="{{this.meeting_link}}" class="card-link">Zoom Link</a>
+                                    </div>
+                                    <div class="p-1">
+                                        {{#if (isEqual userData.userType "mentor") }}
+                                            <a class="btn btn-primary" href="/mentee/{{this.mentee_id}}">View Full Profile</a>
+                                        {{else}}
+                                            <a class="btn btn-primary" href="/mentor/{{this.mentor_id}}">View Full Profile</a>
+                                        {{/if}}
+                                    </div>
                                 </div>
                             </div>
                         {{/each}}
                     {{else}}
                             <p class="pt-5 text-center fs-6 fw-lighter fst-italic">No upcoming sessions.</p>
                     {{/if}}
+                    </div>
                 </div>
             </div>
             <div id="profile-card" class="col col-sm-12 col-md-4">

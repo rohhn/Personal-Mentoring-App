@@ -171,7 +171,6 @@ router
 
             // create User
             if (user_type === "mentee") {
-
                 const parent_email = req.body.parent_email || undefined;
 
                 try {
@@ -203,7 +202,6 @@ router
                     userType: user_type,
                 };
             } else if (user_type == "mentor") {
-
                 const createdUser = await mentorData.createMentor(
                     first_name,
                     last_name,
@@ -286,7 +284,7 @@ router.route("/dashboard").get(async (req, res) => {
         }
 
         userData.userType = userType;
-
+        console.log(sessions);
         res.render("users/dashboard", {
             pageTitle: "Dashboard",
             headerOptions: req.headerOptions,
