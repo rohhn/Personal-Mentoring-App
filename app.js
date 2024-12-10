@@ -107,7 +107,5 @@ app.listen(3000, () => {
 });
 
 // TODO: edit mentor profile
-// TODO: reschedule sessions
-// TODO: Delete sessions
 // TODO: Admin interface
 // TODO: Front-end for adding review and rating

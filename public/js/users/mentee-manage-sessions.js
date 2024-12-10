@@ -40,7 +40,21 @@
     }
 
     function handleCancelSession(event) {
-        console.log(event.data);
+        // console.log(event.data);
+        const apiUrl = `${window.location.origin}/sessions/${event.target.dataset.sessionId}`;
+        $.ajax({
+            type: "DELETE",
+            url: apiUrl,
+            success: (response) => {
+                window.location.href = `${window.location.origin}/dashboard`;
+            },
+            error: (XMLHttpRequest, textStatus, errorThrown) => {
+                console.error("XMLHttpRequest", XMLHttpRequest);
+                console.error("textStatus", textStatus);
+                console.error("errorThrown", errorThrown);
+                alert(XMLHttpRequest.responseJSON.error || errorThrown);
+            },
+        });
     }
 
     function makeBookingForm(response, eventData) {
@@ -184,7 +198,7 @@
             minute: endMin,
         }).toISOString({ keepOffset: true });
 
-        rescheduleSession(event.data.sessionId, formValues);
+        rescheduleSession(event.data.dataset.sessionId, formValues);
     }
 
     function updateAvailabilityDiv(eventData, response) {
