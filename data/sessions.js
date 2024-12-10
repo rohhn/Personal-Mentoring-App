@@ -14,6 +14,7 @@ import {
 import axios from "axios";
 import dotenv from "dotenv";
 import moment from "moment";
+import { start } from "repl";
 dotenv.config();
 
 const clientId = process.env.CLIENT_ID;
@@ -90,8 +91,8 @@ export const createSession = async (
     mentor_id = mentor_id.trim();
     mentee_id = mentee_id.trim();
     subject_area = subject_area.trim();
-    start_time = new Date(start_time.trim()).toISOString();
-    end_time = new Date(end_time.trim()).toISOString();
+    start_time = moment(start_time.trim());
+    end_time = moment(end_time.trim());
 
     // console.log(start_time);
     // console.log(end_time);
@@ -170,8 +171,8 @@ export const createSession = async (
         mentor_id: mentor_id,
         mentee_id: mentee_id,
         subject_area: subject_area,
-        start_time: new Date(start_time),
-        end_time: new Date(end_time),
+        start_time: start_time.toDate(),
+        end_time: end_time.toDate(),
         eventId: bookedSession.id,
         status: "scheduled",
         meeting_link: meeting.join_url,
@@ -219,15 +220,23 @@ export const rescheduleSession = async (id, start_time, end_time) => {
         throw "Invalid object ID.";
     }
 
-    checkTimestamp(start_time);
-    checkTimestamp(end_time);
+    // checkTimestamp(start_time);
+    // checkTimestamp(end_time);
 
-    start_time = new Date(start_time.trim()).toISOString();
-    start_time = new Date(end_time.trim()).toISOString();
+    // start_time = new Date(start_time.trim())
+    // start_time = new Date(end_time.trim())
+
+    start_time = moment(start_time.trim())
+    end_time = moment(end_time.trim())
+    
+
+    if(start_time.isAfter(end_time)){
+        throw "Please enter a valid time range.";
+    }
 
     let reschedSession = {
-        start_time: start_time,
-        end_time: end_time,
+        start_time: start_time.toDate(),
+        end_time: end_time.toDate(),
     };
 
     const sessionCollection = await sessions();
@@ -251,9 +260,10 @@ export const rescheduleSession = async (id, start_time, end_time) => {
     let seshUpdateOnCal = await updateSessionOnCalendar(
         calendarId,
         eventId,
-        start_time,
-        end_time
+        reschedSession.start_time,
+        reschedSession.end_time
     );
+    
 
     const result = await sessionCollection.findOneAndUpdate(
         { _id: new ObjectId(id) },
@@ -270,13 +280,13 @@ export const rescheduleSession = async (id, start_time, end_time) => {
     let mentorName = `${mentor.first_name} ${mentor.last_name}`;
     let menteeName = `${mentee.first_name} ${mentee.last_name}`;
 
-    let subjectName = subject.name;
+    // let subjectName = subject.name;
 
     let returnSession = {
         _id: result._id,
         mentee_name: menteeName,
         mentor_name: mentorName,
-        subject_area: subjectName,
+        // subject_area: subjectName,
         start_time: result.start_time,
         end_time: result.end_time,
         status: result.status,
