@@ -11,7 +11,10 @@ import constructorMethod from "./routes/index.js";
 import { loginMiddleware, makeHeaderOptions } from "./middleware/auth.js";
 import { privateRouteMiddleware, rootMiddleware } from "./middleware/root.js";
 import { allowMenteesOnly, allowMentorsOnly } from "./middleware/users.js";
-import { adminLoginMiddleware } from "./middleware/admin.js";
+import {
+    adminDashboardMiddleware,
+    adminLoginMiddleware,
+} from "./middleware/admin.js";
 
 const rewriteUnsupportedBrowserMethods = (req, res, next) => {
     // If the user posts to the server with a property called _method, rewrite the request's method
@@ -67,10 +70,14 @@ app.use(rewriteUnsupportedBrowserMethods);
 // middleware
 app.use(makeHeaderOptions);
 app.use("/dashboard", privateRouteMiddleware);
+app.use("/dashboard", adminDashboardMiddleware);
+
 app.use("/login", loginMiddleware);
 app.use("/signup", loginMiddleware);
+
 app.use("/admin/login", adminLoginMiddleware);
 app.use("/admin/signup", adminLoginMiddleware);
+
 app.use("/sessions/*", privateRouteMiddleware);
 app.use("/mentor/availability/*", privateRouteMiddleware);
 app.use("/sessions/booking/*", allowMenteesOnly);
