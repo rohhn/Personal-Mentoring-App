@@ -391,7 +391,7 @@ export const checkAvailability = async (calendarId, startTime, endTime) => {
 
     const busySlots = response.data.calendars[calendarId].busy;
 
-    // console.log("busySlots: ",busySlots);
+    console.log("busySlots: ",busySlots);
 
     const isAvailable = busySlots.length === 0;
     return isAvailable;
@@ -431,6 +431,9 @@ export const updateSessionOnCalendar = async (
     end_time
 ) => {
     const authClient = await getAuthClient();
+
+    console.log(start_time);
+    console.log(end_time);
 
     const updatedEvent = {
         start: {
