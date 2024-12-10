@@ -510,4 +510,30 @@ router
         }
     });
 
+router
+.route('/rating/search')
+.get(async (req, res) => {
+    let average_rating = req.body.averageRating;
+
+    // try{
+    //     if(isNaN(average_rating) || average_rating.trim() !== ''){
+    //         throw `Invalid input for average_rating`;
+    //     }
+    // }catch(e){
+    //     return res.status(400).json({ error: e });
+    // }
+
+    // average_rating = parseFloat(average_rating);
+
+    try{
+        let mentorsByRating = await mentorData.getMentorsAboveRating(average_rating);
+        return mentorsByRating;
+    }catch(e){
+        console.log(e);
+        return res.status(500).json({ error: e });
+    }
+    
+
+});
+
 export { router as mentorRoutes };

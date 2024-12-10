@@ -217,7 +217,7 @@ export const createSession = async (
     return returnSession;
 };
 
-export const rescheduleSession = async (id, start_time, end_time, status) => {
+export const rescheduleSession = async (id, start_time, end_time) => {
     checkStringParams(id);
     if (!ObjectId.isValid(id)) {
         throw "Invalid object ID.";
@@ -225,7 +225,6 @@ export const rescheduleSession = async (id, start_time, end_time, status) => {
 
     checkTimestamp(start_time);
     checkTimestamp(end_time);
-    checkStringParams(status);
 
     start_time = new Date(start_time.trim()).toISOString();
     start_time = new Date(end_time.trim()).toISOString();
@@ -233,7 +232,6 @@ export const rescheduleSession = async (id, start_time, end_time, status) => {
     let reschedSession = {
         start_time: start_time,
         end_time: end_time,
-        status: status,
     };
 
     const sessionCollection = await sessions();

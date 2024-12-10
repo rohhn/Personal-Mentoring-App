@@ -553,3 +553,38 @@ export const removeSubjectAreaToMentorByName = async (id, subjectName) => {
 
     return result;
 };
+
+
+export const getMentorsAboveRating = async (averageRating) => {
+    if (typeof averageRating !== 'number' || averageRating < 0 || averageRating > 5) {
+        throw 'Invalid average rating. It must be a number between 0 and 5.';
+    }
+
+
+    // Fetch all mentors
+    const mentorCollection = await mentors();
+
+    // let allMentors = await mentorCollection.find({}).toArray();
+
+    // if (!allMentors || allMentors.length === 0) {
+    //     return [];
+    // }
+
+    // Filter mentors based on average rating
+    const mentorsAboveRating = await mentorCollection
+        .find({ averageRating: { $gt: averageRating } })
+        .toArray();
+
+    if (mentorsAboveRating.length === 0) {
+        return [];
+    }
+
+    // Format the result
+    return mentorsAboveRating.map((mentor) => ({
+        _id: mentor._id,
+        first_name: mentor.first_name,
+        last_name: mentor.last_name,
+        // average_rating: (mentor.reviews.reduce((sum, review) => sum + review.rating, 0) / mentor.reviews.length).toFixed(2), // Calculate average rating for display
+        reviews_count: mentor.reviews.length,
+    }));
+};

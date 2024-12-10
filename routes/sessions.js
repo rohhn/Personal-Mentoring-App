@@ -174,7 +174,6 @@ router
         try {
             checkTimestamp(reschedSession.start_time);
             checkTimestamp(reschedSession.end_time);
-            checkStringParams(reschedSession.status);
         } catch (e) {
             return res.status(400).json({ error: e });
         }
@@ -183,8 +182,7 @@ router
             const session = await sessionsData.rescheduleSession(
                 sessionId,
                 reschedSession.start_time,
-                reschedSession.end_time,
-                reschedSession.status
+                reschedSession.end_time
             );
             return res.status(200).json(session);
         } catch (e) {
