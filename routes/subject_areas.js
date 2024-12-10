@@ -164,4 +164,43 @@ router
 
 });
 
+router
+.route('/mentors/:subjectId')
+.get(async (req, res) => {
+    let subjectId = req.params.subjectId.trim();
+
+    try{
+        checkStringParams(subjectId);
+
+        if (!ObjectId.isValid(subjectId.trim())) {
+            throw "Invalid object ID.";
+        }
+    }catch(e){
+        return res.status(400).json({ error: e });
+    }
+
+    subjectId = subjectId.trim();
+
+    try {
+        const subjectAreasCollection = await subject_areas();
+
+        const subject = await subjectAreasCollection.findOne({ _id: new ObjectId(subjectId) });
+        // console.log(subject);
+        if (!subject) {
+            throw `Subject area with the id ${subjectId} does not exist.`;
+        }
+    } catch (e) {
+        console.log(e);
+        return res.status(404).json({ error: e });
+    }
+
+    try{
+        let mentors = await subjectData.searchMentorsBySubjectId(subjectId);
+        return res.status(200).json(mentors);
+    }catch(e){
+        return res.status(500).json({ error: e });
+    }
+    
+});
+
 export { router as subjectRoutes };

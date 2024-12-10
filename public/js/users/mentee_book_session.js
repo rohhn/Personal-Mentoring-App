@@ -181,7 +181,7 @@
                 console.error("XMLHttpRequest", XMLHttpRequest);
                 console.error("textStatus", textStatus);
                 console.error("errorThrown", errorThrown);
-                alert(errorThrown);
+                alert(XMLHttpRequest.responseJSON.error || errorThrown );
             },
         });
     }
