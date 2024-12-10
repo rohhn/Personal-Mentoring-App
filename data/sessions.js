@@ -411,6 +411,8 @@ export const getSessionsByMentee = async (menteeId, timeline) => {
         let returnSession = {
             _id: sessionObj._id,
             mentee_name: menteeName,
+            mentee_id: mentee._id,
+            mentor_id: mentor._id,
             mentor_name: mentorName,
             subject_area: subjectName,
             start_time: sessionObj.start_time,
@@ -490,6 +492,8 @@ export const getSessionsByMentor = async (mentorId, timeline = "all") => {
             _id: sessionObj._id,
             mentee_name: menteeName,
             mentor_name: mentorName,
+            mentee_id: mentee._id,
+            mentor_id: mentor._id,
             subject_area: subjectName,
             start_time: sessionObj.start_time,
             end_time: sessionObj.end_time,
