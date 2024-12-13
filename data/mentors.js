@@ -68,8 +68,6 @@ export const createMentor = async (
     const calendarId = await createCalendarForMentor();
     newMentorObj.calendarId = calendarId;
 
-    console.log(calendarId);
-
     const mentorCollection = await mentors();
 
     const result = await mentorCollection.insertOne(newMentorObj);
@@ -131,18 +129,20 @@ export const getMentorById = async (id) => {
         mentor.dob = mentor.dob.toISOString().split('T')[0]; 
     }
 
-    let subject_ids = mentor.subject_areas;
+    if(mentor.subject_areas){
+        let subject_ids = mentor.subject_areas;
 
-    let subject_areas = [];
+        let subject_areas = [];
 
-    if (subject_ids.length > 0){
-        for(let i = 0;i < subject_ids.length; i++){
-            let subject = await subjectData.getSubjectById(subject_ids[i]);
-            subject_areas.push(subject);
+        if (subject_ids.length > 0){
+            for(let i = 0;i < subject_ids.length; i++){
+                let subject = await subjectData.getSubjectById(subject_ids[i]);
+                subject_areas.push(subject);
+            }
         }
-    }
 
-    mentor.subject_areas = subject_areas;
+        mentor.subject_areas = subject_areas;
+    }
 
     return mentor;
 };
@@ -166,18 +166,20 @@ export const getMentorByEmail = async (email) => {
 
     mentor._id = mentor._id.toString();
 
-    let subject_ids = mentor.subject_areas;
+    if(mentor.subject_areas){
+        let subject_ids = mentor.subject_areas;
 
-    let subject_areas = [];
+        let subject_areas = [];
 
-    if (subject_ids.length > 0){
-        for(let i = 0;i < subject_ids.length; i++){
-            let subject = await subjectData.getSubjectById(subject_ids[i]);
-            subject_areas.push(subject);
+        if (subject_ids.length > 0){
+            for(let i = 0;i < subject_ids.length; i++){
+                let subject = await subjectData.getSubjectById(subject_ids[i]);
+                subject_areas.push(subject);
+            }
         }
-    }
 
-    mentor.subject_areas = subject_areas;
+        mentor.subject_areas = subject_areas;
+    }
     
     return mentor;
 };
@@ -548,4 +550,39 @@ export const removeSubjectAreaToMentorByName = async (id, subjectName) => {
     result._id = result._id.toString();
 
     return result;
+};
+
+
+export const getMentorsAboveRating = async (averageRating) => {
+    if (typeof averageRating !== 'number' || averageRating < 0 || averageRating > 5) {
+        throw 'Invalid average rating. It must be a number between 0 and 5.';
+    }
+
+
+    // Fetch all mentors
+    const mentorCollection = await mentors();
+
+    // let allMentors = await mentorCollection.find({}).toArray();
+
+    // if (!allMentors || allMentors.length === 0) {
+    //     return [];
+    // }
+
+    // Filter mentors based on average rating
+    const mentorsAboveRating = await mentorCollection
+        .find({ averageRating: { $gt: averageRating } })
+        .toArray();
+
+    if (mentorsAboveRating.length === 0) {
+        return [];
+    }
+
+    // Format the result
+    return mentorsAboveRating.map((mentor) => ({
+        _id: mentor._id,
+        first_name: mentor.first_name,
+        last_name: mentor.last_name,
+        // average_rating: (mentor.reviews.reduce((sum, review) => sum + review.rating, 0) / mentor.reviews.length).toFixed(2), // Calculate average rating for display
+        reviews_count: mentor.reviews.length,
+    }));
 };
