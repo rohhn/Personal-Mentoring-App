@@ -13,7 +13,9 @@ import {
     createCalendarForMentor,
     addAvailability,
     validateAvailability,
+    getAuthClient,
 } from "../helpers.js";
+import { google } from "googleapis";
 
 
 export const createMentor = async (
@@ -29,7 +31,11 @@ export const createMentor = async (
     last_name = checkStringParams(last_name);
     summary = checkStringParams(summary);
     // TODO: Implement a proper date check
-    // dob = checkDate(dob);
+    checkDate(dob);
+
+    dob = new Date(dob.trim());
+
+    let approved = false;
 
     let newMentorObj = {
         first_name,
@@ -37,6 +43,7 @@ export const createMentor = async (
         dob,
         pwd_hash,
         summary,
+        approved,
     };
 
     email = checkEmail(email).toLowerCase();
@@ -76,6 +83,8 @@ export const createMentor = async (
 
     delete mentor.pwd_hash;
 
+    delete mentor.pwd_hash;
+
     return mentor;
 };
 
@@ -91,6 +100,7 @@ export const getAllMentors = async () => {
     allMentors = allMentors.map((mentor) => ({
         _id: mentor._id.toString(),
         name: `${mentor.first_name} ${mentor.last_name}`,
+        summary: mentor.summary,
     }));
 
     return allMentors;
@@ -114,6 +124,26 @@ export const getMentorById = async (id) => {
     }
 
     mentor._id = mentor._id.toString();
+
+    if (mentor.dob && mentor.dob instanceof Date) {
+        mentor.dob = mentor.dob.toISOString().split('T')[0]; 
+    }
+
+    if(mentor.subject_areas){
+        let subject_ids = mentor.subject_areas;
+
+        let subject_areas = [];
+
+        if (subject_ids.length > 0){
+            for(let i = 0;i < subject_ids.length; i++){
+                let subject = await subjectData.getSubjectById(subject_ids[i]);
+                subject_areas.push(subject);
+            }
+        }
+
+        mentor.subject_areas = subject_areas;
+    }
+
     return mentor;
 };
 
@@ -128,9 +158,29 @@ export const getMentorByEmail = async (email) => {
 
     if (!mentor) {
         throw `Mentor with the email ${email} does not exist.`;
+    }   
+
+    if (mentor.dob && mentor.dob instanceof Date) {
+        mentor.dob = mentor.dob.toISOString().split('T')[0]; 
     }
 
     mentor._id = mentor._id.toString();
+
+    if(mentor.subject_areas){
+        let subject_ids = mentor.subject_areas;
+
+        let subject_areas = [];
+
+        if (subject_ids.length > 0){
+            for(let i = 0;i < subject_ids.length; i++){
+                let subject = await subjectData.getSubjectById(subject_ids[i]);
+                subject_areas.push(subject);
+            }
+        }
+
+        mentor.subject_areas = subject_areas;
+    }
+    
     return mentor;
 };
 
@@ -180,35 +230,22 @@ export const updateMentor = async (
         throw `${id} is not a valid ObjectID.`;
     }
 
-<<<<<<< HEAD
     checkStringParams(first_name);
     checkStringParams(last_name);
-    checkDate(dob);
-    // await checkEmail(email, "mentor");
-    checkStringParams(pwd_hash);
-    checkStringParams(profile_image);
-    checkStringParams(summary);
-    checkBoolean(approved);
-    education = checkEducation(education);
-    experience = checkExperience(experience);
-    subject_areas = checkArrayOfStrings(subject_areas);
-=======
-  checkStringParams(first_name);
-  checkStringParams(last_name);
-  checkDate(dob);
-  await checkEmail(email, "mentor");
-  // checkStringParams(pwd_hash);
-  // checkStringParams(profile_image);
-  // checkStringParams(summary);
-  // checkBoolean(approved);
-  // education = checkEducation(education);
-  // experience = checkExperience(experience);
-  // subject_areas = checkArrayOfStrings(subject_areas);
->>>>>>> 850ed94 (Tentative-documentation-for-apis)
+    checkDate(dob.trim());
+    await checkEmail(email, "mentor");
+
+    // checkStringParams(pwd_hash);
+    // checkStringParams(profile_image);
+    // checkStringParams(summary);
+    // checkBoolean(approved);
+    // education = checkEducation(education);
+    // experience = checkExperience(experience);
+    // subject_areas = checkArrayOfStrings(subject_areas);
 
     first_name = first_name.trim();
     last_name = last_name.trim();
-    dob = dob.trim();
+    dob = new Date(dob.trim());
     pwd_hash = pwd_hash.trim();
     profile_image = profile_image.trim();
     summary = summary.trim();
@@ -240,6 +277,10 @@ export const updateMentor = async (
 
     result._id = result._id.toString();
 
+    if (result.dob && result.dob instanceof Date) {
+        result.dob = result.dob.toISOString().split('T')[0]; 
+    }
+
     return result;
 };
 
@@ -253,31 +294,75 @@ export const toAddAvailability = async (id, availability) => {
         throw `${id} is not a valid ObjectID.`;
     }
 
-    let mentor = await getMentorById(id);
+    const mentorCollection = await mentors();
 
-    let calendarId = mentor.calendarId;
-
-    console.log(availability);
-
-    for (let i in availability) {
-        let day = availability[i].day;
-        let start_time = availability[i].start_time;
-        let end_time = availability[i].end_time;
-
-<<<<<<< HEAD
-        console.log(day);
-
-        let av = await addAvailability(calendarId, day, start_time, end_time);
-
-        // console.log(av);
+    const mentor = await mentorCollection.findOne({ _id: new ObjectId(id) });
+    if (!mentor) {
+        throw `Mentor with ID ${id} not found.`;
     }
-};
-=======
-    console.log(av);
 
-  }
-}
->>>>>>> 850ed94 (Tentative-documentation-for-apis)
+    const existingAvailability = mentor.availability || [];
+
+    // Process the availability array to update or append
+    const updatedAvailability = [...existingAvailability];
+
+    for (const newEntry of availability) {
+        const existingEntryIndex = updatedAvailability.findIndex(
+            (entry) => entry.day === newEntry.day
+        );
+
+        if (existingEntryIndex !== -1) {
+            // Update existing entry for the same day
+            updatedAvailability[existingEntryIndex].start_time =
+                newEntry.start_time;
+            updatedAvailability[existingEntryIndex].end_time =
+                newEntry.end_time;
+        } else {
+            // Append new entry for the day
+            updatedAvailability.push(newEntry);
+        }
+    }
+
+    // Update the database
+    const result = await mentorCollection.findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        { $set: { availability: updatedAvailability } },
+        { returnDocument: "after" }
+    );
+
+    if (!result) {
+        throw `Could not update the mentor's availability.`;
+    }
+
+    // Ensure the updated availability is also reflected on Google Calendar
+    const calendarId = mentor.calendarId;
+    if (!calendarId) {
+        throw `Mentor with ID ${id} does not have a calendar associated.`;
+    }
+
+    const authClient = await getAuthClient();
+    const calendar = google.calendar({ version: "v3", auth: authClient });
+
+    // Sync availability to Google Calendar
+    for (const entry of updatedAvailability) {
+        await addAvailability(
+            calendarId,
+            entry.day,
+            entry.start_time,
+            entry.end_time
+        );
+    }
+
+    console.log(
+        "Availability updated successfully on both MongoDB and Google Calendar."
+    );
+
+    return {
+        _id: result._id.toString(),
+        availability: updatedAvailability,
+        calendarId: calendarId,
+    };
+};
 
 export const updateSubjectAreaToMentor = async (id, subjectId) => {
     checkStringParams(id);
@@ -309,6 +394,8 @@ export const updateSubjectAreaToMentor = async (id, subjectId) => {
     let updateDoc = {
         subject_areas: subject_areas,
     };
+
+    const mentorCollection = await mentors();
 
     const result = await mentorCollection.findOneAndUpdate(
         { _id: new ObjectId(id) },
@@ -353,6 +440,8 @@ export const updateSubjectAreaToMentorByName = async (id, subjectName) => {
     let updateDoc = {
         subject_areas: subject_areas,
     };
+
+    const mentorCollection = await mentors();
 
     const result = await mentorCollection.findOneAndUpdate(
         { _id: new ObjectId(id) },
@@ -400,6 +489,8 @@ export const removeSubjectAreaFromMentor = async (id, subjectId) => {
         subject_areas: subject_areas,
     };
 
+    const mentorCollection = await mentors();
+
     const result = await mentorCollection.findOneAndUpdate(
         { _id: new ObjectId(id) },
         { $set: updateDoc },
@@ -444,6 +535,8 @@ export const removeSubjectAreaToMentorByName = async (id, subjectName) => {
         subject_areas: subject_areas,
     };
 
+    const mentorCollection = await mentors();
+
     const result = await mentorCollection.findOneAndUpdate(
         { _id: new ObjectId(id) },
         { $set: updateDoc },
@@ -457,4 +550,39 @@ export const removeSubjectAreaToMentorByName = async (id, subjectName) => {
     result._id = result._id.toString();
 
     return result;
+};
+
+
+export const getMentorsAboveRating = async (averageRating) => {
+    if (typeof averageRating !== 'number' || averageRating < 0 || averageRating > 5) {
+        throw 'Invalid average rating. It must be a number between 0 and 5.';
+    }
+
+
+    // Fetch all mentors
+    const mentorCollection = await mentors();
+
+    // let allMentors = await mentorCollection.find({}).toArray();
+
+    // if (!allMentors || allMentors.length === 0) {
+    //     return [];
+    // }
+
+    // Filter mentors based on average rating
+    const mentorsAboveRating = await mentorCollection
+        .find({ averageRating: { $gt: averageRating } })
+        .toArray();
+
+    if (mentorsAboveRating.length === 0) {
+        return [];
+    }
+
+    // Format the result
+    return mentorsAboveRating.map((mentor) => ({
+        _id: mentor._id,
+        first_name: mentor.first_name,
+        last_name: mentor.last_name,
+        // average_rating: (mentor.reviews.reduce((sum, review) => sum + review.rating, 0) / mentor.reviews.length).toFixed(2), // Calculate average rating for display
+        reviews_count: mentor.reviews.length,
+    }));
 };

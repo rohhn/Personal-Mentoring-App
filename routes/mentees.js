@@ -12,6 +12,7 @@ import {
 } from "../helpers.js";
 import { fileUpload } from "../middleware/common.js";
 import { extractProfileImage } from "../helpers/common.js";
+import moment from "moment";
 
 const router = express.Router();
 
@@ -230,6 +231,7 @@ router.route("/:menteeId/edit").get(async (req, res) => {
         });
 
         mentee.userType = "mentee";
+        // mentee.dob = moment(mentee.dob).format();
 
         // set custom flag for isOwner for edit profile tag
         let isOwner = false;

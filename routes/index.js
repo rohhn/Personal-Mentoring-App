@@ -6,6 +6,7 @@ import { rootRoutes } from "./root.js";
 import { sessionRoutes } from './sessions.js';
 import { subjectRoutes } from "./subject_areas.js";
 import { postRoutes } from "./posts.js";
+import { adminRoutes } from "./admin.js";
 
 
 
@@ -17,7 +18,8 @@ const constructorMethod = (app) => {
     app.use('/sessions', sessionRoutes);
     app.use('/subjects', subjectRoutes);
     app.use('/parentEmailNotify',parentEmailRoutes);
-    app.use('/forum', postRoutes)
+    app.use('/forum', postRoutes);
+    app.use('/admin', adminRoutes);
 
 
     app.use("*", (req, res) => {

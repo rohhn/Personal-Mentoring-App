@@ -1,10 +1,16 @@
 import bcrypt from "bcrypt";
 import express from "express";
-import { menteeData, mentorData, subjectData } from "../data/index.js";
+import {
+    menteeData,
+    mentorData,
+    sessionsData,
+    subjectData,
+} from "../data/index.js";
 import { checkEmail, checkStringParams, formatDate } from "../helpers.js";
 import { isParentEmailRequired } from "../helpers/mentees.js";
 import { fileUpload } from "../middleware/common.js";
 import { extractProfileImage } from "../helpers/common.js";
+import { error } from "console";
 
 const router = express.Router();
 
@@ -165,8 +171,6 @@ router
 
             // create User
             if (user_type === "mentee") {
-                console.log("Creating mentee");
-
                 const parent_email = req.body.parent_email || undefined;
 
                 try {
@@ -198,8 +202,6 @@ router
                     userType: user_type,
                 };
             } else if (user_type == "mentor") {
-                console.log("Creating mentor");
-
                 const createdUser = await mentorData.createMentor(
                     first_name,
                     last_name,
@@ -249,6 +251,7 @@ router.route("/dashboard").get(async (req, res) => {
 
     try {
         let userData = {};
+        let sessions = {};
         if (userType === "mentee") {
             console.log("mentee dashboard");
 
@@ -258,6 +261,11 @@ router.route("/dashboard").get(async (req, res) => {
                 errorObj.name = "ServerError";
                 throw errorObj;
             });
+
+            sessions = await sessionsData.getSessionsByMentee(
+                userId,
+                "upcoming"
+            );
         } else if (userType == "mentor") {
             console.log("mentor dashboard");
             userData = await mentorData.getMentorById(userId).catch((error) => {
@@ -266,16 +274,22 @@ router.route("/dashboard").get(async (req, res) => {
                 errorObj.name = "ServerError";
                 throw errorObj;
             });
+
+            sessions = await sessionsData.getSessionsByMentor(
+                userId,
+                "upcoming"
+            );
         } else {
             res.status(500).redirect("/");
         }
 
         userData.userType = userType;
-
+        console.log(sessions);
         res.render("users/dashboard", {
             pageTitle: "Dashboard",
             headerOptions: req.headerOptions,
             userData,
+            sessions,
         });
     } catch (error) {}
 });

@@ -1,0 +1,101 @@
+<main class="container my-5">
+    <div class="main-body">
+        <div class="row gx-4 gy-2">
+            <div class="col-sm-12 col-md-4">
+                <div class="d-flex flex-column justify-content-center">
+                    <div class="row text-center">
+                        <h2>Update Availability</h2>
+                    </div>
+                    <div class="row">
+                        <form id="manage-availability-form" method="POST">
+                            <div class="row form-group mb-4">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-0">Day</h6>
+                                </div>
+                                <div class="col-sm-9 text-secondary">
+
+                                    <select
+                                        class="form-control"
+                                        name="day"
+                                        id="day-of-week-select"
+                                    >
+                                        {{#each dayofWeek}}
+                                            <option
+                                                value="{{this}}"
+                                            >{{this}}</option>
+                                        {{/each}}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row form-group mb-4">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-0">Start</h6>
+                                </div>
+                                <div class="col-sm-9 text-secondary">
+                                    <input
+                                        class="form-control"
+                                        name="start_time"
+                                        id="start_time"
+                                        type="time"
+                                    />
+                                </div>
+                            </div>
+                            <div class="row form-group mb-4">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-0">End</h6>
+                                </div>
+                                <div class="col-sm-9 text-secondary">
+                                    <input
+                                        class="form-control"
+                                        name="end_time"
+                                        id="end_time"
+                                        type="time"
+                                    />
+                                </div>
+                            </div>
+
+                            <div
+                                class="mt-4 form-group d-flex justify-content-center"
+                            >
+                                <button
+                                    id="save-changes-btn"
+                                    class="btn btn-primary"
+                                    type="submit"
+                                >Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-sm-12 col-md-8">
+                {{!-- <div class=""> --}}
+                    <div class="text-center">
+                        <h2>Current Availability</h2>
+                    </div>
+                    <div id="curr-avl-div" class="row row-cols-2 gy-2 px-2" data-id="{{userId}}">
+                        {{#each availability}}
+                        <div id="avl-{{this.day}}" class="col w-50 mx-auto">
+                            <div class="card text-bg-dark p-2">
+                                <div class="card-title"><h5>{{this.day}}</h5></div>
+                                <div class="card-body">
+                                    <p class="start-time">Start Time: {{this.start_time}}</p>
+                                    <p class="end-time">End Time: {{this.end_time}}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {{/each}}
+                    </div>
+                    
+                        
+                    
+                {{!-- </div> --}}
+
+            </div>
+        </div>
+
+    </div>
+</main>
+
+{{> users/manage-availability}}
