@@ -39,7 +39,7 @@ router.route("/").post(addMenteeIdtoReq, async (req, res, next) => {
         );
         return res.status(200).json(session);
     } catch (e) {
-        // console.log(e);
+        console.log(e);
         return res.status(500).json({ error: e });
     }
 });
@@ -86,7 +86,7 @@ router.route("/mentee/:menteeId").get(async (req, res) => {
             headerOptions: req.headerOptions,
         });
     } catch (e) {
-        // console.log(e);
+        console.log(e);
         return res.status(404).json({ error: e });
     }
 });
@@ -131,7 +131,7 @@ router.route("/mentor/:mentorId").get(async (req, res) => {
             headerOptions: req.headerOptions,
         });
     } catch (e) {
-        // console.log(e);
+        console.log(e);
         return res.status(404).json({ error: e });
     }
 });
@@ -174,6 +174,7 @@ router
         try {
             checkTimestamp(reschedSession.start_time);
             checkTimestamp(reschedSession.end_time);
+            checkStringParams(reschedSession.status);
         } catch (e) {
             return res.status(400).json({ error: e });
         }
@@ -182,7 +183,8 @@ router
             const session = await sessionsData.rescheduleSession(
                 sessionId,
                 reschedSession.start_time,
-                reschedSession.end_time
+                reschedSession.end_time,
+                reschedSession.status
             );
             return res.status(200).json(session);
         } catch (e) {
@@ -252,7 +254,7 @@ router
                 throw "Invalid object ID.";
             }
         } catch (e) {
-            // console.log(e);
+            console.log(e);
             return res.status(400).json({ error: e });
         }
 
@@ -286,7 +288,7 @@ router.route("/booking/book/:mentorId").get(async (req, res) => {
             throw "Invalid object ID.";
         }
     } catch (e) {
-        // console.log(e);
+        console.log(e);
         return res.status(400).json({ error: e });
     }
 

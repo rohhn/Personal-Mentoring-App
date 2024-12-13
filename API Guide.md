@@ -344,80 +344,23 @@ Expected Response:
 
 ## Mentees API
 
-Route: `/mentee/rating/search`
+Route: `/mentee/`
 
 Method: `GET`
 
-Description: Get above the specified rating
+Description: Get a list of all mentees
 
 Request Payload:
 ```json
-{"averageRating" : 3}
 ```
 
 Expected Response:
-```json
+```
 [
-    {
-     "_id": "12345",
-    "first_name": "Test",
-    "last_name": "Test",
-    "email": "test@test11.com",
-    "dob": "02/15/2000",
-    "created_at": "02/12/2024",
-    "profile_image": "https://url.png",
-    "approved": true,
-    "summary": "leading tech team at Google. Expert in Data Science.",
-    "education": [
-        {
-            "degree": "PhD in XYZ",
-            "institution": "Stevens Institute of Technology",
-            "year": 2018
-        }
-    ],
-    "experience": [
-        {
-            "title": "Director of Technology",
-            "institution": "Google",
-            "years": 2
-        }
-    ],
-    "reviews": [
-        {
-            "session_id": "session_id_ref",
-            "rating": 5,
-            "feedback": "this is a review",
-            "author": "Mentee ID",
-            "created_at": "2024-11-05T14:00:00Z"
-        }
-    ],
-    "badges": [
-        {
-            "badge_id": "badge_ref",
-            "created_at": "2024-11-05T14:00:00Z"
-        }
-    ],
-    "subject_areas": [
-        "subject_area_ref"
-    ],
-    "availability": [
-       {
-            "day": "Monday",
-            "start_time": "14:00",
-            "end_time": "16:00",
-            "booked_slots": [
-            "2024-11-13T14:30:00Z",
-            "2024-11-13T15:00:00Z"
-        ]  
-        },
-        {
-            "day": "Tuesday",
-            "start_time": "10:00",
-            "end_time": "12:00",
-            "booked_slots": []
-        }
-    ]
-}
+    {'_id': 'mentee_id',
+    'name': 'firstname lastname'},
+    {'_id': 'mentee_id',
+    'name': 'firstname lastname'}
 ]
 ```
 
@@ -606,7 +549,7 @@ Expected Response:
 ]
 ```
 
-Route: `/sessions/:sessionId`
+Route: `/sessioms/:sessionId`
 
 Method: `PUT`
 
@@ -616,7 +559,8 @@ Request Payload:
 ```json
 {
     "start_time": "2024-12-01T17:00:00Z",
-    "end_time": "2024-12-01T17:30:00Z"
+    "end_time": "2024-12-01T17:30:00Z",
+    "status": "status"
 }
 ```
 
@@ -636,7 +580,7 @@ Expected Response:
 }
 ```
 
-Route: `/sessions/:sessionId`
+Route: `/sessioms/:sessionId`
 
 Method: `DELETE`
 
@@ -749,87 +693,6 @@ Request Payload:
     "name": "Data Science",
     "description": "New Description1"
 }
-```
-
-Expected Response:
-```json
-{
-    "_id": "12345",
-    "name": "Data Science",
-    "description": "New Description1"
-}
-```
-
-Route: `/subjects/mentors/:subjectId`
-
-Method: `GET`
-
-Description: Get mentors by subject Id
-
-Request Payload:
-```json
-[
-    {
-     "_id": "12345",
-    "first_name": "Test",
-    "last_name": "Test",
-    "email": "test@test11.com",
-    "dob": "02/15/2000",
-    "created_at": "02/12/2024",
-    "profile_image": "https://url.png",
-    "approved": true,
-    "summary": "leading tech team at Google. Expert in Data Science.",
-    "education": [
-        {
-            "degree": "PhD in XYZ",
-            "institution": "Stevens Institute of Technology",
-            "year": 2018
-        }
-    ],
-    "experience": [
-        {
-            "title": "Director of Technology",
-            "institution": "Google",
-            "years": 2
-        }
-    ],
-    "reviews": [
-        {
-            "session_id": "session_id_ref",
-            "rating": 5,
-            "feedback": "this is a review",
-            "author": "Mentee ID",
-            "created_at": "2024-11-05T14:00:00Z"
-        }
-    ],
-    "badges": [
-        {
-            "badge_id": "badge_ref",
-            "created_at": "2024-11-05T14:00:00Z"
-        }
-    ],
-    "subject_areas": [
-        "subject_area_ref"
-    ],
-    "availability": [
-       {
-            "day": "Monday",
-            "start_time": "14:00",
-            "end_time": "16:00",
-            "booked_slots": [
-            "2024-11-13T14:30:00Z",
-            "2024-11-13T15:00:00Z"
-        ]  
-        },
-        {
-            "day": "Tuesday",
-            "start_time": "10:00",
-            "end_time": "12:00",
-            "booked_slots": []
-        }
-    ]
-}
-]
 ```
 
 Expected Response:

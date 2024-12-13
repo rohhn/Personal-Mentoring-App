@@ -11,10 +11,8 @@ import {
     checkEmail,
     validateAvailability,
 } from "../helpers.js";
-import { mentorData, subjectData } from "../data/index.js";
+import { mentorData } from "../data/index.js";
 import { error } from "console";
-import { constrainedMemory } from "process";
-import { fileUpload } from "../middleware/common.js";
 
 const router = express.Router();
 
@@ -169,7 +167,7 @@ router
             return res.status(404).json({ error: e });
         }
     })
-    .put(fileUpload.any(), async (req, res) => {
+    .put(async (req, res) => {
         let mentorId = req.params.mentorId.trim();
 
         try {
@@ -350,13 +348,10 @@ router.route("/:mentorId/edit").get(async (req, res) => {
             isOwner = req.session.user.userId === mentor._id;
         }
 
-        const allSubjectAreas = await subjectData.getAllSubjectAreas();
-
         res.render("users/mentors/edit-profile", {
             pageTitle: `${mentor.first_name}'s Profile`,
             headerOptions: req.headerOptions,
             profileInfo: mentor,
-            allSubjectAreas,
             isOwner,
         });
     } catch (error) {
@@ -514,29 +509,5 @@ router
             return res.status(500).json({ error: e });
         }
     });
-
-router.route("/rating/search").get(async (req, res) => {
-    let average_rating = req.body.averageRating;
-
-    // try{
-    //     if(isNaN(average_rating) || average_rating.trim() !== ''){
-    //         throw `Invalid input for average_rating`;
-    //     }
-    // }catch(e){
-    //     return res.status(400).json({ error: e });
-    // }
-
-    // average_rating = parseFloat(average_rating);
-
-    try {
-        let mentorsByRating = await mentorData.getMentorsAboveRating(
-            average_rating
-        );
-        return mentorsByRating;
-    } catch (e) {
-        console.log(e);
-        return res.status(500).json({ error: e });
-    }
-});
 
 export { router as mentorRoutes };

@@ -84,6 +84,7 @@ $(window).on("load", () => {
             data: JSON.stringify(payload),
             contentType: "application/json",
             success: (response) => {
+                console.log(response);
                 const availability = response.availability;
                 updateCurrentAvailability(availability);
             },

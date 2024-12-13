@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { subject_areas, mentors } from "../config/mongoCollections.js";
+import { subject_areas } from "../config/mongoCollections.js";
 import { checkStringParams } from "../helpers.js";
 
 export const createSubjectArea = async (name, description = "") => {
@@ -19,8 +19,7 @@ export const createSubjectArea = async (name, description = "") => {
 
         const result = await subjectAreasCollection.insertOne(newSubjectArea);
 
-        if (!result.acknowledged || !result.insertedId)
-            throw Error("Could not create the subject area.");
+        if (!result.acknowledged || !result.insertedId) throw Error("Could not create the subject area.");
 
         const newId = result.insertedId.toString();
 
@@ -58,9 +57,8 @@ export const getSubjectById = async (id) => {
 
     const subjectAreasCollection = await subject_areas();
 
-    const subject = await subjectAreasCollection.findOne({
-        _id: new ObjectId(id),
-    });
+    const subject = await subjectAreasCollection.findOne({ _id: new ObjectId(id) });
+    console.log(subject);
     if (!subject) {
         throw `Subject area with the id ${id} does not exist.`;
     }
@@ -96,17 +94,13 @@ export const removeSubjectArea = async (id) => {
 
     const subjectAreasCollection = await subject_areas();
 
-    const subject = await subjectAreasCollection.findOne({
-        _id: new ObjectId(id),
-    });
+    const subject = await subjectAreasCollection.findOne({ _id: new ObjectId(id) });
 
     if (!subject) {
         throw `Subject with the id ${id} does not exist.`;
     }
 
-    let result = await subjectAreasCollection.deleteOne({
-        _id: new ObjectId(id),
-    });
+    let result = await subjectAreasCollection.deleteOne({ _id: new ObjectId(id) });
     if (!result === 0) {
         throw `Subject with the id ${id} does not exist, Hence could not delete.`;
     }
@@ -148,34 +142,3 @@ export const updateSubjectArea = async (id, name, description) => {
 
     return result;
 };
-
-
-export const searchMentorsBySubjectId = async (id) => {
-    checkStringParams(id);
-    id = id.trim();
-
-    if (!ObjectId.isValid(id)) {
-        throw `${id} is not a valid ObjectID.`;
-    }
-
-    const subjectAreasCollection = await subject_areas();
-
-    const subject = await subjectAreasCollection.findOne({ _id: new ObjectId(id) });
-
-    if (!subject) {
-        throw `Subject with the id ${id} does not exist.`;
-    }
-
-    const mentorCollection = await mentors();
-
-    const mentorsWithSubject = await mentorCollection
-        .find({ subject_areas: { $elemMatch: { $eq: id } } })
-        .toArray();
-
-    if (!mentorsWithSubject || mentorsWithSubject.length === 0) {
-        return [];
-        // throw `No mentors found with the subject ID ${id}.`;
-    }
-
-    return mentorsWithSubject;
-}

@@ -26,7 +26,9 @@ router.post('/addRating', async (req, res) => {
   }
 });
 router.get('/getUserRatings/:userType/:userId/:reviewId', async (req, res) => {
+  console.log("Reached get call");
   const { userId, reviewId, userType } = req.params;
+  console.log(req.params);
   if (!userId || typeof userId !== 'string') {
     return res.status(400).json({ error: 'Invalid or missing userId' });
   }
@@ -45,6 +47,7 @@ router.get('/getUserRatings/:userType/:userId/:reviewId', async (req, res) => {
   }
 });
 router.delete('/deleteReview/:userType/:userId/:reviewId', async (req, res) => {
+  console.log("Reached delete call");
   const { userId, reviewId, userType } = req.params;
 
   if (!userId || typeof userId !== 'string') {

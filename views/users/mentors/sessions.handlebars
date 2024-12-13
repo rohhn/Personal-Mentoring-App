@@ -2,48 +2,21 @@
     <div class="row d-flex text-center">
         <h2>My sessions</h2>
     </div>
-    <div class="row pt-4 gy-2" id="sessions-list-div">
+    <div class="row pt-4 gy-2">
         {{#if sessions}}
             {{#each sessions}}
-                <div class="card text-bg-dark">
+                <div class="card">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div id="info">
-                                <div class="card-text"><strong>Mentee Name:</strong>
-                                    {{this.mentee_name}}</div>
-                                <div class="card-text"><strong>Subject Area:</strong>
-                                    {{this.subject_area}}</div>
-                                <div class="card-text"><strong>From:</strong>
-                                    {{#formatDateTime
-                                        this.start_time
-                                    }}{{/formatDateTime}}</div>
-                                <div class="card-text"><strong>To: </strong>
-                                    {{#formatDateTime
-                                        this.end_time
-                                    }}{{/formatDateTime}}</div>
-
-                                <div class="card-link"><strong>Meeting Link:
-                                    </strong>
-                                    <a href="{{this.meeting_link}}">Zoom Call</a></div>
-                            </div>
-                            <div id="btns" class="">
-
-                                {{#if (isNotEqual this.status "completed")}}
-                                    <button
-                                        class="btn btn-danger cancel-btn"
-                                        data-session-id="{{this._id}}"
-                                        data-mentor-id="{{this.mentor_id}}"
-                                        data-mentee-id="{{this.mentee_id}}"
-                                    >Cancel Session</button>
-                                {{else}}
-                                    <div
-                                        class="card-text fs-6 fw-lighter fst-italic"
-                                    >{{this.status}}
-                                    </div>
-                                {{/if}}
-                            </div>
-                        </div>
-
+                        <div class="card-text">Mentee Name:
+                            {{this.mentee_name}}</div>
+                        <div class="card-text">Subject Area:
+                            {{this.subject_area}}</div>
+                        <div class="card-text">Start Time:
+                            {{this.start_time}}</div>
+                        <div class="card-text">End Time: {{this.end_time}}</div>
+                        <div class="card-text">Status: {{this.status}}</div>
+                        <div class="card-text">Meeting Link:
+                            {{this.meeting_link}}</div>
                     </div>
                 </div>
             {{/each}}
@@ -51,5 +24,4 @@
             <p class="text-center fs-6 fw-lighter fst-italic">No sessions.</p>
         {{/if}}
     </div>
-
-{{> users/mentee-manage-sessions}}
+</main>
