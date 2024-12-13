@@ -371,7 +371,7 @@ export const addAvailability = async (
         });
         return response.data;
     } catch (error) {
-        console.error("Error adding availability:", error.message);
+        // console.error("Error adding availability:", error.message);
         throw error;
     }
 };
@@ -391,6 +391,8 @@ export const checkAvailability = async (calendarId, startTime, endTime) => {
 
     const busySlots = response.data.calendars[calendarId].busy;
 
+    console.log("busySlots: ",busySlots);
+
     const isAvailable = busySlots.length === 0;
     return isAvailable;
 };
@@ -409,6 +411,8 @@ export const bookSession = async (calendarId, subject, startTime, endTime) => {
             dateTime: endTime, // e.g., 2024-11-20T10:30:00Z
             timeZone: "UTC",
         },
+
+        recurrence: []
     };
 
     const response = await calendar.events.insert({
@@ -427,6 +431,9 @@ export const updateSessionOnCalendar = async (
     end_time
 ) => {
     const authClient = await getAuthClient();
+
+    console.log(start_time);
+    console.log(end_time);
 
     const updatedEvent = {
         start: {
@@ -470,7 +477,7 @@ export const deleteSessionFromCalendar = async (calendarId, eventId) => {
             message: `Event with ID ${eventId} successfully deleted.`,
         };
     } catch (error) {
-        console.error("Error deleting event from calendar:", error.message);
+        // console.error("Error deleting event from calendar:", error.message);
         throw new Error(
             `Could not delete the event with ID ${eventId} on the calendar.`
         );

@@ -164,7 +164,7 @@ body {
 
 .active-month {
   font-weight: 700;
-  color: #000; }
+  color: #cd4dcc; }
 
 .month:hover {
   color: #cd4dcc; }
@@ -172,7 +172,7 @@ body {
 /*  Dates table */
 .table-date {
   cursor: default;
-  color: #2b2b2b;
+  color: #f1f1f1;
   height: 26px;
   width: 26px;
   font-size: 15px;

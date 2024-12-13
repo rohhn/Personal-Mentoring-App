@@ -11,10 +11,14 @@ import constructorMethod from "./routes/index.js";
 import { loginMiddleware, makeHeaderOptions } from "./middleware/auth.js";
 import { privateRouteMiddleware, rootMiddleware } from "./middleware/root.js";
 import { allowMenteesOnly, allowMentorsOnly } from "./middleware/users.js";
+feature/admin
 import {
     adminDashboardMiddleware,
     adminLoginMiddleware,
 } from "./middleware/admin.js";
+import { adminLoginMiddleware } from "./middleware/admin.js";
+import moment from "moment";
+import { datacatalog } from "googleapis/build/src/apis/datacatalog/index.js";
 
 const rewriteUnsupportedBrowserMethods = (req, res, next) => {
     // If the user posts to the server with a property called _method, rewrite the request's method
@@ -44,6 +48,25 @@ const handlebarsInstance = exphbs.create({
         },
         isEqual: (a, b) => {
             return a === b;
+        },
+        isNotEqual: (a, b) => {
+            return a !== b;
+        },
+        formatDateTime: (datetime) => {
+            const dateTimeObj = moment(datetime);
+            if (dateTimeObj.isValid()) {
+                return dateTimeObj.format("MM-DD-YYYY hh:mm");
+            } else {
+                return datetime;
+            }
+        },
+        formatDate: (date) => {
+            const dateObj = moment(date);
+            if (dateObj.isValid()) {
+                return dateObj.format("MM-DD-YYYY");
+            } else {
+                return datetime;
+            }
         },
         partialsDir: ["views/partials/"],
     },
@@ -97,3 +120,4 @@ app.listen(3000, () => {
 // TODO: Forums front-end
 // TODO: Front-end for adding review and rating
 // TODO: middleware for checking mentor status
+// TODO: Front-end for adding review and rating

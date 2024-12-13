@@ -3,20 +3,54 @@
         <h2>My sessions</h2>
     </div>
     <div class="row pt-4 gy-2">
+    <div class="row pt-4 gy-2" id="sessions-list-div">
         {{#if sessions}}
             {{#each sessions}}
-                <div class="card">
+                <div class="card text-bg-dark">
                     <div class="card-body">
-                        <div class="card-text">Mentor Name:
-                            {{this.mentor_name}}</div>
-                        <div class="card-text">Subject Area:
-                            {{this.subject_area}}</div>
-                        <div class="card-text">Start Time:
-                            {{this.start_time}}</div>
-                        <div class="card-text">End Time: {{this.end_time}}</div>
-                        <div class="card-text">Status: {{this.status}}</div>
-                        <div class="card-text">Meeting Link:
-                            {{this.meeting_link}}</div>
+                        <div class="d-flex justify-content-between">
+                            <div id="info">
+                                <div class="card-text"><strong>Mentor Name:</strong>
+                                    {{this.mentor_name}}</div>
+                                <div class="card-text"><strong>Subject Area:</strong>
+                                    {{this.subject_area}}</div>
+                                <div class="card-text"><strong>From:</strong>
+                                    {{#formatDateTime
+                                        this.start_time
+                                    }}{{/formatDateTime}}</div>
+                                <div class="card-text"><strong>To: </strong>
+                                    {{#formatDateTime
+                                        this.end_time
+                                    }}{{/formatDateTime}}</div>
+
+                                <div class="card-link"><strong>Meeting Link:
+                                    </strong>
+                                    <a href="{{this.meeting_link}}">Zoom Call</a></div>
+                            </div>
+                            <div id="btns" class="">
+
+                                {{#if (isNotEqual this.status "completed")}}
+                                    <button
+                                        class="btn btn-success reschedule-btn"
+                                        data-session-id="{{this._id}}"
+                                        data-mentor-id="{{this.mentor_id}}"
+                                        data-mentee-id="{{this.mentee_id}}"
+                                    >Reschedule</button>
+                                    <button
+                                        class="btn btn-danger cancel-btn"
+                                        data-session-id="{{this._id}}"
+                                        data-mentor-id="{{this.mentor_id}}"
+                                        data-mentee-id="{{this.mentee_id}}"
+                                    >Cancel</button>
+                                {{else}}
+                                    <div
+                                        class="card-text fs-6 fw-lighter fst-italic"
+                                    >{{this.status}}
+                                    </div>
+                                {{/if}}
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             {{/each}}
@@ -24,4 +58,110 @@
             <p class="text-center fs-6 fw-lighter fst-italic">No sessions.</p>
         {{/if}}
     </div>
+
+    <div
+        class="modal fade"
+        id="rescheduleModal"
+        tabindex="-1"
+        aria-labelledby="modal-header-label"
+        aria-hidden="true"
+    >
+        <div class="modal-dialog modal-fullscreen modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header text-bg-dark">
+                    <h1
+                        class="modal-title fs-5"
+                        id="modal-header-label"
+                    >Reschedule your session!</h1>
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                    ></button>
+                </div>
+                <div class="modal-body text-bg-dark" id="resch-modal-body">
+                    <div class="row row-cols-2 mt-4">
+                        <div class="col-sm-12 col-md-4">
+                            <div class="content">
+                                <div class="calendar">
+                                    <div
+                                        id="year-header"
+                                        class="d-flex bg-primary p-2 text-center justify-content-between"
+                                    >
+                                        <span class="" id="prev"><i
+                                                class="fa-solid fa-chevron-left"
+                                            ></i></span>
+                                        <span class="year" id="label"></span>
+                                        <span class="" id="next"><i
+                                                class="fa-solid fa-chevron-right"
+                                            ></i></span>
+                                    </div>
+                                    <table
+                                        id="months-table"
+                                        class="w-100 text-center my-1 bg-text-dark"
+                                    >
+                                        <tbody>
+                                            <tr class="months-row">
+                                                <td class="month">Jan</td>
+                                                <td class="month">Feb</td>
+                                                <td class="month">Mar</td>
+                                                <td class="month">Apr</td>
+                                                <td class="month">May</td>
+                                                <td class="month">Jun</td>
+                                                <td class="month">Jul</td>
+                                                <td class="month">Aug</td>
+                                                <td class="month">Sep</td>
+                                                <td class="month">Oct</td>
+                                                <td class="month">Nov</td>
+                                                <td class="month">Dec</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <table
+                                        id="days-table"
+                                        class="text-center my-1 w-100"
+                                    >
+                                        <td class="day">Sun</td>
+                                        <td class="day">Mon</td>
+                                        <td class="day">Tue</td>
+                                        <td class="day">Wed</td>
+                                        <td class="day">Thu</td>
+                                        <td class="day">Fri</td>
+                                        <td class="day">Sat</td>
+                                    </table>
+                                    <div class="frame">
+                                        <table class="text-center my-1 w-100">
+                                            <tbody class="tbody">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-md-8">
+                            <div id="mentor-deets" hidden>
+                                <p>Name:
+                                    {{mentorInfo.first_name}}
+                                    {{mentorInfo.last_name}}</p>
+                                <p>Summary: {{mentorInfo.summary}}</p>
+                            </div>
+                            <div id="availability-div">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer text-bg-dark">
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal"
+                    >Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </main>
+
+{{> users/mentee-manage-sessions}}
