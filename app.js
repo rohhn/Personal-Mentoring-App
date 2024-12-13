@@ -11,11 +11,6 @@ import constructorMethod from "./routes/index.js";
 import { loginMiddleware, makeHeaderOptions } from "./middleware/auth.js";
 import { privateRouteMiddleware, rootMiddleware } from "./middleware/root.js";
 import { allowMenteesOnly, allowMentorsOnly } from "./middleware/users.js";
-feature/admin
-import {
-    adminDashboardMiddleware,
-    adminLoginMiddleware,
-} from "./middleware/admin.js";
 import { adminLoginMiddleware } from "./middleware/admin.js";
 import moment from "moment";
 import { datacatalog } from "googleapis/build/src/apis/datacatalog/index.js";
@@ -93,14 +88,10 @@ app.use(rewriteUnsupportedBrowserMethods);
 // middleware
 app.use(makeHeaderOptions);
 app.use("/dashboard", privateRouteMiddleware);
-app.use("/dashboard", adminDashboardMiddleware);
-
 app.use("/login", loginMiddleware);
 app.use("/signup", loginMiddleware);
-
 app.use("/admin/login", adminLoginMiddleware);
 app.use("/admin/signup", adminLoginMiddleware);
-
 app.use("/sessions/*", privateRouteMiddleware);
 app.use("/mentor/availability/*", privateRouteMiddleware);
 app.use("/sessions/booking/*", allowMenteesOnly);
@@ -117,7 +108,4 @@ app.listen(3000, () => {
 
 // TODO: edit mentor profile
 // TODO: Admin interface
-// TODO: Forums front-end
-// TODO: Front-end for adding review and rating
-// TODO: middleware for checking mentor status
 // TODO: Front-end for adding review and rating
