@@ -104,7 +104,6 @@
         // $("#dialog").hide(250);
         $(".active-date").removeClass("active-date");
         $(this).addClass("active-date");
-        console.log(event.data);
         // show_events(event.data.events, event.data.month, event.data.day);
     }
 

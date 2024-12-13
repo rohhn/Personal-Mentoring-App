@@ -1,15 +1,29 @@
 (function ($) {
-    // reference
-    // https://colorlib.com/wp/template/calendar-04/
-
-    "use strict";
-
-    // Setup the calendar with the current date
     $(document).ready(function () {
-        var date = new Date();
-        var today = date.getDate();
+        $(".reschedule-btn").each(function () {
+            $(this).on(
+                "click",
+                // { session_id: window.location.href.split("/").slice(-1) },
+                openRescheduler
+            );
+        });
 
-        // Set click handlers for DOM elements
+        $(".cancel-btn").each(function () {
+            $(this).on(
+                "click",
+                { session_id: window.location.href.split("/").slice(-1) },
+                handleCancelSession
+            );
+        });
+    });
+
+    function openRescheduler(event) {
+        // console.log(event.data); // passed with "on" bind
+        // console.log(event.target.dataset); // passed from HTML data attrs
+        const rescheduleModalObj = new bootstrap.Modal("#rescheduleModal");
+        const rescheduleModalEle = $("#rescheduleModal");
+
+        let date = new Date();
         $("#next").click({ date: date }, next_year);
         $("#prev").click({ date: date }, prev_year);
         $(".month").click({ date: date }, month_click);
@@ -20,71 +34,30 @@
             .eq(date.getMonth())
             .addClass("active-month");
 
-        init_calendar(date);
-    });
+        init_calendar(date, event.target.dataset);
 
-    // Initialize the calendar by appending the HTML dates
-    function init_calendar(date) {
-        $(".tbody").empty();
-
-        var calendar_days = $(".tbody");
-        var month = date.getMonth();
-        var year = date.getFullYear();
-        var day_count = days_in_month(month, year);
-        var row = $("<tr class='table-row'></tr>");
-        var today = date.getDate();
-        // Set date to 1 to find the first day of the month
-        date.setDate(1);
-        var first_day = date.getDay();
-        // 35+firstDay is the number of date elements to be added to the dates table
-        // 35 is from (7 days in a week) * (up to 5 rows of dates in a month)
-        for (var i = 0; i < 35 + first_day; i++) {
-            // Since some of the elements will be blank,
-            // need to calculate actual date from index
-            var date = i - first_day + 1;
-            // If it is a sunday, make a new row
-            if (i % 7 === 0) {
-                calendar_days.append(row);
-                row = $("<tr class='table-row'></tr>");
-            }
-            // if current index isn't a day in this month, make it blank
-            if (i < first_day || date > day_count) {
-                var curr_date = $("<td class='table-date nil'>" + "</td>");
-                row.append(curr_date);
-            } else {
-                var curr_date = $(`<td class='table-date'> ${date}</td>`);
-
-                // curr_date.data("mentorId", mentorId);
-
-                if (today === date && $(".active-date").length === 0) {
-                    curr_date.addClass("active-date");
-                }
-
-                // Set onClick handler for clicking a date
-                curr_date.click(
-                    {
-                        month: month,
-                        date: date,
-                        year: year,
-                    },
-                    date_click
-                );
-                row.append(curr_date);
-            }
-        }
-        // Append the last row and set the current year
-        calendar_days.append(row);
-        $(".year").text(year);
+        rescheduleModalObj.show();
     }
 
-    // Get the number of days in a given month/year
-    function days_in_month(month, year) {
-        var monthStart = new Date(year, month, 1);
-        var monthEnd = new Date(year, month + 1, 1);
-        return (monthEnd - monthStart) / (1000 * 60 * 60 * 24);
+    function handleCancelSession(event) {
+        // console.log(event.data);
+        const apiUrl = `${window.location.origin}/sessions/${event.target.dataset.sessionId}`;
+        $.ajax({
+            type: "DELETE",
+            url: apiUrl,
+            success: (response) => {
+                window.location.href = `${window.location.origin}/dashboard`;
+            },
+            error: (XMLHttpRequest, textStatus, errorThrown) => {
+                console.error("XMLHttpRequest", XMLHttpRequest);
+                console.error("textStatus", textStatus);
+                console.error("errorThrown", errorThrown);
+                alert(XMLHttpRequest.responseJSON.error || errorThrown);
+            },
+        });
     }
 
-    function makeBookingForm(response, selectedDate) {
+    function makeBookingForm(response, eventData) {
         // show the booking form
         // {
         //     "mentor_id": "mentor_id",
@@ -95,30 +68,8 @@
         // }
 
         const bookingForm = $(
-            `<form name="make-session" id="make-session-form" method="POST" action"/sessions"></form>`
+            `<form name="make-session" id="make-session-form"></form>`
         );
-        const subjectAreaOptions = $.map(
-            response.subject_areas,
-            function (element) {
-                return `<option value="${element._id}">${element.name}</option>`;
-            }
-        );
-
-        const subjectAreaInput = $(`<div class="form-group mb-2">
-                    <div class="col-sm-3">
-                        <h6 class="mb-0">Subject Area</h6>
-                    </div>
-                    <div class="col-sm-9 text-secondary">
-                        <select
-                            class="form-control"
-                            name="subject_area"
-                            id="subject-area-select"
-                        >
-                            ${subjectAreaOptions.join("\n")}
-                        </select>
-                    </div>
-                </div>`);
-        bookingForm.append(subjectAreaInput);
 
         const fromTimeInput = $(`<div class="row form-group mb-2">
                     <div class="col-sm-3">
@@ -150,10 +101,6 @@
                 </div>`);
         bookingForm.append(toTimeInput);
 
-        bookingForm.append(
-            `<input type='text' name='mentor_id' value='${mentorId}' hidden>`
-        );
-
         const submitBtn = $(
             `<button id="make-session-submit" class="btn btn-primary form-control mt-4" type="submit">Book</button>`
         );
@@ -161,15 +108,15 @@
         // submitBtn.click(handleBookSession);
         bookingForm.append(submitBtn);
 
-        bookingForm.on("submit", selectedDate, handleBookSession);
+        bookingForm.on("submit", eventData, handleRescheduleSession);
 
         return bookingForm;
     }
 
-    function bookSession(payload) {
-        const apiUrl = `${window.location.origin}/sessions`;
+    function rescheduleSession(sessionId, payload) {
+        const apiUrl = `${window.location.origin}/sessions/${sessionId}`;
         $.ajax({
-            type: "POST",
+            type: "PUT",
             url: apiUrl,
             data: JSON.stringify(payload),
             contentType: "application/json",
@@ -180,22 +127,16 @@
                 console.error("XMLHttpRequest", XMLHttpRequest);
                 console.error("textStatus", textStatus);
                 console.error("errorThrown", errorThrown);
-                alert(XMLHttpRequest.responseJSON.error || errorThrown );
+                alert(XMLHttpRequest.responseJSON.error || errorThrown);
             },
         });
     }
 
-    function handleBookSession(event) {
+    function handleRescheduleSession(event) {
         event.preventDefault();
         const { year, date, month } = event.data;
 
         const formContraints = {
-            subject_area: {
-                presence: {
-                    allowEmpty: false,
-                },
-                type: "string",
-            },
             start_time: {
                 presence: {
                     allowEmpty: false,
@@ -213,12 +154,6 @@
                 format: {
                     pattern: /\d{2}:\d{2}/,
                 },
-            },
-            mentor_id: {
-                presence: {
-                    allowEmpty: false,
-                },
-                type: "string",
             },
         };
 
@@ -263,16 +198,16 @@
             minute: endMin,
         }).toISOString({ keepOffset: true });
 
-        bookSession(formValues);
+        rescheduleSession(event.data.dataset.sessionId, formValues);
     }
 
-    function updateAvailabilityDiv(selectedDate, response) {
+    function updateAvailabilityDiv(eventData, response) {
         let dayAvl = [];
         if (response.availability) {
             dayAvl = response.availability.filter(
                 (avlInfo) =>
                     avlInfo.day.toLowerCase() ===
-                    selectedDate.selectedDay.toLowerCase()
+                    eventData.selectedDay.toLowerCase()
             );
         }
 
@@ -289,7 +224,7 @@
                 <p class="fs-6 ">To: ${dayAvl.end_time}</p>`
             );
             if (response.subject_areas) {
-                avlDiv.append(makeBookingForm(response, selectedDate));
+                avlDiv.append(makeBookingForm(response, eventData));
             } else {
                 avlDiv.append(
                     `<p class="fs-6 text-danger">Cannot book sessions with this mentor.</p>`
@@ -302,17 +237,18 @@
         }
     }
 
-    // Event handler for when a date is clicked
     function date_click(event) {
-        // $(".events-container").show(250);
-        // $("#dialog").hide(250);
         $(".active-date").removeClass("active-date");
         $(this).addClass("active-date");
 
-        const dateObj = moment(event.data);
+        const dateObj = moment({
+            year: event.data.year,
+            month: event.data.month,
+            date: event.data.date,
+        });
         const selectedDay = daysOfWeek[dateObj.day()];
 
-        const apiUrl = `${window.location.origin}/mentor/${mentorId}?api=true`;
+        const apiUrl = `${window.location.origin}/mentor/${event.data.dataset.mentorId}?api=true`;
 
         $.ajax({
             type: "GET",
@@ -327,6 +263,68 @@
                 console.error("errorThrown", errorThrown);
             },
         });
+    }
+
+    // Initialize the calendar by appending the HTML dates
+    function init_calendar(date, dataset) {
+        $(".tbody").empty();
+
+        var calendar_days = $(".tbody");
+        var month = date.getMonth();
+        var year = date.getFullYear();
+        var day_count = days_in_month(month, year);
+        var row = $("<tr class='table-row'></tr>");
+        var today = date.getDate();
+        // Set date to 1 to find the first day of the month
+        date.setDate(1);
+        var first_day = date.getDay();
+        // 35+firstDay is the number of date elements to be added to the dates table
+        // 35 is from (7 days in a week) * (up to 5 rows of dates in a month)
+        for (var i = 0; i < 35 + first_day; i++) {
+            // Since some of the elements will be blank,
+            // need to calculate actual date from index
+            var date = i - first_day + 1;
+            // If it is a sunday, make a new row
+            if (i % 7 === 0) {
+                calendar_days.append(row);
+                row = $("<tr class='table-row'></tr>");
+            }
+            // if current index isn't a day in this month, make it blank
+            if (i < first_day || date > day_count) {
+                var curr_date = $("<td class='table-date nil'>" + "</td>");
+                row.append(curr_date);
+            } else {
+                var curr_date = $(`<td class='table-date'> ${date}</td>`);
+
+                // curr_date.data("mentorId", mentorId);
+
+                if (today === date && $(".active-date").length === 0) {
+                    curr_date.addClass("active-date");
+                }
+
+                // Set onClick handler for clicking a date
+                curr_date.click(
+                    {
+                        month: month,
+                        date: date,
+                        year: year,
+                        dataset,
+                    },
+                    date_click
+                );
+                row.append(curr_date);
+            }
+        }
+        // Append the last row and set the current year
+        calendar_days.append(row);
+        $(".year").text(year);
+    }
+
+    // Get the number of days in a given month/year
+    function days_in_month(month, year) {
+        var monthStart = new Date(year, month, 1);
+        var monthEnd = new Date(year, month + 1, 1);
+        return (monthEnd - monthStart) / (1000 * 60 * 60 * 24);
     }
 
     // Event handler for when a month is clicked
@@ -360,31 +358,6 @@
         date.setFullYear(new_year);
         init_calendar(date);
     }
-
-    function getMentorAvailability(dayOfWeek) {
-        const apiUrl = `${window.location.origin}/mentor/${mentorId}?api=true`;
-
-        $.ajax({
-            type: "GET",
-            url: apiUrl,
-            contentType: "application/json",
-            success: (response) => {
-                const availability = response.availability;
-                const dayAvl = availability.filter(
-                    (avlInfo) =>
-                        avlInfo.day.toLowerCase() === dayOfWeek.toLowerCase()
-                );
-                return dayAvl;
-            },
-            error: (XMLHttpRequest, textStatus, errorThrown) => {
-                console.error("XMLHttpRequest", XMLHttpRequest);
-                console.error("textStatus", textStatus);
-                console.error("errorThrown", errorThrown);
-            },
-        });
-    }
-
-    var mentorId = window.location.pathname.split("/").slice(-1);
 
     const months = [
         "January",

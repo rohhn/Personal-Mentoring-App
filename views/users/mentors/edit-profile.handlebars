@@ -1,12 +1,11 @@
-{{> users/edit_mentor_profile }}
 <main class="container my-5">
     <div class="main-body">
         <div class="row gutters-sm">
             <div class="col-12">
-                <div class="card mb-3">
+                <div class="card mb-3 text-bg-dark">
                     <div class="card-body">
-                        <form id="update-user-form" method="POST">
-                            <div class="row form-group mb-4" hidden>
+                        <form id="update-user-form" method="POST" data-user-id="{{profileInfo._id}}">
+                            <div class="row form-group mb-4">
                                 <div class="d-flex justify-content-center" style="cursor: pointer;">
                                     <input
                                         id="profile-image-input"
@@ -17,12 +16,13 @@
                                         class="form-control visually-hidden"
                                     />
                                     <label for="profile-image-input" class="justify-content-center">
-                                        {{#if profileInfo.profile_img}}
+                                        {{#if profileInfo.profile_image}}
                                             <img
-                                                src="{{profileInfo.profile_img}}"
+                                                src="{{profileInfo.profile_image}}"
                                                 alt="{{profileInfo.first_name}}"
-                                                class="rounded-circle"
-                                                width="150"
+                                                class="rounded-circle mx-auto d-block"
+                                                width="96"
+                                                height="96"
                                             />
                                         {{else}}
                                             {{! <svg xmlns="http://www.w3.org/2000/svg" width="100" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#003c8a" d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z"/></svg> }}
@@ -97,36 +97,11 @@
                                     <div class="col-sm-3">
                                         <h6 class="mb-0">Education</h6>
                                     </div>
-                                    {{#each profileInfo.education}}
-                                    <div class="col-sm-9 text-secondary">
-                                            <label>Degree:
-                                                <input
-                                                class="form-control"
-                                                type="text"
-                                                name="education_{{@index}}_degree"
-                                                value="{{degree}}"
-                                            />
-                                            </label>
-                                            <label>
-                                                Institution:
-                                                <input
-                                                class="form-control"
-                                                type="text"
-                                                name="education_{{@index}}_institution"
-                                                value="{{institution}}"
-                                            />
-                                            </label>
-                                            <label>
-                                                Year:<input
-                                                class="form-control"
-                                                type="number"
-                                                name="education_{{@index}}_year"
-                                                value="{{year}}"
-                                            />
-                                            </label>
-                                            <hr/>
+                                    <div id="education-div" class="col-sm-9 text-secondary"></div>
+                                    <div class="d-flex justify-content-end">
+                                        <button class="btn btn-success btn-sm" type="button" data-action="add-education"><i class="fa-solid fa-plus fa-sm me-2" style="color: #ffffff;"></i>Add</button>
                                     </div>
-                                    {{/each}}
+                                    
                                 </div>
                                 <hr />
 
@@ -134,36 +109,10 @@
                                     <div class="col-sm-3">
                                         <h6 class="mb-0">Experience</h6>
                                     </div>
-                                    {{#each profileInfo.experience}}
-                                    <div class="col-sm-9 text-secondary">
-                                            <label>Title:
-                                                <input
-                                                class="form-control"
-                                                type="text"
-                                                name="education_{{@index}}_title"
-                                                value="{{title}}"
-                                            />
-                                            </label>
-                                            <label>
-                                                Institution:
-                                                <input
-                                                class="form-control"
-                                                type="text"
-                                                name="education_{{@index}}_institution"
-                                                value="{{institution}}"
-                                            />
-                                            </label>
-                                            <label>
-                                                Years of experience:<input
-                                                class="form-control"
-                                                type="number"
-                                                name="education_{{@index}}_years"
-                                                value="{{years}}"
-                                            />
-                                            </label>
-                                            <hr/>
+                                    <div id="experience-div" class="col-sm-9 text-secondary"></div>
+                                    <div class="d-flex justify-content-end">
+                                        <button class="btn btn-success btn-sm" type="button" data-action="add-experience"><i class="fa-solid fa-plus fa-sm me-2" style="color: #ffffff;"></i>Add</button>
                                     </div>
-                                    {{/each}}
                                 </div>
                                 <hr />
                             <div class="row form-group">
@@ -176,12 +125,15 @@
                                         {{#each profileInfo.subject_areas}}
                                             <li
                                                 class="list-group-item border-0 p-1 px-2 me-2 badge rounded-pill text-bg-info"
-                                                data-subject-area="{{_id}}"
-                                            >{{this}}<button
+                                                data-subject-name="{{name}}" data-subject-id="{{_id}}" id="subject-li-{{@index}}"
+                                            >{{name}}<button
                                                     class="btn-close btn-sm ms-1 remove-subject-btn"
                                                     type="button"
                                                     aria-label="close"
                                                     data-action="remove-subject"
+                                                    data-subject-li="subject-li-{{@index}}"
+                                                    data-subject-id="{{_id}}"
+                                                    data-subject-name="{{name}}"
                                                 ></button>
                                             </li>
                                         {{/each}}
@@ -194,7 +146,13 @@
                                             aria-label="Add Subject Area"
                                             aria-describedby="basic-addon2"
                                             id="new-subject-input"
+                                            list="subject-area-list"
                                         />
+                                        <datalist id="subject-area-list">
+                                            {{#each allSubjectAreas}}
+                                            <option value="{{name}}"/>
+                                            {{/each}}
+                                        </datalist>
                                         <button
                                             id="basic-addon2"
                                             class="input-group-text btn btn-success btn-sm add-subject-btn"
@@ -219,3 +177,6 @@
 
     </div>
 </main>
+
+{{!-- {{> users/edit_mentor_profile }} --}}
+{{> users/edit-mentor-profile user_id=profileInfo._id}}
