@@ -30,7 +30,7 @@ router
 
             res.render("forum/forum", {
                 subject_id: req.params.subject_id,
-                title: forum.title,
+                subject: forum.title,
                 posts: forum.posts || [],
                 replies: forum.posts.replies || [],
             });
