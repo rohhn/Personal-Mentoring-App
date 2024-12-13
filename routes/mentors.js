@@ -202,12 +202,9 @@ router
         try {
             checkStringParams(updatedMentor.first_name);
             checkStringParams(updatedMentor.last_name);
-            checkDate(updatedMentor.dob);
-            await checkEmail(updatedMentor.email, "mentor");
-            checkStringParams(updatedMentor.pwd_hash);
+            checkEmail(updatedMentor.email, "mentor");
             checkStringParams(updatedMentor.profile_image);
             checkStringParams(updatedMentor.summary);
-            checkBoolean(updatedMentor.approved);
             updatedMentor.education = checkEducation(updatedMentor.education);
             updatedMentor.experience = checkExperience(
                 updatedMentor.experience
@@ -215,25 +212,23 @@ router
             updatedMentor.subject_areas = checkArrayOfStrings(
                 updatedMentor.subject_areas
             );
-            // updatedMentor.availability = checkAvailability(updatedMentor.availability);
         } catch (e) {
             // console.log(e);
             return res.status(400).json({ error: e });
         }
+
+        console.log(updatedMentor);
 
         try {
             let mentorCreate = await mentorData.updateMentor(
                 mentorId,
                 updatedMentor.first_name,
                 updatedMentor.last_name,
-                updatedMentor.dob,
-                updatedMentor.pwd_hash,
                 updatedMentor.profile_image,
                 updatedMentor.summary,
+                updatedMentor.email,
                 updatedMentor.education,
                 updatedMentor.experience,
-                updatedMentor.availability,
-                updatedMentor.approved,
                 updatedMentor.subject_areas
             );
 

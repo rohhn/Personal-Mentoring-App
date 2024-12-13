@@ -105,12 +105,6 @@ export const checkDate = (inputDate) => {
 
     let date = new Date(year, month - 1, day);
 
-    // console.log(date);
-
-    // console.log(day);
-    // console.log(month - 1);
-    // console.log(year);
-
     if (
         date.getFullYear() !== year ||
         date.getMonth() !== month - 1 ||
@@ -237,7 +231,6 @@ export const validateAvailability = (availability) => {
     ];
 
     let keys = Object.keys(availability);
-    // console.log(keys);
     for (let i in availability.av) {
         if (
             !Object.keys(availability[i]).includes("day") ||
@@ -390,9 +383,6 @@ export const checkAvailability = async (calendarId, startTime, endTime) => {
     });
 
     const busySlots = response.data.calendars[calendarId].busy;
-
-    console.log("busySlots: ",busySlots);
-
     const isAvailable = busySlots.length === 0;
     return isAvailable;
 };
@@ -431,9 +421,6 @@ export const updateSessionOnCalendar = async (
     end_time
 ) => {
     const authClient = await getAuthClient();
-
-    console.log(start_time);
-    console.log(end_time);
 
     const updatedEvent = {
         start: {

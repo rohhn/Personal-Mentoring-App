@@ -212,14 +212,11 @@ export const updateMentor = async (
     id,
     first_name,
     last_name,
-    dob,
-    pwd_hash,
     profile_image,
     summary,
+    email,
     education,
     experience,
-    availability,
-    approved,
     subject_areas
 ) => {
     checkStringParams(id, "id");
@@ -232,35 +229,44 @@ export const updateMentor = async (
 
     checkStringParams(first_name);
     checkStringParams(last_name);
-    checkDate(dob.trim());
-    await checkEmail(email, "mentor");
-
-    // checkStringParams(pwd_hash);
-    // checkStringParams(profile_image);
-    // checkStringParams(summary);
-    // checkBoolean(approved);
-    // education = checkEducation(education);
-    // experience = checkExperience(experience);
-    // subject_areas = checkArrayOfStrings(subject_areas);
+    checkEmail(email, "mentor"); 
+    checkStringParams(summary);
+    education = checkEducation(education);
+    experience = checkExperience(experience);
+    subject_areas = checkArrayOfStrings(subject_areas);
 
     first_name = first_name.trim();
     last_name = last_name.trim();
-    dob = new Date(dob.trim());
-    pwd_hash = pwd_hash.trim();
     profile_image = profile_image.trim();
     summary = summary.trim();
+
+    let subject_areas_arr = []
+
+    let mentor = await getMentorById(id);
+
+    subject_areas_arr = mentor.subject_areas;
+
+    for( let i = 0; i< subject_areas.length; i++){
+        let subject = await subjectData.getSubjectByName(subject_areas[i]);
+
+        let subjectId = subject._id.toString();
+
+
+        if (!subject_areas_arr.includes(subjectId)) {
+            // throw `You already have the subject area.`;
+            subject_areas_arr.push(subjectId);
+        }
+    }
 
     let mentorUpdate = {
         first_name: first_name,
         last_name: last_name,
-        dob: dob,
-        pwd_hash: pwd_hash,
         profile_image: profile_image,
+        email: email,
         summary: summary,
         education: education,
         experience: experience,
-        approved: approved,
-        subject_areas: subject_areas,
+        subject_areas: subject_areas_arr
     };
 
     const mentorCollection = await mentors();
@@ -419,9 +425,9 @@ export const updateSubjectAreaToMentorByName = async (id, subjectName) => {
     id = id.trim();
     subjectName = subjectName.trim();
 
-    if (!ObjectId.isValid(subjectId)) {
-        throw `${subjectId} is not a valid ObjectID.`;
-    }
+    // if (!ObjectId.isValid(subjectId)) {
+    //     throw `${subjectId} is not a valid ObjectID.`;
+    // }
 
     let mentor = await getMentorById(id);
 
@@ -431,11 +437,10 @@ export const updateSubjectAreaToMentorByName = async (id, subjectName) => {
 
     let subject_areas = mentor.subject_areas;
 
-    if (subject_areas.includes(subjectId)) {
-        throw `You already have the subject area.`;
+    if (!subject_areas.includes(subjectId)) {
+        // throw `You already have the subject area.`;
+        subject_areas.push(subjectId);
     }
-
-    subject_areas.push(subjectId);
 
     let updateDoc = {
         subject_areas: subject_areas,
