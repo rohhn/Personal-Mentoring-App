@@ -1,9 +1,6 @@
 // You can add and export any helper functions you want here - if you aren't using any, then you can just leave this file as is
-import fs from "fs";
-import { google } from "googleapis";
-import path from "path";
-import { mentees, mentors } from "./config/mongoCollections.js";
 import dotenv from "dotenv";
+import { google } from "googleapis";
 import moment from "moment";
 dotenv.config();
 
@@ -35,11 +32,13 @@ export const formatDate = (dateStr) => {
 };
 
 export function validateRating(rating) {
+    const numRating = Number(rating);
     if (
-        typeof rating !== "number" ||
-        rating < 1 ||
-        rating > 5 ||
-        rating % 1 !== 0
+        typeof numRating !== "number" ||
+        numRating < 1 ||
+        numRating > 5 ||
+        numRating % 1 !== 0 ||
+        isNaN(numRating)
     ) {
         throw new Error("Rating must be a whole number between 1 and 5");
     }
