@@ -15,6 +15,7 @@ import { mentorData, subjectData } from "../data/index.js";
 import { error } from "console";
 import { constrainedMemory } from "process";
 import { fileUpload } from "../middleware/common.js";
+import { extractProfileImage } from "../helpers/common.js";
 
 const router = express.Router();
 
@@ -199,6 +200,8 @@ router
 
         const updatedMentor = req.body;
 
+        
+
         try {
             checkStringParams(updatedMentor.first_name, "firstname");
             checkStringParams(updatedMentor.last_name, "lastname");
@@ -220,14 +223,16 @@ router
             return res.status(400).json({ error: e });
         }
 
-        console.log(updatedMentor);
+        // console.log(updatedMentor);
+
+        let profileImageBase64 = extractProfileImage(req);
 
         try {
             let mentorCreate = await mentorData.updateMentor(
                 mentorId,
                 updatedMentor.first_name,
                 updatedMentor.last_name,
-                updatedMentor.profile_image,
+                profileImageBase64,
                 updatedMentor.summary,
                 updatedMentor.email,
                 updatedMentor.education,

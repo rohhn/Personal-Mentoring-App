@@ -212,7 +212,7 @@ export const updateMentor = async (
     id,
     first_name,
     last_name,
-    profile_image,
+    profileImageBase64 = null,
     summary,
     email,
     education,
@@ -256,30 +256,21 @@ export const updateMentor = async (
         newSubjects.push(subject._id.toString());
     }
 
-    // console.log(newSubjects);
-
-    // for( let i = 0; i< subject_areas_arr.length; i++){
-
-    // }
-
-    // for( let i = 0; i< subject_areas.length; i++){
-    //     let subject = await subjectData.getSubjectByName(subject_areas[i]);
-
-    //     let subjectId = subject._id.toString();
-
-    //     await updateSubjectAreaToMentor(id, subjectId);
-    // }
+   
 
     let mentorUpdate = {
         first_name: first_name,
         last_name: last_name,
-        profile_image: profile_image,
         email: email,
         summary: summary,
         education: education,
         experience: experience,
         subject_areas: newSubjects
     };
+
+    if (profileImageBase64) {
+        mentorUpdate.profile_image = profileImageBase64;
+    }
 
     // const mentorCollection = await mentors();
 
