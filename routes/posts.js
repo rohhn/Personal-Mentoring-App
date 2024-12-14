@@ -2,18 +2,30 @@ import express from "express";
 import * as postData from "../data/posts.js";
 import * as repliesData from "../data/replies.js";
 import * as adminData from "../data/admin.js";
-
+import * as subjectData from "../data/subject_areas.js";
 
 const router = express.Router();
 
+router.route("/").get(async (req, res) => {
+    if (!req.session || (!req.session.user && !req.session.admin)) {
+        return res.redirect("/login");
+    }
+
+    const subjectAreas = await subjectData.getAllSubjectAreas();
+
+    return res.render("forum/landing", {
+        headerOptions: req.headerOptions,
+        pageTitle: "Forums",
+        subjectAreas,
+    });
+});
 
 router
     .route("/:subject_id")
     .get(async (req, res) => {
-        if (!req.session || !req.session.user && !req.session.admin) {
+        if (!req.session || (!req.session.user && !req.session.admin)) {
             return res.redirect("/login");
         }
-
 
         try {
             let forum = await postData.getForums(req.params.subject_id);
@@ -22,13 +34,15 @@ router
                 if (post.replies && Array.isArray(post.replies)) {
                     post.replies.forEach((reply) => {
                         if (!reply.replyAuthorName) {
-                            reply.replyAuthorName = reply.replyAuthorName || "Unknown Author";
+                            reply.replyAuthorName =
+                                reply.replyAuthorName || "Unknown Author";
                         }
                     });
                 }
             });
 
             res.render("forum/forum", {
+                headerOptions: req.headerOptions,
                 subject_id: req.params.subject_id,
                 subject: forum.title,
                 posts: forum.posts || [],
@@ -36,8 +50,10 @@ router
             });
         } catch (e) {
             res.status(500).render("error", {
+                headerOptions: req.headerOptions,
                 errorTitle: "Internal Server Error",
-                errorMessage: e || "Something went wrong while fetching the forum.",
+                errorMessage:
+                    e || "Something went wrong while fetching the forum.",
             });
         }
     })
@@ -46,10 +62,10 @@ router
         let { title, content, authorName } = req.body;
 
         if (!req.session) {
-            return res.redirect('/login');
+            return res.redirect("/login");
         }
         let userId;
-        let sessionAuthorName
+        let sessionAuthorName;
         if (req.session.admin) {
             userId = req.session.admin._id;
             sessionAuthorName = req.session.admin.firstName;
@@ -60,6 +76,7 @@ router
 
         if (!userId) {
             return res.status(401).render("error", {
+                headerOptions: req.headerOptions,
                 errorTitle: "Unauthorized",
                 errorMessage: "You must be logged in to create a post.",
             });
@@ -71,8 +88,10 @@ router
 
         if (!title || !content || !authorName) {
             return res.status(400).render("error", {
+                headerOptions: req.headerOptions,
                 errorTitle: "Bad Request",
-                errorMessage: "Missing required fields: title, content, or authorName.",
+                errorMessage:
+                    "Missing required fields: title, content, or authorName.",
             });
         }
 
@@ -92,6 +111,7 @@ router
             let forum = await postData.getForums(req.params.subject_id);
 
             return res.render("forum/forum", {
+                headerOptions: req.headerOptions,
                 subject_id: req.params.subject_id,
                 authorName: forum.authorName,
                 title: forum.title,
@@ -101,29 +121,32 @@ router
             console.error("Error while creating a post:", e || e);
             if (e.code === 11000) {
                 return res.status(409).render("error", {
+                    headerOptions: req.headerOptions,
                     errorTitle: "Duplicate Key Error",
-                    errorMessage: e || "A post with the same title already exists.",
+                    errorMessage:
+                        e || "A post with the same title already exists.",
                 });
             } else {
                 return res.status(500).render("error", {
+                    headerOptions: req.headerOptions,
                     errorTitle: "Internal Server Error",
-                    errorMessage: e || "An error occurred while creating the post.",
+                    errorMessage:
+                        e || "An error occurred while creating the post.",
                 });
             }
         }
     });
 
-
-
 router
     .route("/:subject_id/:post_id")
     .get(async (req, res) => {
-        if (!req.session || !req.session.user && !req.session.admin)  {
+        if (!req.session || (!req.session.user && !req.session.admin)) {
             return res.redirect("/login");
         }
         try {
             let post = await postData.getPost(req.params.post_id);
             res.render("forum/post", {
+                headerOptions: req.headerOptions,
                 subject_id: req.params.subject_id,
                 post_id: post._id,
                 title: post.title,
@@ -132,6 +155,7 @@ router
             });
         } catch (e) {
             res.status(404).render("error", {
+                headerOptions: req.headerOptions,
                 errorTitle: "Post Not Found",
                 errorMessage: e || "The requested post could not be found.",
             });
@@ -141,7 +165,7 @@ router
         let { updatedContent, updatedTitle } = req.body;
 
         if (!req.session) {
-            return res.redirect('/login');
+            return res.redirect("/login");
         }
 
         let userId;
@@ -151,6 +175,7 @@ router
             userId = req.session.admin._id;
         } else {
             return res.status(401).render("error", {
+                headerOptions: req.headerOptions,
                 errorTitle: "Unauthorized",
                 errorMessage: "You must be logged in to edit a post.",
             });
@@ -158,8 +183,10 @@ router
 
         if (!updatedContent && !updatedTitle) {
             return res.status(400).render("error", {
+                headerOptions: req.headerOptions,
                 errorTitle: "Bad Request",
-                errorMessage: "Missing required fields: updatedContent or updatedTitle.",
+                errorMessage:
+                    "Missing required fields: updatedContent or updatedTitle.",
             });
         }
 
@@ -175,20 +202,23 @@ router
             );
 
             return res.redirect(`/forum/${req.params.subject_id}`);
-        } catch(e) {
+        } catch (e) {
             let errorMessage = e.message || String(e);
             if (errorMessage.includes("Unauthorized")) {
                 return res.status(403).render("error", {
+                    headerOptions: req.headerOptions,
                     errorTitle: "Unauthorized",
                     errorMessage: errorMessage,
                 });
             } else if (errorMessage.includes("not found")) {
                 return res.status(404).render("error", {
+                    headerOptions: req.headerOptions,
                     errorTitle: "Not Found",
                     errorMessage: errorMessage,
                 });
             } else {
                 return res.status(500).render("error", {
+                    headerOptions: req.headerOptions,
                     errorTitle: "Internal Server Error",
                     errorMessage: errorMessage,
                 });
@@ -196,10 +226,10 @@ router
         }
     })
 
-
     .delete(async (req, res) => {
-        if (!req.session || !req.session.user && !req.session.admin)  {
+        if (!req.session || (!req.session.user && !req.session.admin)) {
             return res.status(401).render("error", {
+                headerOptions: req.headerOptions,
                 errorTitle: "Unauthorized",
                 errorMessage: "You must be logged in to delete a post.",
             });
@@ -212,6 +242,7 @@ router
             userId = req.session.admin._id;
         } else {
             return res.status(401).render("error", {
+                headerOptions: req.headerOptions,
                 errorTitle: "Unauthorized",
                 errorMessage: "You must be logged in to delete a post.",
             });
@@ -225,20 +256,23 @@ router
             );
 
             res.redirect(`/forum/${req.params.subject_id}`);
-        } catch(e) {
+        } catch (e) {
             let errorMessage = e.message || String(e);
             if (errorMessage.includes("Unauthorized")) {
                 return res.status(403).render("error", {
+                    headerOptions: req.headerOptions,
                     errorTitle: "Unauthorized",
                     errorMessage: errorMessage,
                 });
             } else if (errorMessage.includes("not found")) {
                 return res.status(404).render("error", {
+                    headerOptions: req.headerOptions,
                     errorTitle: "Not Found",
                     errorMessage: errorMessage,
                 });
             } else {
                 return res.status(500).render("error", {
+                    headerOptions: req.headerOptions,
                     errorTitle: "Internal Server Error",
                     errorMessage: errorMessage,
                 });
@@ -249,10 +283,10 @@ router
 router
     .route("/:subject_id/:post_id/reply")
     .get(async (req, res) => {
-        if (!req.session || !req.session.user && !req.session.admin)  {
+        if (!req.session || (!req.session.user && !req.session.admin)) {
             return res.redirect("/login");
         }
-        let sessionAuthorName
+        let sessionAuthorName;
         if (req.session.admin) {
             sessionAuthorName = req.session.admin.firstName;
         } else if (req.session.user) {
@@ -262,6 +296,7 @@ router
             let post = await postData.getPost(req.params.post_id);
 
             res.render("forum/makeReply", {
+                headerOptions: req.headerOptions,
                 subject_id: req.params.subject_id,
                 post_id: req.params.post_id,
                 postTitle: post.title,
@@ -269,19 +304,20 @@ router
             });
         } catch (e) {
             res.status(404).render("error", {
+                headerOptions: req.headerOptions,
                 errorTitle: "Post Not Found",
                 errorMessage: e || "The requested post could not be found.",
             });
         }
     })
     .post(async (req, res) => {
-        if (!req.session || !req.session.user && !req.session.admin)  {
+        if (!req.session || (!req.session.user && !req.session.admin)) {
             return res.redirect("/login");
         }
         let { replyAuthorName, content } = req.body;
 
         let userId;
-        let sessionAuthorName
+        let sessionAuthorName;
         if (req.session.admin) {
             userId = req.session.admin._id;
             sessionAuthorName = req.session.admin.firstName;
@@ -292,6 +328,7 @@ router
 
         if (!userId) {
             return res.status(401).render("error", {
+                headerOptions: req.headerOptions,
                 errorTitle: "Unauthorized",
                 errorMessage: "You must be logged in to create a post.",
             });
@@ -303,6 +340,7 @@ router
 
         if (!replyAuthorName || !content) {
             return res.status(400).render("error", {
+                headerOptions: req.headerOptions,
                 errorTitle: "Bad Request",
                 errorMessage: "Missing required fields: authorName or content.",
             });
@@ -311,24 +349,25 @@ router
         try {
             let newReply = await repliesData.makeReply(
                 req.params.post_id,
-                userId,                
+                userId,
                 replyAuthorName,
                 content
             );
             res.redirect(`/forum/${req.params.subject_id}`);
-        }
-        catch (e) {
+        } catch (e) {
             res.status(500).render("error", {
+                headerOptions: req.headerOptions,
                 errorTitle: "Internal Server Error",
-                errorMessage: e || "An error occurred while creating the reply.",
+                errorMessage:
+                    e || "An error occurred while creating the reply.",
             });
         }
-    })
+    });
 
 router
     .route("/:subject_id/:post_id/:reply_id/edit")
     .get(async (req, res) => {
-        if (!req.session || !req.session.user && !req.session.admin)  {
+        if (!req.session || (!req.session.user && !req.session.admin)) {
             return res.redirect("/login");
         }
         try {
@@ -338,6 +377,7 @@ router
             );
 
             res.render("forum/editReply", {
+                headerOptions: req.headerOptions,
                 subject_id: req.params.subject_id,
                 post_id: req.params.post_id,
                 reply_id: req.params.reply_id,
@@ -346,6 +386,7 @@ router
             });
         } catch (e) {
             res.status(404).render("error", {
+                headerOptions: req.headerOptions,
                 errorTitle: "Reply Not Found",
                 errorMessage: e || "The requested reply could not be found.",
             });
@@ -353,7 +394,7 @@ router
     })
 
     .patch(async (req, res) => {
-        if (!req.session || !req.session.user && !req.session.admin)  {
+        if (!req.session || (!req.session.user && !req.session.admin)) {
             return res.redirect("/login");
         }
 
@@ -366,6 +407,7 @@ router
             userId = req.session.admin._id;
         } else {
             return res.status(401).render("error", {
+                headerOptions: req.headerOptions,
                 errorTitle: "Unauthorized",
                 errorMessage: "You must be logged in to delete a post.",
             });
@@ -373,11 +415,11 @@ router
 
         if (!updatedContent || updatedContent.trim().length === 0) {
             return res.status(400).render("error", {
+                headerOptions: req.headerOptions,
                 errorTitle: "Bad Request",
                 errorMessage: "Missing or invalid content for the reply.",
             });
         }
-
 
         try {
             let updatedReply = await repliesData.editReply(
@@ -388,20 +430,23 @@ router
             );
 
             res.redirect(`/forum/${req.params.subject_id}`);
-        } catch(e) {
+        } catch (e) {
             let errorMessage = e.message || String(e);
             if (errorMessage.includes("Unauthorized")) {
                 return res.status(403).render("error", {
+                    headerOptions: req.headerOptions,
                     errorTitle: "Unauthorized",
                     errorMessage: errorMessage,
                 });
             } else if (errorMessage.includes("not found")) {
                 return res.status(404).render("error", {
+                    headerOptions: req.headerOptions,
                     errorTitle: "Not Found",
                     errorMessage: errorMessage,
                 });
             } else {
                 return res.status(500).render("error", {
+                    headerOptions: req.headerOptions,
                     errorTitle: "Internal Server Error",
                     errorMessage: errorMessage,
                 });
@@ -409,65 +454,66 @@ router
         }
     });
 
+router.route("/:subject_id/:post_id/:reply_id").delete(async (req, res) => {
+    if (!req.session || (!req.session.user && !req.session.admin)) {
+        return res.status(401).render("error", {
+            headerOptions: req.headerOptions,
+            errorTitle: "Unauthorized",
+            errorMessage: "You must be logged in to delete a reply.",
+        });
+    }
 
+    let userId;
+    if (req.session.user) {
+        userId = req.session.user.userId;
+    } else if (req.session.admin) {
+        userId = req.session.admin._id;
+    } else {
+        return res.status(401).render("error", {
+            headerOptions: req.headerOptions,
+            errorTitle: "Unauthorized",
+            errorMessage: "You must be logged in to delete a post.",
+        });
+    }
 
-router
-    .route("/:subject_id/:post_id/:reply_id")
-    .delete(async (req, res) => {
-        if (!req.session || !req.session.user && !req.session.admin)  {
-            return res.status(401).render("error", {
-                errorTitle: "Unauthorized",
-                errorMessage: "You must be logged in to delete a reply.",
+    try {
+        let result = await repliesData.deleteReply(
+            req.params.post_id,
+            req.params.reply_id,
+            userId
+        );
+
+        if (!result) {
+            return res.status(404).render("error", {
+                headerOptions: req.headerOptions,
+                errorTitle: "Reply Not Found",
+                errorMessage: "Unable to locate or delete the reply.",
             });
         }
 
-        let userId;
-        if (req.session.user) {
-            userId = req.session.user.userId;
-        } else if (req.session.admin) {
-            userId = req.session.admin._id;
+        res.redirect(`/forum/${req.params.subject_id}`);
+    } catch (e) {
+        let errorMessage = e.message || String(e);
+        if (errorMessage.includes("Unauthorized")) {
+            return res.status(403).render("error", {
+                headerOptions: req.headerOptions,
+                errorTitle: "Unauthorized",
+                errorMessage: errorMessage,
+            });
+        } else if (errorMessage.includes("not found")) {
+            return res.status(404).render("error", {
+                headerOptions: req.headerOptions,
+                errorTitle: "Not Found",
+                errorMessage: errorMessage,
+            });
         } else {
-            return res.status(401).render("error", {
-                errorTitle: "Unauthorized",
-                errorMessage: "You must be logged in to delete a post.",
+            return res.status(500).render("error", {
+                headerOptions: req.headerOptions,
+                errorTitle: "Internal Server Error",
+                errorMessage: errorMessage,
             });
         }
-
-        try {
-            let result = await repliesData.deleteReply(
-                req.params.post_id,
-                req.params.reply_id,
-                userId
-            );
-
-            if (!result) {
-                return res.status(404).render("error", {
-                    errorTitle: "Reply Not Found",
-                    errorMessage: "Unable to locate or delete the reply.",
-                });
-            }
-
-            res.redirect(`/forum/${req.params.subject_id}`);
-        } catch(e) {
-            let errorMessage = e.message || String(e);
-            if (errorMessage.includes("Unauthorized")) {
-                return res.status(403).render("error", {
-                    errorTitle: "Unauthorized",
-                    errorMessage: errorMessage,
-                });
-            } else if (errorMessage.includes("not found")) {
-                return res.status(404).render("error", {
-                    errorTitle: "Not Found",
-                    errorMessage: errorMessage,
-                });
-            } else {
-                return res.status(500).render("error", {
-                    errorTitle: "Internal Server Error",
-                    errorMessage: errorMessage,
-                });
-            }
-        }
-    });
-
+    }
+});
 
 export { router as postRoutes };

@@ -1,0 +1,27 @@
+<main class="container my-3">
+
+    <section id="recent-forums">
+        <div>
+            <h2>Recent Forums</h2>
+        </div>
+    </section>
+    <section id="subject-areas-section">
+        <div>
+            <h2>Subject Areas</h2>
+        </div>
+        <div class="row gy-2">
+            {{#each subjectAreas}}
+
+                <div class="card text-bg-dark p-2">
+                    <div class="card-title">
+                        <h5>{{this.name}}</h5>
+                    </div>
+                    <div class="card-link">
+                        <a href="/forum/{{this._id}}">forum</a>
+                    </div>
+                </div>
+
+            {{/each}}
+        </div>
+    </section>
+</main>

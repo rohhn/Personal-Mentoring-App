@@ -7,14 +7,22 @@ import { auth } from "googleapis/build/src/apis/abusiveexperiencereport/index.js
 
 export const getForums = async (subject_id) => {
     let forumCollection = await forums();
-    let forum = await forumCollection.findOne({ _id: ObjectId.createFromHexString(subject_id) });
+    let forum = await forumCollection.findOne({
+        _id: ObjectId.createFromHexString(subject_id),
+    });
     if (!forum) {
         throw "Error, no posts in this forum, sorry";
     }
     return { title: forum.title, posts: forum.posts || [] };
 };
 
-export const makePost = async (subject_id, sessionUserId, authorName, title, content) => {
+export const makePost = async (
+    subject_id,
+    sessionUserId,
+    authorName,
+    title,
+    content
+) => {
     helper.postVerify(content);
     helper.postVerify(title);
     helper.postVerify(authorName);
@@ -29,19 +37,22 @@ export const makePost = async (subject_id, sessionUserId, authorName, title, con
 
     let authorId = null;
 
-    let mentee = await menteeCollection.findOne({ _id: ObjectId.createFromHexString(sessionUserId) });
+    let mentee = await menteeCollection.findOne({
+        _id: ObjectId.createFromHexString(sessionUserId),
+    });
     if (mentee) {
         authorId = mentee._id;
     } else {
-        let mentor = await mentorCollection.findOne({ _id: ObjectId.createFromHexString(sessionUserId) });
+        let mentor = await mentorCollection.findOne({
+            _id: ObjectId.createFromHexString(sessionUserId),
+        });
         if (mentor) {
             authorId = mentor._id;
-        }
-        else
-        {
-            let admin = await adminCollection.findOne({ _id: ObjectId.createFromHexString(sessionUserId) });
-            if(admin)
-            {
+        } else {
+            let admin = await adminCollection.findOne({
+                _id: ObjectId.createFromHexString(sessionUserId),
+            });
+            if (admin) {
                 authorId = admin._id;
             }
         }
@@ -78,17 +89,19 @@ export const makePost = async (subject_id, sessionUserId, authorName, title, con
     };
 };
 
-
 export const getPost = async (postId) => {
     let forumCollection = await forums();
-    let forum = await forumCollection.findOne({ "posts._id": ObjectId.createFromHexString(postId) });
+    let forum = await forumCollection.findOne({
+        "posts._id": ObjectId.createFromHexString(postId),
+    });
     if (!forum) throw "Post not found1";
 
-    let post = forum.posts.find((p) => p._id.equals(ObjectId.createFromHexString(postId)));
+    let post = forum.posts.find((p) =>
+        p._id.equals(ObjectId.createFromHexString(postId))
+    );
     if (!post) throw "Post not found2";
     return post;
 };
-
 
 export const editPost = async (postId, sessionUserId, newContent, newTitle) => {
     try {
@@ -105,7 +118,9 @@ export const editPost = async (postId, sessionUserId, newContent, newTitle) => {
             throw new Error("Forum or post not found.");
         }
 
-        let post = forum.posts.find((p) => p._id.equals(ObjectId.createFromHexString(postId)));
+        let post = forum.posts.find((p) =>
+            p._id.equals(ObjectId.createFromHexString(postId))
+        );
         if (!post) {
             throw new Error("Post not found.");
         }
@@ -135,8 +150,6 @@ export const editPost = async (postId, sessionUserId, newContent, newTitle) => {
     }
 };
 
-
-
 export const deletePost = async (subject_id, post_id, sessionUserId) => {
     try {
         if (!subject_id || !post_id || !sessionUserId) {
@@ -154,13 +167,17 @@ export const deletePost = async (subject_id, post_id, sessionUserId) => {
             throw new Error("Forum or post not found.");
         }
 
-        let post = forum.posts.find((p) => p._id.equals(ObjectId.createFromHexString(post_id)));
+        let post = forum.posts.find((p) =>
+            p._id.equals(ObjectId.createFromHexString(post_id))
+        );
         if (!post) {
             throw new Error("Post not found.");
         }
 
         if (String(post.authorId) !== String(sessionUserId)) {
-            throw new Error("Unauthorized action. You cannot delete this post.");
+            throw new Error(
+                "Unauthorized action. You cannot delete this post."
+            );
         }
 
         let deleteResult = await forumCollection.updateOne(
