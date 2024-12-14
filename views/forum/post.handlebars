@@ -3,7 +3,7 @@
         <h1>Edit Post</h1>
     </header>
     <main>
-        <form action="/forum/{{subject_id}}/{{post_id}}" method="POST">
+        <form action="/forum/{{forum_id}}/{{post_id}}" method="POST">
             <input type="hidden" name="_method" value="PATCH">
             <input type="hidden" name="authorID" value="{{author}}">
             

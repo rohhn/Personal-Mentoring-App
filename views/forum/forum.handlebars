@@ -7,7 +7,7 @@
     <main class="container my-5">
         <section id="new-post" class="mb-5">
             <h2>Create a New Post</h2>
-            <form action="/forum/{{subject_id}}" method="POST">
+            <form action="/forum/{{forum_id}}" method="POST">
                 <div class="mb-3">
                     <label for="authorName" class="form-label">Author Name</label>
                     <input type="text" id="authorName" name="authorName" class="form-control"
@@ -40,9 +40,9 @@
                 <p><strong>Content:</strong> {{content}}</p>
                 <p><strong>Posted At:</strong> {{created_at}}</p>
 
-                <a href="/forum/{{../subject_id}}/{{_id}}" class="btn btn-secondary btn-sm">Edit</a>
+                <a href="/forum/{{../forum_id}}/{{_id}}" class="btn btn-secondary btn-sm">Edit</a>
 
-                <form action="/forum/{{../subject_id}}/{{_id}}" method="POST" class="d-inline-block ms-2">
+                <form action="/forum/{{../forum_id}}/{{_id}}" method="POST" class="d-inline-block ms-2">
                     <input type="hidden" name="_method" value="DELETE">
                     <input type="hidden" name="authorName" value="{{authorName}}">
                     <button type="submit" class="btn btn-danger btn-sm">Delete Post</button>
@@ -58,10 +58,10 @@
                             <p>{{content}}</p>
                             <p><strong>Replied At:</strong> {{created_at}}</p>
 
-                            <a href="/forum/{{../subject_id}}/{{../_id}}/{{_id}}/edit"
+                            <a href="/forum/{{../forum_id}}/{{../_id}}/{{_id}}/edit"
                                 class="btn btn-secondary btn-sm">Edit</a>
 
-                            <form action="/forum/{{../../subject_id}}/{{../_id}}/{{_id}}" method="POST"
+                            <form action="/forum/{{../../forum_id}}/{{../_id}}/{{_id}}" method="POST"
                                 class="d-inline-block ms-2">
                                 <input type="hidden" name="_method" value="DELETE">
                                 <button type="submit" class="btn btn-danger btn-sm">Delete Reply</button>
@@ -72,7 +72,7 @@
                 </section>
                 {{/if}}
 
-                <a href="/forum/{{../subject_id}}/{{_id}}/reply" class="btn btn-info btn-sm mt-2">Add Reply</a>
+                <a href="/forum/{{../forum_id}}/{{_id}}/reply" class="btn btn-info btn-sm mt-2">Add Reply</a>
             </article>
             {{/each}}
             {{else}}

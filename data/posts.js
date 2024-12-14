@@ -16,6 +16,23 @@ export const getForums = async (subject_id) => {
     return { title: forum.title, posts: forum.posts || [] };
 };
 
+export const getAllForums = async () => {
+    try {
+        let forumCollection = await forums();
+        let allForums = await forumCollection.find({}).toArray();
+        if (!allForums || allForums.length === 0) {
+            throw new Error("No forums found in the database.");
+        }
+        return allForums.map((forum) => ({
+            _id: forum._id.toString(),
+            title: forum.title,
+            postCount: forum.posts ? forum.posts.length : 0,
+        }));
+    } catch (error) {
+        throw new Error("Error fetching all forums: " + error);
+    }
+};
+
 export const makePost = async (
     subject_id,
     sessionUserId,

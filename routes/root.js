@@ -63,6 +63,7 @@ router
                         email,
                         userId: userData._id,
                         userType,
+                        userName: userData.first_name,
                     };
                 } else {
                     const errorObj = new Error("Incorrect E-mail or password.");
@@ -93,6 +94,7 @@ router
                         email,
                         userId: userData._id,
                         userType,
+                        userName: userData.first_name,
                     };
                 } else {
                     const errorObj = new Error("Incorrect E-mail or password.");

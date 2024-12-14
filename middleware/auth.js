@@ -10,11 +10,11 @@ export const loginMiddleware = (req, res, next) => {
 export const makeHeaderOptions = (req, res, next) => {
     // req.url = "/signup"
 
-    req.session.user = {
-        email: "rohan@mentee.com",
-        userId: "6755fb40b8e580d6306cea02",
-        userType: "mentee",
-    };
+    // req.session.user = {
+    //     email: "rohan@mentee.com",
+    //     userId: "6755fb40b8e580d6306cea02",
+    //     userType: "mentee",
+    // };
 
     const headerOptions = {};
     if (req.session.user || req.session.admin) {

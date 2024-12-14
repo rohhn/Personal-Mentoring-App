@@ -11,7 +11,7 @@ router.route("/").get(async (req, res) => {
         return res.redirect("/login");
     }
 
-    const subjectAreas = await subjectData.getAllSubjectAreas();
+    const subjectAreas = await postData.getAllForums();
 
     return res.render("forum/landing", {
         headerOptions: req.headerOptions,
@@ -21,14 +21,14 @@ router.route("/").get(async (req, res) => {
 });
 
 router
-    .route("/:subject_id")
+    .route("/:forum_id")
     .get(async (req, res) => {
         if (!req.session || (!req.session.user && !req.session.admin)) {
             return res.redirect("/login");
         }
 
         try {
-            let forum = await postData.getForums(req.params.subject_id);
+            let forum = await postData.getForums(req.params.forum_id);
 
             forum.posts.forEach((post) => {
                 if (post.replies && Array.isArray(post.replies)) {
@@ -43,7 +43,7 @@ router
 
             res.render("forum/forum", {
                 headerOptions: req.headerOptions,
-                subject_id: req.params.subject_id,
+                forum_id: req.params.forum_id,
                 subject: forum.title,
                 posts: forum.posts || [],
                 replies: forum.posts.replies || [],
@@ -101,18 +101,18 @@ router
 
         try {
             const newPost = await postData.makePost(
-                req.params.subject_id,
+                req.params.forum_id,
                 userId,
                 authorName,
                 title,
                 content
             );
 
-            let forum = await postData.getForums(req.params.subject_id);
+            let forum = await postData.getForums(req.params.forum_id);
 
             return res.render("forum/forum", {
                 headerOptions: req.headerOptions,
-                subject_id: req.params.subject_id,
+                forum_id: req.params.forum_id,
                 authorName: forum.authorName,
                 title: forum.title,
                 posts: forum.posts || [],
@@ -138,7 +138,7 @@ router
     });
 
 router
-    .route("/:subject_id/:post_id")
+    .route("/:forum_id/:post_id")
     .get(async (req, res) => {
         if (!req.session || (!req.session.user && !req.session.admin)) {
             return res.redirect("/login");
@@ -147,7 +147,7 @@ router
             let post = await postData.getPost(req.params.post_id);
             res.render("forum/post", {
                 headerOptions: req.headerOptions,
-                subject_id: req.params.subject_id,
+                forum_id: req.params.forum_id,
                 post_id: post._id,
                 title: post.title,
                 content: post.content,
@@ -201,7 +201,7 @@ router
                 updatedTitle
             );
 
-            return res.redirect(`/forum/${req.params.subject_id}`);
+            return res.redirect(`/forum/${req.params.forum_id}`);
         } catch (e) {
             let errorMessage = e.message || String(e);
             if (errorMessage.includes("Unauthorized")) {
@@ -250,12 +250,12 @@ router
 
         try {
             let result = await postData.deletePost(
-                req.params.subject_id,
+                req.params.forum_id,
                 req.params.post_id,
                 userId
             );
 
-            res.redirect(`/forum/${req.params.subject_id}`);
+            res.redirect(`/forum/${req.params.forum_id}`);
         } catch (e) {
             let errorMessage = e.message || String(e);
             if (errorMessage.includes("Unauthorized")) {
@@ -281,7 +281,7 @@ router
     });
 
 router
-    .route("/:subject_id/:post_id/reply")
+    .route("/:forum_id/:post_id/reply")
     .get(async (req, res) => {
         if (!req.session || (!req.session.user && !req.session.admin)) {
             return res.redirect("/login");
@@ -297,7 +297,7 @@ router
 
             res.render("forum/makeReply", {
                 headerOptions: req.headerOptions,
-                subject_id: req.params.subject_id,
+                forum_id: req.params.forum_id,
                 post_id: req.params.post_id,
                 postTitle: post.title,
                 replyAuthorName: sessionAuthorName || "",
@@ -353,7 +353,7 @@ router
                 replyAuthorName,
                 content
             );
-            res.redirect(`/forum/${req.params.subject_id}`);
+            res.redirect(`/forum/${req.params.forum_id}`);
         } catch (e) {
             res.status(500).render("error", {
                 headerOptions: req.headerOptions,
@@ -365,7 +365,7 @@ router
     });
 
 router
-    .route("/:subject_id/:post_id/:reply_id/edit")
+    .route("/:forum_id/:post_id/:reply_id/edit")
     .get(async (req, res) => {
         if (!req.session || (!req.session.user && !req.session.admin)) {
             return res.redirect("/login");
@@ -378,7 +378,7 @@ router
 
             res.render("forum/editReply", {
                 headerOptions: req.headerOptions,
-                subject_id: req.params.subject_id,
+                forum_id: req.params.forum_id,
                 post_id: req.params.post_id,
                 reply_id: req.params.reply_id,
                 replyAuthorName: reply.replyAuthorName,
@@ -429,7 +429,7 @@ router
                 updatedContent
             );
 
-            res.redirect(`/forum/${req.params.subject_id}`);
+            res.redirect(`/forum/${req.params.forum_id}`);
         } catch (e) {
             let errorMessage = e.message || String(e);
             if (errorMessage.includes("Unauthorized")) {
@@ -454,7 +454,7 @@ router
         }
     });
 
-router.route("/:subject_id/:post_id/:reply_id").delete(async (req, res) => {
+router.route("/:forum_id/:post_id/:reply_id").delete(async (req, res) => {
     if (!req.session || (!req.session.user && !req.session.admin)) {
         return res.status(401).render("error", {
             headerOptions: req.headerOptions,
@@ -491,7 +491,7 @@ router.route("/:subject_id/:post_id/:reply_id").delete(async (req, res) => {
             });
         }
 
-        res.redirect(`/forum/${req.params.subject_id}`);
+        res.redirect(`/forum/${req.params.forum_id}`);
     } catch (e) {
         let errorMessage = e.message || String(e);
         if (errorMessage.includes("Unauthorized")) {
