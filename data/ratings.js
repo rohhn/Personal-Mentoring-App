@@ -10,43 +10,32 @@ export const addReviewAndUpdateRating = async (
     userType,
     author
 ) => {
-    if (
-        !userId ||
-        !sessionId ||
-        !isValidRating(rating) ||
-        !userType ||
-        !author
-    ) {
+    if (!userId || !sessionId || !isValidRating(rating) || !userType || !author) {
         throw new Error("Invalid input");
     }
-
     let recipientCollection, authorCollection;
     if (userType === "mentee") {
         recipientCollection = await mentors();
         authorCollection = await mentees();
-    } else {
+    } else { 
         recipientCollection = await mentees();
-        authorCollection = await mentors();
+        authorCollection = await mentors(); 
     }
 
     try {
-        const recipient = await recipientCollection.findOne({
-            _id: new ObjectId(userId),
-        });
+        const recipient = await recipientCollection.findOne({ _id: new ObjectId(userId) });
         if (!recipient) {
             throw new Error("Recipient not found");
         }
+
         const existingReview = await recipientCollection.findOne({
             _id: new ObjectId(userId),
-            "reviews.sessionId": sessionId,
+            'reviews.sessionId': sessionId 
         });
 
         if (existingReview) {
-            throw new Error(
-                "A review for this session has already been posted"
-            );
+            throw new Error("A review for this session has already been posted");
         }
-
         const reviewId = new ObjectId();
         const newReview = {
             _id: reviewId,
@@ -57,7 +46,6 @@ export const addReviewAndUpdateRating = async (
             author,
             created_at: new Date().toISOString(),
         };
-
         const updateResult = await recipientCollection.updateOne(
             { _id: new ObjectId(userId) },
             { $push: { reviews: newReview } }
@@ -66,25 +54,18 @@ export const addReviewAndUpdateRating = async (
         if (updateResult.modifiedCount === 0) {
             throw new Error("Failed to add review");
         }
-
-        const updatedRecipient = await recipientCollection.findOne({
-            _id: new ObjectId(userId),
-        });
-        const sum = updatedRecipient.reviews.reduce(
-            (acc, cur) => acc + cur.rating,
-            0
-        );
-        const avgRating = sum / updatedRecipient.reviews.length;
+        const updatedRecipient = await recipientCollection.findOne({ _id: new ObjectId(userId) });
+        const sum = updatedRecipient.reviews.reduce((acc, cur) => acc + parseInt(cur.rating, 10), 0);
+        const avgRating = updatedRecipient.reviews.length > 0 ? sum / updatedRecipient.reviews.length : 0;
 
         await recipientCollection.updateOne(
             { _id: new ObjectId(userId) },
             { $set: { averageRating: avgRating } }
         );
-
         return { averageRating: avgRating, newReview };
     } catch (error) {
         console.error(`Database operation failed: ${error}`);
-        throw new Error(`${error.message}`);
+        throw new Error(`Database operation failed: ${error.message}`);
     }
 };
 
