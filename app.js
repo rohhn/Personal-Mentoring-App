@@ -65,6 +65,28 @@ const handlebarsInstance = exphbs.create({
                 return datetime;
             }
         },
+        beforeNow: (date) => {
+            const dateObj = moment(date);
+            if (dateObj.isValid()) {
+                return dateObj.isBefore(moment());
+            }
+            return;
+        },
+        afterNow: (date) => {
+            const dateObj = moment(date);
+            if (dateObj.isValid()) {
+                return dateObj.isAfter(moment());
+            }
+            return;
+        },
+        happeningNow: (start, end) => {
+            start = moment(start);
+            end = moment(end);
+            if (start.isValid() && end.isValid()) {
+                return moment().isBetween(start, end);
+            }
+            return;
+        },
         partialsDir: ["views/partials/"],
     },
 });
