@@ -88,10 +88,7 @@ $(window).on("load", () => {
             data: formValues,
             dataType: "json",
             success: function (response) {
-                // const reviewModalObj = new bootstrap.Modal("#reviewModal");
-                // console.log("reviewModalObj ", reviewModalObj);
                 reviewModalObj.hide();
-
                 triggerToast("Review submitted!", "info");
             },
             error: (XMLHttpRequest, textStatus, errorThrown) => {
@@ -99,11 +96,12 @@ $(window).on("load", () => {
                 console.error("textStatus", textStatus);
                 console.error("errorThrown", errorThrown);
 
-                // const reviewModalObj = new bootstrap.Modal("#reviewModal");
                 reviewModalObj.hide();
-
-                // reviewModalObj.hide();
-                triggerToast("An error occured! Couldn't submit your review.");
+                triggerToast(
+                    XMLHttpRequest.responseJSON.error ||
+                        "An error occured! Couldn't submit your review.",
+                    "error"
+                );
             },
         });
     };
