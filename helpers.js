@@ -26,7 +26,6 @@ export const postVerify = (content) => {
     }
 };
 
-
 export const formatDate = (dateStr) => {
     const date = new Date(dateStr);
     const year = date.getFullYear();
@@ -221,7 +220,7 @@ export const checkArray = (array) => {
     if (!Array.isArray(array)) {
         throw `${array} is not an array`;
     }
-}
+};
 
 export const validateAvailability = (availability) => {
     // checkArrayOfO(availability);
@@ -391,7 +390,7 @@ export const checkAvailability = async (calendarId, startTime, endTime) => {
 
     const busySlots = response.data.calendars[calendarId].busy;
 
-    console.log("busySlots: ",busySlots);
+    console.log("busySlots: ", busySlots);
 
     const isAvailable = busySlots.length === 0;
     return isAvailable;
@@ -412,7 +411,7 @@ export const bookSession = async (calendarId, subject, startTime, endTime) => {
             timeZone: "UTC",
         },
 
-        recurrence: []
+        recurrence: [],
     };
 
     const response = await calendar.events.insert({

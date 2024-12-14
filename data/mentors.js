@@ -17,7 +17,6 @@ import {
 } from "../helpers.js";
 import { google } from "googleapis";
 
-
 export const createMentor = async (
     first_name,
     last_name,
@@ -126,16 +125,16 @@ export const getMentorById = async (id) => {
     mentor._id = mentor._id.toString();
 
     if (mentor.dob && mentor.dob instanceof Date) {
-        mentor.dob = mentor.dob.toISOString().split('T')[0]; 
+        mentor.dob = mentor.dob.toISOString().split("T")[0];
     }
 
-    if(mentor.subject_areas){
+    if (mentor.subject_areas) {
         let subject_ids = mentor.subject_areas;
 
         let subject_areas = [];
 
-        if (subject_ids.length > 0){
-            for(let i = 0;i < subject_ids.length; i++){
+        if (subject_ids.length > 0) {
+            for (let i = 0; i < subject_ids.length; i++) {
                 let subject = await subjectData.getSubjectById(subject_ids[i]);
                 subject_areas.push(subject);
             }
@@ -158,21 +157,21 @@ export const getMentorByEmail = async (email) => {
 
     if (!mentor) {
         throw `Mentor with the email ${email} does not exist.`;
-    }   
+    }
 
     if (mentor.dob && mentor.dob instanceof Date) {
-        mentor.dob = mentor.dob.toISOString().split('T')[0]; 
+        mentor.dob = mentor.dob.toISOString().split("T")[0];
     }
 
     mentor._id = mentor._id.toString();
 
-    if(mentor.subject_areas){
+    if (mentor.subject_areas) {
         let subject_ids = mentor.subject_areas;
 
         let subject_areas = [];
 
-        if (subject_ids.length > 0){
-            for(let i = 0;i < subject_ids.length; i++){
+        if (subject_ids.length > 0) {
+            for (let i = 0; i < subject_ids.length; i++) {
                 let subject = await subjectData.getSubjectById(subject_ids[i]);
                 subject_areas.push(subject);
             }
@@ -180,7 +179,7 @@ export const getMentorByEmail = async (email) => {
 
         mentor.subject_areas = subject_areas;
     }
-    
+
     return mentor;
 };
 
@@ -278,7 +277,7 @@ export const updateMentor = async (
     result._id = result._id.toString();
 
     if (result.dob && result.dob instanceof Date) {
-        result.dob = result.dob.toISOString().split('T')[0]; 
+        result.dob = result.dob.toISOString().split("T")[0];
     }
 
     return result;
@@ -552,12 +551,14 @@ export const removeSubjectAreaToMentorByName = async (id, subjectName) => {
     return result;
 };
 
-
 export const getMentorsAboveRating = async (averageRating) => {
-    if (typeof averageRating !== 'number' || averageRating < 0 || averageRating > 5) {
-        throw 'Invalid average rating. It must be a number between 0 and 5.';
+    if (
+        typeof averageRating !== "number" ||
+        averageRating < 0 ||
+        averageRating > 5
+    ) {
+        throw "Invalid average rating. It must be a number between 0 and 5.";
     }
-
 
     // Fetch all mentors
     const mentorCollection = await mentors();

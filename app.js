@@ -134,9 +134,4 @@ app.listen(3000, () => {
     console.log("your routes will be running on http://localhost:3000");
 });
 
-// TODO: edit mentor profile
-// TODO: Admin interface
 // TODO: Forums front-end
-// TODO: Front-end for adding review and rating
-// TODO: middleware for checking mentor status
-// TODO: Front-end for adding review and rating
