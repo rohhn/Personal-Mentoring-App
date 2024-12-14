@@ -200,20 +200,23 @@ router
         const updatedMentor = req.body;
 
         try {
-            checkStringParams(updatedMentor.first_name);
-            checkStringParams(updatedMentor.last_name);
+            checkStringParams(updatedMentor.first_name, "firstname");
+            checkStringParams(updatedMentor.last_name, "lastname");
             checkEmail(updatedMentor.email, "mentor");
-            checkStringParams(updatedMentor.profile_image);
-            checkStringParams(updatedMentor.summary);
+            // checkStringParams(updatedMentor.profile_image, "profile image");
+            checkStringParams(updatedMentor.summary, "summary");
+            updatedMentor.education = JSON.parse(updatedMentor.education);
             updatedMentor.education = checkEducation(updatedMentor.education);
+            updatedMentor.experience = JSON.parse(updatedMentor.experience);
             updatedMentor.experience = checkExperience(
                 updatedMentor.experience
             );
+            updatedMentor.subject_areas = JSON.parse(updatedMentor.subject_areas);
             updatedMentor.subject_areas = checkArrayOfStrings(
                 updatedMentor.subject_areas
             );
         } catch (e) {
-            // console.log(e);
+            console.log(e);
             return res.status(400).json({ error: e });
         }
 

@@ -76,7 +76,9 @@ export const getSubjectByName = async (name) => {
 
     const subjectAreasCollection = await subject_areas();
 
-    const subject = await subjectAreasCollection.findOne({ name });
+    const subject = await subjectAreasCollection.findOne({
+        name: { $regex: `^${name}$`, $options: 'i' } 
+    });
 
     if (!subject) {
         throw `Subject with the name ${name} does not exist.`;
