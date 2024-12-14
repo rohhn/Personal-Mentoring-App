@@ -23,12 +23,9 @@ $(window).on("load", () => {
     };
 
     const openReviewModal = (event) => {
-        const reviewModalObj = new bootstrap.Modal("#reviewModal");
-        const reviewModalEle = $("#reviewModal");
-
         // const { sessionId, mentorId, menteeId } = $(event.target).data();
-        // console.log($(event.target).data());
         reviewModalEle.data($(event.target).data());
+
         reviewFormReset();
         reviewModalObj.show();
     };
@@ -91,8 +88,10 @@ $(window).on("load", () => {
             data: formValues,
             dataType: "json",
             success: function (response) {
-                const reviewModalObj = new bootstrap.Modal("#reviewModal");
+                // const reviewModalObj = new bootstrap.Modal("#reviewModal");
+                // console.log("reviewModalObj ", reviewModalObj);
                 reviewModalObj.hide();
+
                 triggerToast("Review submitted!", "info");
             },
             error: (XMLHttpRequest, textStatus, errorThrown) => {
@@ -100,14 +99,19 @@ $(window).on("load", () => {
                 console.error("textStatus", textStatus);
                 console.error("errorThrown", errorThrown);
 
-                const reviewModalObj = new bootstrap.Modal("#reviewModal");
+                // const reviewModalObj = new bootstrap.Modal("#reviewModal");
                 reviewModalObj.hide();
+
+                // reviewModalObj.hide();
                 triggerToast("An error occured! Couldn't submit your review.");
             },
         });
     };
 
     const reviewForm = $("#review-form");
+    const reviewModalObj = new bootstrap.Modal("#reviewModal");
+    const reviewModalEle = $("#reviewModal");
+
     reviewForm.on("submit", handleSubmitForm);
 
     $(".review-btn").each(function () {

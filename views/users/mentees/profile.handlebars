@@ -58,7 +58,7 @@
 
                             {{#each profileInfo.badges}}
                                 <div class="p-2">
-                                    <img src="/public/badges/{{icon}}" />
+                                    <img src="/public/img/badges/{{icon}}" />
                                 </div>
                             {{/each}}
                         </div>
@@ -139,7 +139,7 @@
                     <div class="card-body">
                         <h5 class="d-flex align-items-center mb-3">Reviews</h5>
                         {{#each profileInfo.reviews}}
-                            <div>
+                            <div class="p-2 border-bottom">
                                 <div class="mb-1 ratings-render" data-rating={{rating}}></div>
                                 <p class="mb-0">{{author}}</p>
                                 <p class="text-secondary">{{feedback}}</p>
