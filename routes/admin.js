@@ -16,6 +16,9 @@ const router = express.Router();
 // router
 //     .route("/signup")
 //     .get((req, res) => {
+//         if (req.session && req.session.admin) {
+//             return res.redirect("/admin/dashboard");
+//         }
 //         try {
 //             res.render("admin/admin-signup", {
 //                 pageTitle: "Admin Sign-Up",
@@ -33,7 +36,7 @@ const router = express.Router();
 
 //     .post(fileUpload.any(), async (req, res) => {
 //         let keys = Object.keys(req.body);
-//         for (let i = 0; i < keys.length; i) {
+//         for (let i = 0; i < keys.length; i++) {
 //             req.body[keys[i]] = xss(req.body[keys[i]]);
 //         }
 //         let { first_name, last_name, email, password, dob, summary } = req.body;
@@ -72,6 +75,10 @@ const router = express.Router();
 router
     .route("/login")
     .get((req, res) => {
+        if (req.session && req.session.admin) {
+            return res.redirect("/admin/dashboard");
+        }
+
         try {
             res.render("admin/admin-login", {
                 pageTitle: "Admin Login",
@@ -113,7 +120,7 @@ router
                     isAdmin: admin.isAdmin,
                     userType: "admin",
                 };
-                res.redirect("/admin/dashboard");
+                res.redirect("/dashboard");
             } else {
                 throw new Error("Invalid email or password.");
             }
