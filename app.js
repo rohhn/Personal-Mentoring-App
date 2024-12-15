@@ -101,7 +101,6 @@ app.use("/admin/signup", adminLoginMiddleware);
 app.use("/sessions/*", privateRouteMiddleware);
 app.use("/mentor/availability/*", privateRouteMiddleware);
 app.use("/sessions/booking/*", allowMenteesOnly);
-
 app.engine("handlebars", handlebarsInstance.engine);
 app.set("view engine", "handlebars");
 
@@ -118,3 +117,4 @@ app.listen(3000, () => {
 // TODO: Front-end for adding review and rating
 // TODO: middleware for checking mentor status
 // TODO: Front-end for adding review and rating
+// TODO: Booking Conflict for Mentee

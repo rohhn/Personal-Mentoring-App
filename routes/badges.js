@@ -1,10 +1,13 @@
 import express from "express";
 import { badgesData } from "../data/index.js";
+import xss from "xss";
 
 const router = express.Router();
 
 router.post("/awardBadge", async (req, res) => {
-    const { userId, userType } = req.body;
+    let { userId, userType } = req.body;
+    userId = xss(userId);
+    userType = xss(userType);
     if (!userId || !userType) {
         return res.status(400).json({ error: "Missing required fields" });
     }
@@ -21,7 +24,9 @@ router.post("/awardBadge", async (req, res) => {
 });
 
 router.get("/getUserBadges/:userType/:userId", async (req, res) => {
-    const { userId, userType } = req.params;
+    let { userId, userType } = req.params;
+    userId = xss(userId);
+    userType = xss(userType);
     if (!userId || typeof userId !== "string") {
         return res.status(400).json({ error: "Invalid or missing userId" });
     }

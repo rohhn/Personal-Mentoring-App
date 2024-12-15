@@ -5,6 +5,7 @@ import path from "path";
 import { mentees, mentors } from "./config/mongoCollections.js";
 import dotenv from "dotenv";
 import moment from "moment";
+import xss from "xss";
 dotenv.config();
 
 export const postVerify = (content) => {
@@ -105,12 +106,6 @@ export const checkDate = (inputDate) => {
 
     let date = new Date(year, month - 1, day);
 
-    // console.log(date);
-
-    // console.log(day);
-    // console.log(month - 1);
-    // console.log(year);
-
     if (
         date.getFullYear() !== year ||
         date.getMonth() !== month - 1 ||
@@ -197,8 +192,8 @@ export const checkExperience = (experience) => {
         checkStringParams(ex.institution, "institution");
         checkYears(ex.years);
 
-        ex.title = ex.title.trim();
-        ex.institution = ex.institution.trim();
+        ex.title = xss(ex.title.trim());
+        ex.institution = xss(ex.institution.trim());
     }
     return experience;
 };
@@ -211,7 +206,7 @@ export const checkArrayOfStrings = (array) => {
     for (let i = 0; i < +array.length; i++) {
         checkStringParams(array[i], "String");
 
-        array[i] = array[i].trim();
+        array[i] = xss(array[i].trim());
     }
 
     return array;
@@ -237,7 +232,6 @@ export const validateAvailability = (availability) => {
     ];
 
     let keys = Object.keys(availability);
-    // console.log(keys);
     for (let i in availability.av) {
         if (
             !Object.keys(availability[i]).includes("day") ||
@@ -254,12 +248,12 @@ export const validateAvailability = (availability) => {
         checkDate(start_time);
         checkDate(end_time);
 
-        availability[i].day = day.trim();
-        availability[i].start_time = new Date(start_time.trim());
-        availability[i].end_time = new Date(end_time.trim());
+        availability[i].day = xss(day.trim());
+        availability[i].start_time = new Date(xss(start_time.trim()));
+        availability[i].end_time = new Date(xss(end_time.trim()));
 
-        avail.start_time = avail.start_time.trim();
-        avail.end_time = avail.end_time.trim();
+        avail.start_time = xss(avail.start_time.trim());
+        avail.end_time = xss(avail.end_time.trim());
     }
     return availability;
 };
@@ -273,7 +267,7 @@ export const checkEmail = (email, user) => {
         throw `Please Enter a Valid Email Id.`;
     }
 
-    return email;
+    return xss(email);
 };
 
 const keyFilePath = process.env.KEYFILECONTENT;
@@ -390,9 +384,6 @@ export const checkAvailability = async (calendarId, startTime, endTime) => {
     });
 
     const busySlots = response.data.calendars[calendarId].busy;
-
-    console.log("busySlots: ",busySlots);
-
     const isAvailable = busySlots.length === 0;
     return isAvailable;
 };
@@ -431,9 +422,6 @@ export const updateSessionOnCalendar = async (
     end_time
 ) => {
     const authClient = await getAuthClient();
-
-    console.log(start_time);
-    console.log(end_time);
 
     const updatedEvent = {
         start: {
