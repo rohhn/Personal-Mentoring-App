@@ -1,0 +1,67 @@
+<div class="card m-1 max-w-100">
+    <div class="card-body p-1">
+        <div>
+            <div class="card-title">
+                <h5>{{this.first_name}} {{this.last_name}}</h5>
+            </div>
+            <div class="card-text text-break text-wrap">
+                <p>Email: {{this.email}}</p>
+                <p>Summary: {{this.summary}}</p>
+            </div>
+        </div>
+
+        <div>
+            <a class="btn btn-sm btn-primary" href="/mentor/{{this._id}}">View
+                Full Profile</a>
+
+            {{#if (isEqual status "approved")}}
+                <form
+                    action="/admin/applications/{{this._id}}/reject"
+                    method="POST"
+                    class="d-inline"
+                >
+                    <button
+                        class="btn btn-sm btn-danger"
+                        type="submit"
+                    >Reject</button>
+                </form>
+            {{else}}
+                {{#if (isEqual status "rejected")}}
+                    <form
+                        action="/admin/applications/{{this._id}}/approve"
+                        method="POST"
+                        class="d-inline"
+                    >
+                        <button
+                            class="btn btn-sm btn-success"
+                            type="submit"
+                        >Approve</button>
+                    </form>
+
+                {{else}}
+                    <form
+                        action="/admin/applications/{{this._id}}/approve"
+                        method="POST"
+                        class="d-inline"
+                    >
+                        <button
+                            class="btn btn-sm btn-success"
+                            type="submit"
+                        >Approve</button>
+                    </form>
+                    <form
+                        action="/admin/applications/{{this._id}}/reject"
+                        method="POST"
+                        class="d-inline"
+                    >
+                        <button
+                            class="btn btn-sm btn-danger"
+                            type="submit"
+                        >Reject</button>
+                    </form>
+                {{/if}}
+            {{/if}}
+        </div>
+    </div>
+
+</div>

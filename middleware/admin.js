@@ -15,3 +15,11 @@ export const adminDashboardMiddleware = (req, res, next) => {
         next();
     }
 };
+
+export const allowAdminOnly = (req, res, next) => {
+    if (!req.session.admin) {
+        return res.redirect("/admin/login");
+    } else {
+        next();
+    }
+};
