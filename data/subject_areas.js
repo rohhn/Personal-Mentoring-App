@@ -172,8 +172,13 @@ export const searchMentorsBySubjectId = async (id) => {
     const mentorCollection = await mentors();
 
     const mentorsWithSubject = await mentorCollection
-        .find({ subject_areas: { $elemMatch: { $eq: id } } })
-        .toArray();
+    .find({
+        $and: [
+            { subject_areas: { $elemMatch: { $eq: id } } }, // Mentors with the specific subject ID
+            { approved: "approved" }                       // Mentors with "approved" status
+        ]
+    })
+    .toArray();
 
     if (!mentorsWithSubject || mentorsWithSubject.length === 0) {
         return [];

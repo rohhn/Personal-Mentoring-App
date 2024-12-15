@@ -134,5 +134,3 @@ app.listen(3000, () => {
     console.log("We have now got a server");
     console.log("your routes will be running on http://localhost:3000");
 });
-
-//TODO: Only Approved Mnetors to be fetched.
