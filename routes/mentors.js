@@ -16,6 +16,8 @@ import { error } from "console";
 import { constrainedMemory } from "process";
 import { fileUpload } from "../middleware/common.js";
 import { extractProfileImage } from "../helpers/common.js";
+import xss from "xss";
+
 
 const router = express.Router();
 
@@ -32,7 +34,6 @@ router
     })
     .post(async (req, res) => {
         const newMentor = req.body;
-
         try {
             checkStringParams(newMentor.first_name);
             checkStringParams(newMentor.last_name);
@@ -79,7 +80,7 @@ router
     .get(async (req, res) => {
         let queryParams = req.query;
 
-        let mentorId = req.params.mentorId.trim();
+        let mentorId = xss(req.params.mentorId.trim());
 
         try {
             checkStringParams(mentorId);
@@ -135,7 +136,7 @@ router
         }
     })
     .delete(async (req, res) => {
-        let mentorId = req.params.mentorId.trim();
+        let mentorId = xss(req.params.mentorId.trim());
 
         try {
             checkStringParams(mentorId);
@@ -171,7 +172,7 @@ router
         }
     })
     .put(fileUpload.any(), async (req, res) => {
-        let mentorId = req.params.mentorId.trim();
+        let mentorId = xss(req.params.mentorId.trim());
 
         try {
             checkStringParams(mentorId);
@@ -199,6 +200,16 @@ router
         }
 
         const updatedMentor = req.body;
+
+        updatedMentor.first_name = xss(updatedMentor.first_name);
+        updatedMentor.last_name = xss(updatedMentor.last_name);
+        updatedMentor.email = xss(updatedMentor.email);
+        updatedMentor.summary = xss(updatedMentor.summary);
+        updatedMentor.education = xss(updatedMentor.education);
+        updatedMentor.experience = xss(updatedMentor.experience);
+        updatedMentor.subject_areas = xss(updatedMentor.subject_areas);
+        updatedMentor.first_name = xss(updatedMentor.first_name);
+        
 
         
 
@@ -250,7 +261,7 @@ router
 router
     .route("/availability/:mentorId")
     .get(async (req, res) => {
-        const mentorId = req.params.mentorId;
+        const mentorId = xss(req.params.mentorId);
 
         if (req.session.user.userId != mentorId) {
             return res.redirect("/dashboard");
@@ -275,7 +286,7 @@ router
         });
     })
     .post(async (req, res) => {
-        let mentorId = req.params.mentorId.trim();
+        let mentorId = xss(req.params.mentorId.trim());
 
         try {
             checkStringParams(mentorId);
@@ -302,15 +313,8 @@ router
             return res.status(404).json({ error: e });
         }
 
-        let availability = req.body;
-
-        // try {
-        //     // console.log(availability.av);
-        //     availability = validateAvailability(availability);
-        // } catch (e) {
-        //     console.log(e);
-        //     return res.status(400).json({ error: e });
-        // }
+        let availability = xss(req.body);
+        
         try {
             let avail = await mentorData.toAddAvailability(
                 mentorId,
@@ -324,7 +328,7 @@ router
     });
 
 router.route("/:mentorId/edit").get(async (req, res) => {
-    let mentorId = req.params.mentorId.trim();
+    let mentorId = xss(req.params.mentorId.trim());
 
     if (req.session.user.userId !== mentorId) {
         res.redirect("/dashboard");
@@ -380,7 +384,7 @@ router.route("/:mentorId/edit").get(async (req, res) => {
 router
     .route("/subject/:mentorId")
     .put(async (req, res) => {
-        let mentorId = req.params.mentorId.trim();
+        let mentorId = xss(req.params.mentorId.trim());
 
         try {
             checkStringParams(mentorId);
@@ -409,7 +413,7 @@ router
             return res.status(404).json({ error: e });
         }
 
-        let subjectId = req.body.subjectId.trim();
+        let subjectId = xss(req.body.subjectId.trim());
 
         try {
             checkStringParams(subjectId);
@@ -451,7 +455,7 @@ router
         }
     })
     .delete(async (req, res) => {
-        let mentorId = req.params.mentorId.trim();
+        let mentorId = xss(req.params.mentorId.trim());
 
         try {
             checkStringParams(mentorId);
@@ -478,7 +482,7 @@ router
             return res.status(404).json({ error: e });
         }
 
-        let subjectId = req.body.subjectId.trim();
+        let subjectId = xss(req.body.subjectId.trim());
 
         try {
             checkStringParams(subjectId);
@@ -519,7 +523,7 @@ router
     });
 
 router.route("/rating/search").get(async (req, res) => {
-    let average_rating = req.body.averageRating;
+    let average_rating = xss(req.body.averageRating);
 
     // try{
     //     if(isNaN(average_rating) || average_rating.trim() !== ''){

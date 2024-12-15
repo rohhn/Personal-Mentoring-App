@@ -9,6 +9,7 @@ import { admin } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
 import * as applicationData from "../data/applications.js";
 import { file } from "googleapis/build/src/apis/file/index.js";
+import xss from "xss";
 
 
 const router = express.Router();
@@ -28,6 +29,10 @@ router
         }
     })
     .post(fileUpload.any(), async (req, res) => {
+        let keys = Object.keys(req.body);
+        for(let i = 0; i < keys.length; i){
+            req.body[keys[i]] = xss(req.body[keys[i]]);
+        }
         let { first_name, last_name, email, password, dob, summary } = req.body;
         let profile_image = extractProfileImage(req);
 
@@ -77,6 +82,10 @@ router
         }
     })
     .post(fileUpload.any(), async (req, res) => {
+        let keys = Object.keys(req.body);
+        for(let i = 0; i < keys.length; i){
+            req.body[keys[i]] = xss(req.body[keys[i]]);
+        }
         let { email, password } = req.body;
 
         try {
@@ -113,8 +122,11 @@ router
             return res.redirect("/admin/login");
         }
 
+        req.session= xss(req.session);
+        req.session.admin = xss(req.session.admin);
+
         try {
-            let admin = await adminData.getAdminById(req.session.admin._id);
+            let admin = await adminData.getAdminById(xss(req.session.admin._id));
 
             res.render("admin/dashboard", {
                 pageTitle: "Admin Dashboard",
@@ -134,6 +146,10 @@ router
     })
 
     .post(fileUpload.any(), async (req, res) => {
+        let keys = Object.keys(req.body);
+        for(let i = 0; i < keys.length; i){
+            req.body[keys[i]] = xss(req.body[keys[i]]);
+        }
         let { email, password } = req.body;
 
         try {
@@ -170,9 +186,12 @@ router
         if (!req.session || !req.session.admin) {
             return res.redirect("/admin/login");
         }
+
+        req.session= xss(req.session);
+        req.session.admin = xss(req.session.admin);
     
         try {
-            let adminId = req.session.admin._id;
+            let adminId = xss(req.session.admin._id);
     
             if (req.query.update === "true") {
                 let { firstName, lastName, summary, email, password } = req.query;
@@ -220,6 +239,9 @@ router
             return res.redirect("/admin/login");
         }
 
+        req.session= xss(req.session);
+        req.session.admin = xss(req.session.admin);
+
         try {
             let pendingApplications = await applicationData.getPendingMentorApplications();
             res.render("admin/applications", {
@@ -241,8 +263,11 @@ router.route("/applications/:id/approve")
             return res.redirect("/admin/login");
         }
 
+        req.session= xss(req.session);
+        req.session.admin = xss(req.session.admin);
+
         try {
-            let mentorId = req.params.id;
+            let mentorId = xss(req.params.id);
             await applicationData.updateMentorApproval(mentorId, true);
             res.redirect("/admin/applications");
         } catch (e) {
@@ -260,8 +285,11 @@ router.route("/applications/:id/reject")
             return res.redirect("/admin/login");
         }
 
+        req.session= xss(req.session);
+        req.session.admin = xss(req.session.admin);
+
         try {
-            let mentorId = req.params.id;
+            let mentorId = xss(req.params.id);
             await applicationData.updateMentorApproval(mentorId, false);
             res.redirect("/admin/applications");
         } catch (e) {
