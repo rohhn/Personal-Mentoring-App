@@ -53,13 +53,11 @@
                 </div>
                 <div class="card mt-3 text-bg-dark p-2">
                     {{#if profileInfo.badges}}
-                        <h5>Badges</h5>
-                        <div class="d-flex flex-row">
-
+                        <h5>Badge Earned</h5>
+                        <div class="p-2">
                             {{#each profileInfo.badges}}
-                                <div class="p-2">
-                                    <img height="64" width="64" src="/public/img/badges/{{icon}}" />
-                                </div>
+                                    <img class="mx-auto d-block" height="150" width="150" src="/public/img/badges/{{icon}}" />
+                                    <p class="mb-0 text-center text-secondary fs-6 fw-lighter">{{description}}</p>
                             {{/each}}
                         </div>
                     {{else}}

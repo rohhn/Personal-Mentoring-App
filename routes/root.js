@@ -16,13 +16,13 @@ import xss from "xss";
 const router = express.Router();
 
 router.route("/").get(async (req, res) => {
-    const mentorsList = await mentorData.getAllMentors();
+    const mentorsList = await mentorData.getMentorsAboveRating(1);
     const subjectAreasList = await subjectData.getAllSubjectAreas();
     res.render("landing/landing-page", {
         pageTitle: "Personal Mentoring App",
         headerOptions: req.headerOptions,
         mentors: mentorsList,
-        subject_areas: subjectAreasList,
+        subject_areas: subjectAreasList.slice(0, 6),
     });
 });
 
@@ -295,7 +295,6 @@ router.route("/dashboard").get(async (req, res) => {
         }
 
         userData.userType = userType;
-        console.log(sessions);
         res.render("users/dashboard", {
             pageTitle: "Dashboard",
             headerOptions: req.headerOptions,
