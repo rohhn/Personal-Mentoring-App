@@ -28,6 +28,7 @@ router.route("/").post(addMenteeIdtoReq, async (req, res, next) => {
         newSession.end_time = xss(newSession.end_time.trim());
         // console.log(newSession.start_time);
     } catch (e) {
+        console.log(e);
         return res.status(400).json({ error: e });
     }
 
@@ -41,7 +42,7 @@ router.route("/").post(addMenteeIdtoReq, async (req, res, next) => {
         );
         return res.status(200).json(session);
     } catch (e) {
-        // console.log(e);
+        console.log(e);
         return res.status(500).json({ error: e });
     }
 });

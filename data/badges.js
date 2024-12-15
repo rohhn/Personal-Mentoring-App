@@ -25,7 +25,6 @@ export const countSessions = async (userId, userType) => {
     }
     const sessionCount = sessions.length;
 
-    console.log(`Session count for userId: ${userId}, userType: ${userType} is ${sessionCount}`);
     return sessionCount;
 };
 
