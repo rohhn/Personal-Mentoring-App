@@ -24,8 +24,6 @@ export const countSessions = async (userId, userType) => {
         sessions = await getSessionsByMentee(userId, 'previous');
     }
     const sessionCount = sessions.length;
-
-    console.log(`Session count for userId: ${userId}, userType: ${userType} is ${sessionCount}`);
     return sessionCount;
 };
 
@@ -41,7 +39,6 @@ export const awardBadgeBasedOnSessions = async (userId, userType) => {
     const collection = userType === 'mentor' ? await mentors() : await mentees();
     const sessionCount = await countSessions(userId, userType);
     const existingBadges = await getUserBadges(userId, userType);
-    console.log(sessionCount)
 
     let latestBadge = null;
     for (const milestone of badgeMilestones) {

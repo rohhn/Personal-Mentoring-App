@@ -1,7 +1,7 @@
 import express from 'express';
+import xss from 'xss';
 import { ratingData } from '../data/index.js';
 import { validateRating as isValidRating } from '../helpers.js';
-import xss from 'xss';
 
 const router = express.Router();
 router.post('/addRating', async (req, res) => {
@@ -26,6 +26,7 @@ router.post('/addRating', async (req, res) => {
   }
   try {
     const result = await ratingData.addReviewAndUpdateRating(sessionId, userId, rating, review || 'N/A', userType,author);
+    console.log(result)
     res.status(200).json(result);
   } catch (error) {
     console.error(error);
