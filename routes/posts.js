@@ -2,6 +2,7 @@ import express from "express";
 import * as postData from "../data/posts.js";
 import * as repliesData from "../data/replies.js";
 import * as adminData from "../data/admin.js";
+import xss from "xss";
 import * as menteeData from "../data/mentees.js";
 import * as mentorData from "../data/mentors.js";
 import * as subjectData from "../data/subject_areas.js";
@@ -174,7 +175,7 @@ router
         // TODO: deletes but throws errors too
         let userId;
         if (req.session.user) {
-            userId = req.session.user.userId;
+            userId = xss(req.session.user.userId);
         } else if (req.session.admin) {
             userId = req.session.admin._id;
         }
@@ -285,12 +286,12 @@ router
         }
         let sessionAuthorName;
         if (req.session.admin) {
-            sessionAuthorName = req.session.admin.firstName;
+            sessionAuthorName = xss(req.session.admin.firstName);
         } else if (req.session.user) {
-            sessionAuthorName = req.session.user.userName;
+            sessionAuthorName = xss(req.session.user.userName);
         }
         try {
-            let post = await postData.getPost(req.params.post_id);
+            let post = await postData.getPost(xss(req.params.post_id));
 
             res.render("forum/makeReply", {
                 headerOptions: req.headerOptions,
@@ -358,10 +359,15 @@ router
         if (!req.session || (!req.session.user && !req.session.admin)) {
             return res.redirect("/login");
         }
+
+        req.session = xss(req.session);
+        req.session.user = xss(req.session.user);
+        req.session.admin = xss(req.session.admin);
+
         try {
             let reply = await repliesData.getReply(
-                req.params.post_id,
-                req.params.reply_id
+                xss(req.params.post_id),
+                xss(req.params.reply_id)
             );
 
             res.render("forum/editReply", {
@@ -390,9 +396,9 @@ router
 
         let userId;
         if (req.session.user) {
-            userId = req.session.user.userId;
+            userId = xss(req.session.user.userId);
         } else if (req.session.admin) {
-            userId = req.session.admin._id;
+            userId = xss(req.session.admin._id);
         } else {
             return res.status(401).render("error", {
                 headerOptions: req.headerOptions,
@@ -411,8 +417,8 @@ router
 
         try {
             let updatedReply = await repliesData.editReply(
-                req.params.post_id,
-                req.params.reply_id,
+                xss(req.params.post_id),
+                xss(req.params.reply_id),
                 userId,
                 updatedContent
             );

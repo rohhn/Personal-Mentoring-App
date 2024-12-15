@@ -51,14 +51,14 @@
                         </div>
                     </div>
                 </div>
-                <div class="card mt-3 text-bg-dark">
+                <div class="card mt-3 text-bg-dark p-2">
                     {{#if profileInfo.badges}}
                         <h5>Badges</h5>
                         <div class="d-flex flex-row">
 
                             {{#each profileInfo.badges}}
                                 <div class="p-2">
-                                    <img src="/public/badges/{{icon}}" />
+                                    <img height="64" width="64" src="/public/img/badges/{{icon}}" />
                                 </div>
                             {{/each}}
                         </div>
@@ -139,7 +139,7 @@
                     <div class="card-body">
                         <h5 class="d-flex align-items-center mb-3">Reviews</h5>
                         {{#each profileInfo.reviews}}
-                            <div>
+                            <div class="p-2 border-bottom">
                                 <div class="mb-1 ratings-render" data-rating={{rating}}></div>
                                 <p class="mb-0">{{author}}</p>
                                 <p class="text-secondary">{{feedback}}</p>

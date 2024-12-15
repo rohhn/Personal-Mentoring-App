@@ -1,11 +1,34 @@
 import { ObjectId } from 'mongodb';
 import { mentees, mentors } from '../config/mongoCollections.js';
+import { getSessionsByMentee, getSessionsByMentor } from './sessions.js';
 
 const badgeMilestones = [
-    { sessions: 5, badge: { badge_id: 'badge_5_sessions', name: 'Beginner', description: 'Awarded for completing 5 sessions', icon: 'public/css/badge_3_icon' } },
-    { sessions: 10, badge: { badge_id: 'badge_10_sessions', name: 'Intermediate', description: 'Awarded for completing 10 sessions', icon: 'public/css/badge_10_icon' } },
-    { sessions: 12, badge: { badge_id: 'badge_100_sessions', name: 'Advanced', description: 'Awarded for completing 100 sessions', icon: 'public/css/badge_100_icon' } },
+    { sessions: 5, badge: { badge_id: 'Beginner', name: 'Beginner', description: 'Awarded for completing 5 sessions', icon: 'badge_3_icon.png' } },
+    { sessions: 10, badge: { badge_id: 'Intermediate', name: 'Intermediate', description: 'Awarded for completing 10 sessions', icon: 'badge_10_icon.png' } },
+    { sessions: 12, badge: { badge_id: 'Advance', name: 'Advanced', description: 'Awarded for completing 12 sessions', icon: 'badge_100_icon.png' } },
 ];
+
+export const countSessions = async (userId, userType) => {
+    if (!userId || typeof userId !== 'string' || !ObjectId.isValid(userId)) {
+        throw new Error('Invalid userId');
+    }
+
+    if (userType !== 'mentor' && userType !== 'mentee') {
+        throw new Error('Invalid userType, must be "mentor" or "mentee"');
+    }
+
+    let sessions = [];
+    if (userType === 'mentor') {
+        sessions = await getSessionsByMentor(userId, 'previous'); 
+    } else if (userType === 'mentee') {
+        sessions = await getSessionsByMentee(userId, 'previous');
+    }
+    const sessionCount = sessions.length;
+
+    console.log(`Session count for userId: ${userId}, userType: ${userType} is ${sessionCount}`);
+    return sessionCount;
+};
+
 
 export const awardBadgeBasedOnSessions = async (userId, userType) => {
     if (!userId || typeof userId !== 'string' || !ObjectId.isValid(userId)) {
@@ -16,12 +39,9 @@ export const awardBadgeBasedOnSessions = async (userId, userType) => {
     }
 
     const collection = userType === 'mentor' ? await mentors() : await mentees();
-    const user = await collection.findOne({ _id: new ObjectId(userId) });
-
-    if (!user) throw new Error('User not found');
-
-    const reviews = user.reviews || [];
-    const sessionCount = reviews.length;
+    const sessionCount = await countSessions(userId, userType);
+    const existingBadges = await getUserBadges(userId, userType);
+    console.log(sessionCount)
 
     let latestBadge = null;
     for (const milestone of badgeMilestones) {
@@ -29,19 +49,20 @@ export const awardBadgeBasedOnSessions = async (userId, userType) => {
             latestBadge = { ...milestone.badge, created_at: new Date().toISOString() };
         }
     }
-    if (latestBadge) {
-        const existingBadge = user.badges?.[0]; // Assume only one badge is stored
-        if (!existingBadge || existingBadge.name !== latestBadge.name) {
-            await collection.updateOne(
-                { _id: new ObjectId(userId) },
-                { $set: { badges: [latestBadge] } }
-            );
-        }
+
+    if (!latestBadge) {
+        return { sessionCount, badge: null }; 
+    }
+    const existingBadge = existingBadges?.[0];
+    if (!existingBadge || existingBadge.name !== latestBadge.name) {
+        await collection.updateOne(
+            { _id: new ObjectId(userId) },
+            { $set: { badges: [latestBadge] } }
+        );
     }
 
     return { sessionCount, badge: latestBadge };
 };
-
 
 
 

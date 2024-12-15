@@ -6,7 +6,7 @@
         {{#if sessions}}
             {{#each sessions}}
                 <div class="card text-bg-dark">
-                    <div class="card-body">
+                    <div class="card-body" id="session-card-{{this._id}}">
                         <div class="d-flex justify-content-between">
                             <div id="info">
                                 <div class="card-text"><strong>Mentee Name:</strong>
@@ -28,18 +28,34 @@
                             </div>
                             <div id="btns" class="">
 
-                                {{#if (isNotEqual this.status "completed")}}
-                                    <button
-                                        class="btn btn-danger cancel-btn"
-                                        data-session-id="{{this._id}}"
-                                        data-mentor-id="{{this.mentor_id}}"
-                                        data-mentee-id="{{this.mentee_id}}"
-                                    >Cancel Session</button>
-                                {{else}}
+                                {{#if
+                                    (happeningNow this.start_time this.end_time)
+                                }}
                                     <div
                                         class="card-text fs-6 fw-lighter fst-italic"
-                                    >{{this.status}}
+                                    ><a
+                                            class="btn btn-info"
+                                            href="{{this.meeting_link}}"
+                                        >Happening Now!</a>
                                     </div>
+                                {{else}}
+                                    {{#if (beforeNow this.end_time)}}
+                                        <button
+                                                class="btn btn-light review-btn"
+                                                data-session-id="{{this._id}}"
+                                                data-mentor-id="{{this.mentor_id}}"
+                                                data-mentee-id="{{this.mentee_id}}"
+                                            >Leave a review</button>
+                                    {{else}}
+                                        {{#if (afterNow this.start_time)}}
+                                            <button
+                                                class="btn btn-danger cancel-btn"
+                                                data-session-id="{{this._id}}"
+                                                data-mentor-id="{{this.mentor_id}}"
+                                                data-mentee-id="{{this.mentee_id}}"
+                                            >Cancel</button>
+                                        {{/if}}
+                                    {{/if}}
                                 {{/if}}
                             </div>
                         </div>
@@ -51,5 +67,33 @@
             <p class="text-center fs-6 fw-lighter fst-italic">No sessions.</p>
         {{/if}}
     </div>
+    {{>common/review-modal}}
+</main>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div
+        id="alert-toast"
+        class="toast text-bg-dark"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+    >
+        <div class="toast-body p-2">
+            <div class="row gx-2">
+                <div class="col"><button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="toast"
+                        aria-label="Close"
+                    ></button></div>
+                <div class="col">
+                    <p class="mb-0" id="toast-content"></p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
 
 {{> users/mentee-manage-sessions}}
+{{>users/add-review userData=userData}}

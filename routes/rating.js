@@ -1,10 +1,17 @@
 import express from 'express';
 import { ratingData } from '../data/index.js';
 import { validateRating as isValidRating } from '../helpers.js';
+import xss from 'xss';
 
 const router = express.Router();
 router.post('/addRating', async (req, res) => {
-  const { sessionId, userId, rating, review, userType,author } = req.body;
+  let { sessionId, userId, rating, review, userType,author } = req.body;
+  sessionId = xss(sessionId);
+  userId = xss(userId);
+  rating = xss(rating);
+  review = xss(review);
+  userType = xss(userType);
+  author = xss(author);
   if (!userId || typeof userId !== 'string') {
     return res.status(400).json({ error: 'Invalid or missing userId' });
   }
@@ -26,7 +33,11 @@ router.post('/addRating', async (req, res) => {
   }
 });
 router.get('/getUserRatings/:userType/:userId/:reviewId', async (req, res) => {
-  const { userId, reviewId, userType } = req.params;
+  let { userId, reviewId, userType } = req.params;
+  userId = xss(userId);
+  reviewId = xss(reviewId);
+  userType = xss(userType);
+
   if (!userId || typeof userId !== 'string') {
     return res.status(400).json({ error: 'Invalid or missing userId' });
   }
@@ -45,24 +56,33 @@ router.get('/getUserRatings/:userType/:userId/:reviewId', async (req, res) => {
   }
 });
 router.delete('/deleteReview/:userType/:userId/:reviewId', async (req, res) => {
-  const { userId, reviewId, userType } = req.params;
+  let { userId, reviewId, userType } = req.params;
+  userId = xss(userId);
+  reviewId = xss(reviewId);
+  userType = xss(userType);
 
-  if (!userId || typeof userId !== 'string') {
-      return res.status(400).json({ error: 'Invalid or missing userId' });
-  }
-  if (!reviewId || typeof reviewId !== 'string') {
-      return res.status(400).json({ error: 'Invalid or missing reviewId' });
-  }
-  if (!userType || (userType !== 'mentor' && userType !== 'mentee')) {
-      return res.status(400).json({ error: 'Invalid userType, must be "mentor" or "mentee"' });
-  }
+    if (!userId || typeof userId !== "string") {
+        return res.status(400).json({ error: "Invalid or missing userId" });
+    }
+    if (!reviewId || typeof reviewId !== "string") {
+        return res.status(400).json({ error: "Invalid or missing reviewId" });
+    }
+    if (!userType || (userType !== "mentor" && userType !== "mentee")) {
+        return res
+            .status(400)
+            .json({ error: 'Invalid userType, must be "mentor" or "mentee"' });
+    }
 
-  try {
-      const result = await ratingData.deleteReviewById(userId, reviewId, userType);
-      res.status(200).json(result);
-  } catch (error) {
-      console.error(error);
-      res.status(404).json({ error: error.message });
-  }
+    try {
+        const result = await ratingData.deleteReviewById(
+            userId,
+            reviewId,
+            userType
+        );
+        res.status(200).json(result);
+    } catch (error) {
+        console.error(error);
+        res.status(404).json({ error: error.message });
+    }
 });
 export { router as ratingsRoutes };

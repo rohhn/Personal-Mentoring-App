@@ -17,7 +17,6 @@ import {
 } from "../helpers.js";
 import { google } from "googleapis";
 
-
 export const createMentor = async (
     first_name,
     last_name,
@@ -126,16 +125,16 @@ export const getMentorById = async (id) => {
     mentor._id = mentor._id.toString();
 
     if (mentor.dob && mentor.dob instanceof Date) {
-        mentor.dob = mentor.dob.toISOString().split('T')[0]; 
+        mentor.dob = mentor.dob.toISOString().split("T")[0];
     }
 
-    if(mentor.subject_areas){
+    if (mentor.subject_areas) {
         let subject_ids = mentor.subject_areas;
 
         let subject_areas = [];
 
-        if (subject_ids.length > 0){
-            for(let i = 0;i < subject_ids.length; i++){
+        if (subject_ids.length > 0) {
+            for (let i = 0; i < subject_ids.length; i++) {
                 let subject = await subjectData.getSubjectById(subject_ids[i]);
                 subject_areas.push(subject);
             }
@@ -158,21 +157,21 @@ export const getMentorByEmail = async (email) => {
 
     if (!mentor) {
         throw `Mentor with the email ${email} does not exist.`;
-    }   
+    }
 
     if (mentor.dob && mentor.dob instanceof Date) {
-        mentor.dob = mentor.dob.toISOString().split('T')[0]; 
+        mentor.dob = mentor.dob.toISOString().split("T")[0];
     }
 
     mentor._id = mentor._id.toString();
 
-    if(mentor.subject_areas){
+    if (mentor.subject_areas) {
         let subject_ids = mentor.subject_areas;
 
         let subject_areas = [];
 
-        if (subject_ids.length > 0){
-            for(let i = 0;i < subject_ids.length; i++){
+        if (subject_ids.length > 0) {
+            for (let i = 0; i < subject_ids.length; i++) {
                 let subject = await subjectData.getSubjectById(subject_ids[i]);
                 subject_areas.push(subject);
             }
@@ -180,7 +179,7 @@ export const getMentorByEmail = async (email) => {
 
         mentor.subject_areas = subject_areas;
     }
-    
+
     return mentor;
 };
 
@@ -212,14 +211,11 @@ export const updateMentor = async (
     id,
     first_name,
     last_name,
-    dob,
-    pwd_hash,
-    profile_image,
+    profileImageBase64 = null,
     summary,
+    email,
     education,
     experience,
-    availability,
-    approved,
     subject_areas
 ) => {
     checkStringParams(id, "id");
@@ -230,40 +226,52 @@ export const updateMentor = async (
         throw `${id} is not a valid ObjectID.`;
     }
 
-    checkStringParams(first_name);
-    checkStringParams(last_name);
-    checkDate(dob.trim());
-    await checkEmail(email, "mentor");
-
-    // checkStringParams(pwd_hash);
-    // checkStringParams(profile_image);
-    // checkStringParams(summary);
-    // checkBoolean(approved);
+    checkStringParams(first_name, "first_name");
+    checkStringParams(last_name, "last name");
+    checkEmail(email, "mentor"); 
+    checkStringParams(summary, "summary");
     // education = checkEducation(education);
-    // experience = checkExperience(experience);
-    // subject_areas = checkArrayOfStrings(subject_areas);
+    experience = checkExperience(experience);
+    subject_areas = checkArrayOfStrings(subject_areas);
+    // console.log(subject_areas);
 
     first_name = first_name.trim();
     last_name = last_name.trim();
-    dob = new Date(dob.trim());
-    pwd_hash = pwd_hash.trim();
-    profile_image = profile_image.trim();
+    // profile_image = profile_image.trim();
     summary = summary.trim();
+
+    let subject_areas_arr = []
+
+    const mentorCollection = await mentors();
+
+    const mentor = await mentorCollection.findOne({ _id: new ObjectId(id) });
+
+    subject_areas_arr = mentor.subject_areas;
+
+    let newSubjects = [];
+
+    for( let i = 0; i< subject_areas.length; i++){
+        let subject = await subjectData.getSubjectByName(subject_areas[i]);
+        newSubjects.push(subject._id.toString());
+    }
+
+   
 
     let mentorUpdate = {
         first_name: first_name,
         last_name: last_name,
-        dob: dob,
-        pwd_hash: pwd_hash,
-        profile_image: profile_image,
+        email: email,
         summary: summary,
         education: education,
         experience: experience,
-        approved: approved,
-        subject_areas: subject_areas,
+        subject_areas: newSubjects
     };
 
-    const mentorCollection = await mentors();
+    if (profileImageBase64) {
+        mentorUpdate.profile_image = profileImageBase64;
+    }
+
+    // const mentorCollection = await mentors();
 
     const result = await mentorCollection.findOneAndUpdate(
         { _id: new ObjectId(id) },
@@ -278,7 +286,7 @@ export const updateMentor = async (
     result._id = result._id.toString();
 
     if (result.dob && result.dob instanceof Date) {
-        result.dob = result.dob.toISOString().split('T')[0]; 
+        result.dob = result.dob.toISOString().split("T")[0];
     }
 
     return result;
@@ -370,6 +378,7 @@ export const updateSubjectAreaToMentor = async (id, subjectId) => {
 
     id = id.trim();
     subjectId = subjectId.trim();
+    console.log("subjectId", subjectId);
 
     if (!ObjectId.isValid(subjectId)) {
         throw `${id} is not a valid ObjectID.`;
@@ -379,37 +388,37 @@ export const updateSubjectAreaToMentor = async (id, subjectId) => {
         throw `${subjectId} is not a valid ObjectID.`;
     }
 
-    let mentor = await getMentorById(id);
+    const mentorCollection = await mentors();
 
-    let subject = await subjectData.getSubjectById(subjectId);
+    const mentor = await mentorCollection.findOne({ _id: new ObjectId(id) });
 
     let subject_areas = mentor.subject_areas;
 
-    if (subject_areas.includes(subjectId)) {
-        throw `You already have the subject area.`;
+    // console.log("Outside subject_areas, ", subject_areas);
+
+    if (!subject_areas.includes(subjectId)) {
+        // throw `You already have the subject area.`;
+        subject_areas.push(subjectId);
+
+        let updateDoc = {
+            subject_areas: subject_areas,
+        };
+    
+        const mentorCollection = await mentors();
+    
+        const result = await mentorCollection.findOneAndUpdate(
+            { _id: new ObjectId(id) },
+            { $set: updateDoc },
+            { returnDocument: "after" }
+        );
+    
+        if (!result) {
+            throw `Could not Update the Mentor.`;
+        }
+    
+        result._id = result._id.toString();
     }
-
-    subject_areas.push(subjectId);
-
-    let updateDoc = {
-        subject_areas: subject_areas,
-    };
-
-    const mentorCollection = await mentors();
-
-    const result = await mentorCollection.findOneAndUpdate(
-        { _id: new ObjectId(id) },
-        { $set: updateDoc },
-        { returnDocument: "after" }
-    );
-
-    if (!result) {
-        throw `Could not Update the Mentor.`;
-    }
-
-    result._id = result._id.toString();
-
-    return result;
+    // return result;
 };
 
 export const updateSubjectAreaToMentorByName = async (id, subjectName) => {
@@ -419,11 +428,13 @@ export const updateSubjectAreaToMentorByName = async (id, subjectName) => {
     id = id.trim();
     subjectName = subjectName.trim();
 
-    if (!ObjectId.isValid(subjectId)) {
-        throw `${subjectId} is not a valid ObjectID.`;
-    }
+    // if (!ObjectId.isValid(subjectId)) {
+    //     throw `${subjectId} is not a valid ObjectID.`;
+    // }
 
-    let mentor = await getMentorById(id);
+    const mentorCollection = await mentors();
+
+    const mentor = await mentorCollection.findOne({ _id: new ObjectId(id) });
 
     let subject = await subjectData.getSubjectByName(subjectName);
 
@@ -431,17 +442,14 @@ export const updateSubjectAreaToMentorByName = async (id, subjectName) => {
 
     let subject_areas = mentor.subject_areas;
 
-    if (subject_areas.includes(subjectId)) {
-        throw `You already have the subject area.`;
+    if (!subject_areas.includes(subjectId)) {
+        // throw `You already have the subject area.`;
+        subject_areas.push(subjectId);
     }
-
-    subject_areas.push(subjectId);
 
     let updateDoc = {
         subject_areas: subject_areas,
     };
-
-    const mentorCollection = await mentors();
 
     const result = await mentorCollection.findOneAndUpdate(
         { _id: new ObjectId(id) },
@@ -473,9 +481,10 @@ export const removeSubjectAreaFromMentor = async (id, subjectId) => {
         throw `${subjectId} is not a valid ObjectID.`;
     }
 
-    let mentor = await getMentorById(id);
+    const mentorCollection = await mentors();
 
-    let subject = await subjectData.getSubjectById(subjectId);
+    const mentor = await mentorCollection.findOne({ _id: new ObjectId(id) });
+
 
     let subject_areas = mentor.subject_areas;
 
@@ -488,8 +497,6 @@ export const removeSubjectAreaFromMentor = async (id, subjectId) => {
     let updateDoc = {
         subject_areas: subject_areas,
     };
-
-    const mentorCollection = await mentors();
 
     const result = await mentorCollection.findOneAndUpdate(
         { _id: new ObjectId(id) },
@@ -517,7 +524,9 @@ export const removeSubjectAreaToMentorByName = async (id, subjectName) => {
         throw `${subjectId} is not a valid ObjectID.`;
     }
 
-    let mentor = await getMentorById(id);
+    const mentorCollection = await mentors();
+
+    const mentor = await mentorCollection.findOne({ _id: new ObjectId(id) });
 
     let subject = await subjectData.getSubjectByName(subjectName);
 
@@ -535,8 +544,6 @@ export const removeSubjectAreaToMentorByName = async (id, subjectName) => {
         subject_areas: subject_areas,
     };
 
-    const mentorCollection = await mentors();
-
     const result = await mentorCollection.findOneAndUpdate(
         { _id: new ObjectId(id) },
         { $set: updateDoc },
@@ -552,12 +559,14 @@ export const removeSubjectAreaToMentorByName = async (id, subjectName) => {
     return result;
 };
 
-
 export const getMentorsAboveRating = async (averageRating) => {
-    if (typeof averageRating !== 'number' || averageRating < 0 || averageRating > 5) {
-        throw 'Invalid average rating. It must be a number between 0 and 5.';
+    if (
+        typeof averageRating !== "number" ||
+        averageRating < 0 ||
+        averageRating > 5
+    ) {
+        throw "Invalid average rating. It must be a number between 0 and 5.";
     }
-
 
     // Fetch all mentors
     const mentorCollection = await mentors();

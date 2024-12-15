@@ -97,8 +97,16 @@ export const createSession = async (
     // console.log(start_time);
     // console.log(end_time);
 
-    if(end_time < start_time){
+    if(end_time.isBefore(start_time)){
         throw "Please enter a valid time range.";
+    }
+
+    if (start_time.isBefore(moment())) {
+        throw "Start time cannot be in the past.";
+    }
+
+    if (end_time.isBefore(moment())) {
+        throw "End time cannot be in the past.";
     }
 
     if (!ObjectId.isValid(mentor_id)) {
@@ -220,18 +228,21 @@ export const rescheduleSession = async (id, start_time, end_time) => {
         throw "Invalid object ID.";
     }
 
-    // checkTimestamp(start_time);
-    // checkTimestamp(end_time);
 
-    // start_time = new Date(start_time.trim())
-    // start_time = new Date(end_time.trim())
-
-    start_time = moment(start_time.trim())
-    end_time = moment(end_time.trim())
+    start_time = moment(start_time.trim());
+    end_time = moment(end_time.trim());
     
 
     if(start_time.isAfter(end_time)){
         throw "Please enter a valid time range.";
+    }
+
+    if (start_time.isBefore(moment())) {
+        throw "Start time cannot be in the past.";
+    }
+
+    if (end_time.isBefore(moment())) {
+        throw "End time cannot be in the past.";
     }
 
     let reschedSession = {

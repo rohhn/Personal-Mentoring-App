@@ -11,6 +11,7 @@ import { isParentEmailRequired } from "../helpers/mentees.js";
 import { fileUpload } from "../middleware/common.js";
 import { extractProfileImage } from "../helpers/common.js";
 import { error } from "console";
+import xss from "xss";
 
 const router = express.Router();
 
@@ -34,9 +35,9 @@ router
         });
     })
     .post(async (req, res) => {
-        const userType = req.body.user_type;
-        const email = req.body.email;
-        const password = req.body.password;
+        const userType = xss(req.body.user_type);
+        const email = xss(req.body.email);
+        const password = xss(req.body.password);
 
         try {
             if (userType === "mentee") {
@@ -125,7 +126,7 @@ router
 
             res.status(statusCode).render("auth/login-page", {
                 pageTitle: "Login",
-                headerOptions: req.headerOptions,
+                headerOptions: xss(req.headerOptions),
                 error: errorMessage,
             });
         }
@@ -140,7 +141,7 @@ router
         });
     })
     .post(fileUpload.any(), async (req, res) => {
-        const {
+        let {
             first_name,
             last_name,
             user_type,
@@ -149,6 +150,14 @@ router
             dob,
             password,
         } = req.body;
+
+        first_name = xss(first_name);
+        last_name = xss(last_name);
+        user_type = xss(user_type);
+        summary = xss(summary);
+        email = xss(email);
+        dob = xss(dob);
+        password = xss(password);
 
         try {
             // validations
@@ -173,7 +182,7 @@ router
 
             // create User
             if (user_type === "mentee") {
-                const parent_email = req.body.parent_email || undefined;
+                const parent_email = xss(req.body.parent_email) || undefined;
 
                 try {
                     if (isParentEmailRequired(dob)) {
@@ -298,8 +307,8 @@ router.route("/dashboard").get(async (req, res) => {
 export { router as rootRoutes };
 
 router.route("/profile/:userType/:userId").get(async (req, res) => {
-    const userType = req.params.userType;
-    const userId = req.params.userId;
+    const userType = xss(req.params.userType);
+    const userId = xss(req.params.userId);
 
     if (["mentee", "mentor"].includes(userType)) {
         res.redirect(`/${userType}/${userId}`);
