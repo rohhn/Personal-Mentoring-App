@@ -130,7 +130,24 @@
                             name="start_time"
                             id="start_time"
                             type="time"
+                            list="start-time-list"
                         />
+                        <datalist id="start-time-list">
+                            <option value="08:00"/>
+                            <option value="09:00"/>
+                            <option value="10:00"/>
+                            <option value="11:00"/>
+                            <option value="12:00"/>
+                            <option value="13:00"/>
+                            <option value="14:00"/>
+                            <option value="15:00"/>
+                            <option value="16:00"/>
+                            <option value="17:00"/>
+                            <option value="18:00"/>
+                            <option value="19:00"/>
+                            <option value="20:00"/>
+                            <option value="21:00"/>
+                        </datalist>
                     </div>
                 </div>`);
         bookingForm.append(fromTimeInput);
@@ -145,7 +162,24 @@
                             name="end_time"
                             id="end_time"
                             type="time"
+                            list="end-time-list"
                         />
+                        <datalist id="end-time-list">
+                            <option value="08:00"/>
+                            <option value="09:00"/>
+                            <option value="10:00"/>
+                            <option value="11:00"/>
+                            <option value="12:00"/>
+                            <option value="13:00"/>
+                            <option value="14:00"/>
+                            <option value="15:00"/>
+                            <option value="16:00"/>
+                            <option value="17:00"/>
+                            <option value="18:00"/>
+                            <option value="19:00"/>
+                            <option value="20:00"/>
+                            <option value="21:00"/>
+                        </datalist>
                     </div>
                 </div>`);
         bookingForm.append(toTimeInput);
@@ -180,7 +214,7 @@
                 console.error("XMLHttpRequest", XMLHttpRequest);
                 console.error("textStatus", textStatus);
                 console.error("errorThrown", errorThrown);
-                alert(XMLHttpRequest.responseJSON.error || errorThrown );
+                alert(XMLHttpRequest.responseJSON.error || errorThrown);
             },
         });
     }

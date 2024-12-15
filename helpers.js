@@ -218,6 +218,7 @@ export const checkArray = (array) => {
 
 export const validateAvailability = (availability) => {
     // checkArrayOfO(availability);
+    // console.log(availability);
     checkArray(availability);
     let days = [
         "Monday",

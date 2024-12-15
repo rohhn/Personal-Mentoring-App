@@ -34,7 +34,7 @@ export const createMentor = async (
 
     dob = new Date(dob.trim());
 
-    let approved = false;
+    let approved = "pending";
 
     let newMentorObj = {
         first_name,
@@ -90,7 +90,7 @@ export const createMentor = async (
 export const getAllMentors = async () => {
     const mentorCollection = await mentors();
 
-    let allMentors = await mentorCollection.find({}).toArray();
+    let allMentors = await mentorCollection.find({ approved: "approved" }).toArray();
 
     if (!allMentors) {
         return [];
@@ -100,7 +100,33 @@ export const getAllMentors = async () => {
         _id: mentor._id.toString(),
         name: `${mentor.first_name} ${mentor.last_name}`,
         summary: mentor.summary,
+        profile_image: mentor.profile_image,
+        subject_areas: mentor.subject_areas,
     }));
+
+    for (let mentorIdx = 0; mentorIdx < allMentors.length; mentorIdx++) {
+        const mentor = allMentors[mentorIdx];
+        if (mentor.subject_areas) {
+            let subject_ids = mentor.subject_areas;
+
+            let subject_areas = [];
+
+            if (subject_ids.length > 0) {
+                for (
+                    let subjectIdx = 0;
+                    subjectIdx < subject_ids.length;
+                    subjectIdx++
+                ) {
+                    let subject = await subjectData.getSubjectById(
+                        subject_ids[subjectIdx]
+                    );
+                    subject_areas.push(subject);
+                }
+            }
+
+            mentor.subject_areas = subject_areas;
+        }
+    }
 
     return allMentors;
 };
@@ -228,7 +254,7 @@ export const updateMentor = async (
 
     checkStringParams(first_name, "first_name");
     checkStringParams(last_name, "last name");
-    checkEmail(email, "mentor"); 
+    checkEmail(email, "mentor");
     checkStringParams(summary, "summary");
     // education = checkEducation(education);
     experience = checkExperience(experience);
@@ -240,7 +266,7 @@ export const updateMentor = async (
     // profile_image = profile_image.trim();
     summary = summary.trim();
 
-    let subject_areas_arr = []
+    let subject_areas_arr = [];
 
     const mentorCollection = await mentors();
 
@@ -250,12 +276,10 @@ export const updateMentor = async (
 
     let newSubjects = [];
 
-    for( let i = 0; i< subject_areas.length; i++){
+    for (let i = 0; i < subject_areas.length; i++) {
         let subject = await subjectData.getSubjectByName(subject_areas[i]);
         newSubjects.push(subject._id.toString());
     }
-
-   
 
     let mentorUpdate = {
         first_name: first_name,
@@ -264,7 +288,7 @@ export const updateMentor = async (
         summary: summary,
         education: education,
         experience: experience,
-        subject_areas: newSubjects
+        subject_areas: newSubjects,
     };
 
     if (profileImageBase64) {
@@ -313,6 +337,7 @@ export const toAddAvailability = async (id, availability) => {
 
     // Process the availability array to update or append
     const updatedAvailability = [...existingAvailability];
+    
 
     for (const newEntry of availability) {
         const existingEntryIndex = updatedAvailability.findIndex(
@@ -403,19 +428,19 @@ export const updateSubjectAreaToMentor = async (id, subjectId) => {
         let updateDoc = {
             subject_areas: subject_areas,
         };
-    
+
         const mentorCollection = await mentors();
-    
+
         const result = await mentorCollection.findOneAndUpdate(
             { _id: new ObjectId(id) },
             { $set: updateDoc },
             { returnDocument: "after" }
         );
-    
+
         if (!result) {
             throw `Could not Update the Mentor.`;
         }
-    
+
         result._id = result._id.toString();
     }
     // return result;
@@ -484,7 +509,6 @@ export const removeSubjectAreaFromMentor = async (id, subjectId) => {
     const mentorCollection = await mentors();
 
     const mentor = await mentorCollection.findOne({ _id: new ObjectId(id) });
-
 
     let subject_areas = mentor.subject_areas;
 
@@ -579,8 +603,13 @@ export const getMentorsAboveRating = async (averageRating) => {
 
     // Filter mentors based on average rating
     const mentorsAboveRating = await mentorCollection
-        .find({ averageRating: { $gt: averageRating } })
-        .toArray();
+    .find({
+        $and: [
+            { averageRating: { $gt: averageRating } }, // Mentors with averageRating greater than the input
+            { approved: "approved" }                  // Mentors with "approved" status
+        ]
+    })
+    .toArray();
 
     if (mentorsAboveRating.length === 0) {
         return [];
@@ -589,9 +618,10 @@ export const getMentorsAboveRating = async (averageRating) => {
     // Format the result
     return mentorsAboveRating.map((mentor) => ({
         _id: mentor._id,
-        first_name: mentor.first_name,
-        last_name: mentor.last_name,
+        name: `${mentor.first_name} ${mentor.last_name}`,
         // average_rating: (mentor.reviews.reduce((sum, review) => sum + review.rating, 0) / mentor.reviews.length).toFixed(2), // Calculate average rating for display
         reviews_count: mentor.reviews.length,
+        profile_image: mentor.profile_image,
+        summary: mentor.summary,
     }));
 };

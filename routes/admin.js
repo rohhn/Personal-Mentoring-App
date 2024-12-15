@@ -33,7 +33,7 @@ router
 
     .post(fileUpload.any(), async (req, res) => {
         let keys = Object.keys(req.body);
-        for (let i = 0; i < keys.length; i) {
+        for (let i = 0; i < keys.length; i++) {
             req.body[keys[i]] = xss(req.body[keys[i]]);
         }
         let { first_name, last_name, email, password, dob, summary } = req.body;
@@ -90,7 +90,7 @@ router
 
     .post(fileUpload.any(), async (req, res) => {
         let keys = Object.keys(req.body);
-        for (let i = 0; i < keys.length; i) {
+        for (let i = 0; i < keys.length; i++) {
             req.body[keys[i]] = xss(req.body[keys[i]]);
         }
 
@@ -163,7 +163,7 @@ router
 
     .post(fileUpload.any(), async (req, res) => {
         let keys = Object.keys(req.body);
-        for (let i = 0; i < keys.length; i) {
+        for (let i = 0; i < keys.length; i++) {
             req.body[keys[i]] = xss(req.body[keys[i]]);
         }
         let { email, password } = req.body;
