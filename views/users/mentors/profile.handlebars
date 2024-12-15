@@ -66,14 +66,14 @@
                         </div>
                     </div>
                 </div>
-                <div class="card mt-3 text-bg-dark">
+                <div class="card mt-3 text-bg-dark p-2">
                     {{#if profileInfo.badges}}
                         <h5>Badges</h5>
                         <div class="d-flex flex-row">
 
                             {{#each profileInfo.badges}}
                                 <div class="p-2">
-                                    <img src="/public/badges/{{icon}}" />
+                                    <img height="64" width="64" class="rounded" src="/public/img/badges/{{icon}}" />
                                 </div>
                             {{/each}}
                         </div>

@@ -1,17 +1,15 @@
 import express from "express";
 import { ObjectId } from "mongodb";
-import multer from "multer";
 import { mentees } from "../config/mongoCollections.js";
-import { menteeData } from "../data/index.js";
+import { badgesData, menteeData } from "../data/index.js";
 import {
     checkArrayOfStrings,
     checkDate,
     checkEmail,
     checkStringParams,
-    formatDate,
 } from "../helpers.js";
-import { fileUpload } from "../middleware/common.js";
 import { extractProfileImage } from "../helpers/common.js";
+import { fileUpload } from "../middleware/common.js";
 import moment from "moment";
 import xss from "xss";
 
@@ -88,6 +86,12 @@ router
 
             mentee.userType = "mentee";
 
+            const { sessionCount, badge } =
+                await badgesData.awardBadgeBasedOnSessions(
+                    menteeId,
+                    mentee.userType
+                );
+            console.log(badge);
             // set custom flag for isOwner for edit profile tag
             let isOwner = false;
             if (req.session.user) {
@@ -97,6 +101,7 @@ router
                 pageTitle: `${mentee.first_name}'s Profile`,
                 headerOptions: req.headerOptions,
                 profileInfo: mentee,
+                latestBadge: badge,
                 isOwner,
             });
         } catch (error) {

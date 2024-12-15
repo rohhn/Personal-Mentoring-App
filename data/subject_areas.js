@@ -151,7 +151,6 @@ export const updateSubjectArea = async (id, name, description) => {
     return result;
 };
 
-
 export const searchMentorsBySubjectId = async (id) => {
     checkStringParams(id);
     id = id.trim();
@@ -162,7 +161,9 @@ export const searchMentorsBySubjectId = async (id) => {
 
     const subjectAreasCollection = await subject_areas();
 
-    const subject = await subjectAreasCollection.findOne({ _id: new ObjectId(id) });
+    const subject = await subjectAreasCollection.findOne({
+        _id: new ObjectId(id),
+    });
 
     if (!subject) {
         throw `Subject with the id ${id} does not exist.`;
@@ -180,4 +181,4 @@ export const searchMentorsBySubjectId = async (id) => {
     }
 
     return mentorsWithSubject;
-}
+};

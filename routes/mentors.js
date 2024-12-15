@@ -1,19 +1,16 @@
 import express from "express";
 import { ObjectId } from "mongodb";
 import { mentors, subject_areas } from "../config/mongoCollections.js";
+import { badgesData, mentorData, subjectData } from "../data/index.js";
 import {
     checkArrayOfStrings,
     checkBoolean,
     checkDate,
     checkEducation,
-    checkExperience,
-    checkStringParams,
     checkEmail,
-    validateAvailability,
+    checkExperience,
+    checkStringParams
 } from "../helpers.js";
-import { mentorData, subjectData } from "../data/index.js";
-import { error } from "console";
-import { constrainedMemory } from "process";
 import { fileUpload } from "../middleware/common.js";
 import { extractProfileImage } from "../helpers/common.js";
 import xss from "xss";
@@ -100,7 +97,7 @@ router
                 });
 
             mentor.userType = "mentor";
-
+            const { sessionCount, badge } = await badgesData.awardBadgeBasedOnSessions(mentorId,mentor.userType);
             // set custom flag for isOwner for edit profile tag
             let isOwner = false;
             if (req.session.user) {
@@ -114,6 +111,7 @@ router
                     pageTitle: `${mentor.first_name}'s Profile`,
                     headerOptions: req.headerOptions,
                     profileInfo: mentor,
+                    latestBadge: badge,
                     isOwner,
                 });
             }

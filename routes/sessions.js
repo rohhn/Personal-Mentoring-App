@@ -73,17 +73,15 @@ router.route("/mentee/:menteeId").get(async (req, res) => {
         if (!mentee) {
             throw `Mentee with the id ${menteeId} does not exist.`;
         }
-    } catch (e) {
-        return res.status(404).json({ error: e });
-    }
+        mentee.userType = "mentee";
 
-    try {
         let sessionsByMentee = await sessionsData.getSessionsByMentee(
             menteeId,
             "all"
         );
         // return res.status(200).json(sessionsByMentee);
         return res.render("users/mentees/sessions", {
+            userData: mentee,
             sessions: sessionsByMentee,
             headerOptions: req.headerOptions,
         });
@@ -118,17 +116,15 @@ router.route("/mentor/:mentorId").get(async (req, res) => {
         if (!mentor) {
             throw `Mentor with the id ${mentorId} does not exist.`;
         }
-    } catch (e) {
-        return res.status(404).json({ error: e });
-    }
+        mentor.userType = "mentor";
 
-    try {
         let sessionsByMentor = await sessionsData.getSessionsByMentor(
             mentorId,
             "all"
         );
         // return res.status(200).json(sessionsByMentor);
         return res.render("users/mentors/sessions", {
+            userData: mentor,
             sessions: sessionsByMentor,
             headerOptions: req.headerOptions,
         });

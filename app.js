@@ -65,6 +65,28 @@ const handlebarsInstance = exphbs.create({
                 return datetime;
             }
         },
+        beforeNow: (date) => {
+            const dateObj = moment(date);
+            if (dateObj.isValid()) {
+                return dateObj.isBefore(moment());
+            }
+            return;
+        },
+        afterNow: (date) => {
+            const dateObj = moment(date);
+            if (dateObj.isValid()) {
+                return dateObj.isAfter(moment());
+            }
+            return;
+        },
+        happeningNow: (start, end) => {
+            start = moment(start);
+            end = moment(end);
+            if (start.isValid() && end.isValid()) {
+                return moment().isBetween(start, end);
+            }
+            return;
+        },
         partialsDir: ["views/partials/"],
     },
 });
@@ -111,10 +133,3 @@ app.listen(3000, () => {
     console.log("your routes will be running on http://localhost:3000");
 });
 
-// TODO: edit mentor profile
-// TODO: Admin interface
-// TODO: Forums front-end
-// TODO: Front-end for adding review and rating
-// TODO: middleware for checking mentor status
-// TODO: Front-end for adding review and rating
-// TODO: Booking Conflict for Mentee

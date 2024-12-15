@@ -42,17 +42,27 @@
     function handleCancelSession(event) {
         // console.log(event.data);
         const apiUrl = `${window.location.origin}/sessions/${event.target.dataset.sessionId}`;
+
         $.ajax({
             type: "DELETE",
             url: apiUrl,
             success: (response) => {
-                window.location.href = `${window.location.origin}/dashboard`;
+                // window.location.href = `${window.location.origin}/dashboard`;
+                const deleteElement = $(
+                    `#session-card-${event.target.dataset.sessionId}`
+                );
+                deleteElement.remove();
+                triggerToast("Session deleted!", "info");
             },
             error: (XMLHttpRequest, textStatus, errorThrown) => {
                 console.error("XMLHttpRequest", XMLHttpRequest);
                 console.error("textStatus", textStatus);
                 console.error("errorThrown", errorThrown);
-                alert(XMLHttpRequest.responseJSON.error || errorThrown);
+                // alert(XMLHttpRequest.responseJSON.error || errorThrown);
+                triggerToast(
+                    XMLHttpRequest.responseJSON.error || errorThrown,
+                    "error"
+                );
             },
         });
     }
@@ -127,7 +137,11 @@
                 console.error("XMLHttpRequest", XMLHttpRequest);
                 console.error("textStatus", textStatus);
                 console.error("errorThrown", errorThrown);
-                alert(XMLHttpRequest.responseJSON.error || errorThrown);
+                // alert(XMLHttpRequest.responseJSON.error || errorThrown);
+                triggerToast(
+                    XMLHttpRequest.responseJSON.error || errorThrown,
+                    "error"
+                );
             },
         });
     }
@@ -162,7 +176,8 @@
         });
 
         if (validateResult) {
-            alert(validateResult[0]);
+            // alert(validateResult[0]);
+            triggerToast(validateResult[0], "error");
             return;
         } else {
             console.log("form is valid.");
@@ -247,6 +262,12 @@
             date: event.data.date,
         });
         const selectedDay = daysOfWeek[dateObj.day()];
+
+        const avlDiv = $("#availability-div");
+        avlDiv.empty();
+        avlDiv.append(
+            `<p class="pt-5 text-center fs-6 fw-lighter fst-italic">Loading availability...</p>`
+        );
 
         const apiUrl = `${window.location.origin}/mentor/${event.data.dataset.mentorId}?api=true`;
 
@@ -383,4 +404,23 @@
         "Friday",
         "Saturday",
     ];
+
+    var triggerToast = (content, type = undefined) => {
+        $("#toast-content").text(content);
+
+        alertToast.removeClass();
+
+        if (type === "danger") {
+            alertToast.addClass("text-bg-danger toast");
+        } else if (type === "info") {
+            alertToast.addClass("text-bg-info toast");
+        } else {
+            alertToast.addClass("text-bg-dark toast");
+        }
+        const toastBootstrap = bootstrap.Toast.getOrCreateInstance(alertToast);
+
+        toastBootstrap.show();
+    };
+
+    const alertToast = $("#alert-toast");
 })(jQuery);
