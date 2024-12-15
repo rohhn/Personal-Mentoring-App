@@ -132,7 +132,7 @@ app.set("view engine", "handlebars");
 
 constructorMethod(app);
 
-const server = app.listen(3000, () => {
+app.listen(3000, () => {
     console.log("We have now got a server");
     console.log("your routes will be running on http://localhost:3000");
 });
