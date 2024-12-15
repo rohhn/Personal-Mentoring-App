@@ -313,6 +313,7 @@ export const toAddAvailability = async (id, availability) => {
 
     // Process the availability array to update or append
     const updatedAvailability = [...existingAvailability];
+    
 
     for (const newEntry of availability) {
         const existingEntryIndex = updatedAvailability.findIndex(
