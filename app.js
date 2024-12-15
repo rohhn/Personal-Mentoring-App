@@ -17,6 +17,7 @@ import {
     allowAdminOnly,
 } from "./middleware/admin.js";
 import moment from "moment";
+import { closeConnection } from "./config/mongoConnection.js";
 
 const rewriteUnsupportedBrowserMethods = (req, res, next) => {
     // If the user posts to the server with a property called _method, rewrite the request's method
@@ -134,4 +135,9 @@ constructorMethod(app);
 const server = app.listen(3000, () => {
     console.log("We have now got a server");
     console.log("your routes will be running on http://localhost:3000");
+});
+
+process.on("SIGTERM", () => {
+    console.debug("Shutting Down Database");
+    closeConnection();
 });
