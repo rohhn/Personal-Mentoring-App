@@ -123,7 +123,6 @@ app.use("/admin/signup", adminLoginMiddleware);
 app.use("/sessions/*", privateRouteMiddleware);
 app.use("/mentor/availability/*", privateRouteMiddleware);
 app.use("/sessions/booking/*", allowMenteesOnly);
-
 app.engine("handlebars", handlebarsInstance.engine);
 app.set("view engine", "handlebars");
 
@@ -134,4 +133,3 @@ app.listen(3000, () => {
     console.log("your routes will be running on http://localhost:3000");
 });
 
-// TODO: Forums front-end

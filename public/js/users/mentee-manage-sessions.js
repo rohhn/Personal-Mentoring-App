@@ -263,6 +263,12 @@
         });
         const selectedDay = daysOfWeek[dateObj.day()];
 
+        const avlDiv = $("#availability-div");
+        avlDiv.empty();
+        avlDiv.append(
+            `<p class="pt-5 text-center fs-6 fw-lighter fst-italic">Loading availability...</p>`
+        );
+
         const apiUrl = `${window.location.origin}/mentor/${event.data.dataset.mentorId}?api=true`;
 
         $.ajax({

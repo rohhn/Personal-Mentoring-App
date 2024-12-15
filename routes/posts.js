@@ -2,6 +2,7 @@ import express from "express";
 import * as postData from "../data/posts.js";
 import * as repliesData from "../data/replies.js";
 import * as adminData from "../data/admin.js";
+import xss from "xss";
 
 
 const router = express.Router();
@@ -10,13 +11,21 @@ const router = express.Router();
 router
     .route("/:subject_id")
     .get(async (req, res) => {
-        if (!req.session || !req.session.user && !req.session.admin) {
+
+        
+        if (!req.session && !req.session.user || !req.session.admin) {
+
             return res.redirect("/login");
         }
 
+        req.session = xss(req.session);
+        req.session.user = xss(req.session.user);
+        req.session.user = xss(req.session.user);
+
 
         try {
-            let forum = await postData.getForums(req.params.subject_id);
+            req.params.subject_id = xss(req.params.subject_id);
+            let forum = await postData.getForums(xss(req.params.subject_id));
 
             forum.posts.forEach((post) => {
                 if (post.replies && Array.isArray(post.replies)) {
@@ -29,8 +38,10 @@ router
             });
 
             res.render("forum/forum", {
-                subject_id: req.params.subject_id,
-                subject: forum.title,
+
+                subject_id: xss(req.params.subject_id),
+                title: forum.title,
+
                 posts: forum.posts || [],
                 replies: forum.posts.replies || [],
             });
@@ -51,11 +62,11 @@ router
         let userId;
         let sessionAuthorName
         if (req.session.admin) {
-            userId = req.session.admin._id;
-            sessionAuthorName = req.session.admin.firstName;
+            userId = (xss);
+            sessionAuthorName = xss(req.session.admin.firstName);
         } else if (req.session.user) {
-            userId = req.session.user.userId;
-            sessionAuthorName = req.session.user.userName;
+            userId = xss(req.session.user.userId);
+            sessionAuthorName = xss(req.session.user.userName);
         }
 
         if (!userId) {
@@ -76,9 +87,9 @@ router
             });
         }
 
-        title = title.trim();
-        content = content.trim();
-        authorName = authorName.trim();
+        title = xss(title.trim());
+        content = xss(content.trim());
+        authorName = xss(authorName.trim());
 
         try {
             const newPost = await postData.makePost(
@@ -93,9 +104,9 @@ router
 
             return res.render("forum/forum", {
                 subject_id: req.params.subject_id,
-                authorName: forum.authorName,
-                title: forum.title,
-                posts: forum.posts || [],
+                authorName: xss(forum.authorName),
+                title: xss(forum.title),
+                posts: xss(forum.posts) || [],
             });
         } catch (e) {
             console.error("Error while creating a post:", e || e);
@@ -121,10 +132,15 @@ router
         if (!req.session || !req.session.user && !req.session.admin)  {
             return res.redirect("/login");
         }
+
+        req.session = xss(req.session);
+        req.session.user = xss(req.session.user);
+        req.session.admin = xss(req.session.admin);
+
         try {
-            let post = await postData.getPost(req.params.post_id);
+            let post = await postData.getPost(xss(req.params.post_id));
             res.render("forum/post", {
-                subject_id: req.params.subject_id,
+                subject_id: xss(req.params.subject_id),
                 post_id: post._id,
                 title: post.title,
                 content: post.content,
@@ -139,16 +155,23 @@ router
     })
     .patch(async (req, res) => {
         let { updatedContent, updatedTitle } = req.body;
+        
+        updatedContent = xss(updatedContent.trim());
+        updatedTitle = xss(updatedTitle.trim());
 
         if (!req.session) {
             return res.redirect('/login');
         }
 
+        req.session = xss(req.session);
+        // req.session.user = xss(req.session.user);
+        // req.session.admin = xss(req.session.admin);
+
         let userId;
         if (req.session.user) {
-            userId = req.session.user.userId;
+            userId = xss(req.session.user.userId);
         } else if (req.session.admin) {
-            userId = req.session.admin._id;
+            userId = xss(req.session.admin._id);
         } else {
             return res.status(401).render("error", {
                 errorTitle: "Unauthorized",
@@ -168,16 +191,17 @@ router
 
         try {
             let updatedPost = await postData.editPost(
-                req.params.post_id,
+                xss(req.params.post_id),
                 userId,
                 updatedContent,
                 updatedTitle
             );
 
-            return res.redirect(`/forum/${req.params.subject_id}`);
-        } catch(e) {
-            let errorMessage = e.message || String(e);
-            if (errorMessage.includes("Unauthorized")) {
+
+            return res.redirect(`/forum/${xss(req.params.subject_id)}`);
+        } catch (e) {
+            if (e.includes("Unauthorized")) {
+
                 return res.status(403).render("error", {
                     errorTitle: "Unauthorized",
                     errorMessage: errorMessage,
@@ -205,11 +229,15 @@ router
             });
         }
 
+        req.session = xss(req.session);
+        req.session.user = xss(req.session.user);
+        req.session.admin = xss(req.session.admin);
+
         let userId;
         if (req.session.user) {
-            userId = req.session.user.userId;
+            userId = xss(req.session.user.userId);
         } else if (req.session.admin) {
-            userId = req.session.admin._id;
+            userId = xss(req.session.admin._id);
         } else {
             return res.status(401).render("error", {
                 errorTitle: "Unauthorized",
@@ -219,15 +247,16 @@ router
 
         try {
             let result = await postData.deletePost(
-                req.params.subject_id,
-                req.params.post_id,
+                xss(req.params.subject_id),
+                xss(req.params.post_id),
                 userId
             );
 
-            res.redirect(`/forum/${req.params.subject_id}`);
-        } catch(e) {
-            let errorMessage = e.message || String(e);
-            if (errorMessage.includes("Unauthorized")) {
+
+            res.redirect(`/forum/${xss(req.params.subject_id)}`);
+        } catch (e) {
+            if (e == "Error: Unauthorized action. You cannot delete this post.") {
+
                 return res.status(403).render("error", {
                     errorTitle: "Unauthorized",
                     errorMessage: errorMessage,
@@ -252,18 +281,23 @@ router
         if (!req.session || !req.session.user && !req.session.admin)  {
             return res.redirect("/login");
         }
+
+        req.session = xss(req.session);
+        req.session.user = xss(req.session.user);
+        req.session.admin = xss(req.session.admin);
+
         let sessionAuthorName
         if (req.session.admin) {
-            sessionAuthorName = req.session.admin.firstName;
+            sessionAuthorName = xss(req.session.admin.firstName);
         } else if (req.session.user) {
-            sessionAuthorName = req.session.user.userName;
+            sessionAuthorName = xss(req.session.user.userName);
         }
         try {
-            let post = await postData.getPost(req.params.post_id);
+            let post = await postData.getPost(xss(req.params.post_id));
 
             res.render("forum/makeReply", {
-                subject_id: req.params.subject_id,
-                post_id: req.params.post_id,
+                subject_id: xss(req.params.subject_id),
+                post_id: xss(req.params.post_id),
                 postTitle: post.title,
                 replyAuthorName: sessionAuthorName || "",
             });
@@ -278,16 +312,25 @@ router
         if (!req.session || !req.session.user && !req.session.admin)  {
             return res.redirect("/login");
         }
+
+        req.session = xss(req.session);
+        req.session.user = xss(req.session.user);
+        req.session.admin = xss(req.session.admin);
+
+
         let { replyAuthorName, content } = req.body;
+
+        replyAuthorName = xss(replyAuthorName);
+        content = xss(content);
 
         let userId;
         let sessionAuthorName
         if (req.session.admin) {
-            userId = req.session.admin._id;
-            sessionAuthorName = req.session.admin.firstName;
+            userId = xss(req.session.admin._id);
+            sessionAuthorName = xss(req.session.admin.firstName);
         } else if (req.session.user) {
-            userId = req.session.user.userId;
-            sessionAuthorName = req.session.user.userName;
+            userId = xss(req.session.user.userId);
+            sessionAuthorName = xss(req.session.user.userName);
         }
 
         if (!userId) {
@@ -310,12 +353,12 @@ router
 
         try {
             let newReply = await repliesData.makeReply(
-                req.params.post_id,
+                xss(req.params.post_id),
                 userId,                
                 replyAuthorName,
                 content
             );
-            res.redirect(`/forum/${req.params.subject_id}`);
+            res.redirect(`/forum/${xss(req.params.subject_id)}`);
         }
         catch (e) {
             res.status(500).render("error", {
@@ -331,16 +374,21 @@ router
         if (!req.session || !req.session.user && !req.session.admin)  {
             return res.redirect("/login");
         }
+
+        req.session = xss(req.session);
+        req.session.user = xss(req.session.user);
+        req.session.admin = xss(req.session.admin);
+
         try {
             let reply = await repliesData.getReply(
-                req.params.post_id,
-                req.params.reply_id
+                xss(req.params.post_id),
+                xss(req.params.reply_id)
             );
 
             res.render("forum/editReply", {
-                subject_id: req.params.subject_id,
-                post_id: req.params.post_id,
-                reply_id: req.params.reply_id,
+                subject_id: xss(req.params.subject_id),
+                post_id: xss(req.params.post_id),
+                reply_id: xss(req.params.reply_id),
                 replyAuthorName: reply.replyAuthorName,
                 content: reply.content,
             });
@@ -357,13 +405,20 @@ router
             return res.redirect("/login");
         }
 
+        req.session = xss(req.session);
+        req.session.user = xss(req.session.user);
+        req.session.admin = xss(req.session.admin);
+
+
         let { updatedContent } = req.body;
+
+        
 
         let userId;
         if (req.session.user) {
-            userId = req.session.user.userId;
+            userId = xss(req.session.user.userId);
         } else if (req.session.admin) {
-            userId = req.session.admin._id;
+            userId = xss(req.session.admin._id);
         } else {
             return res.status(401).render("error", {
                 errorTitle: "Unauthorized",
@@ -381,8 +436,8 @@ router
 
         try {
             let updatedReply = await repliesData.editReply(
-                req.params.post_id,
-                req.params.reply_id,
+                xss(req.params.post_id),
+                xss(req.params.reply_id),
                 userId,
                 updatedContent
             );
@@ -421,11 +476,15 @@ router
             });
         }
 
+        req.session = xss(req.session);
+        req.session.user = xss(req.session.user);
+        req.session.admin = xss(req.session.admin);
+
         let userId;
         if (req.session.user) {
-            userId = req.session.user.userId;
+            userId = xss(req.session.user.userId);
         } else if (req.session.admin) {
-            userId = req.session.admin._id;
+            userId = xss(req.session.admin._id);
         } else {
             return res.status(401).render("error", {
                 errorTitle: "Unauthorized",
@@ -435,8 +494,8 @@ router
 
         try {
             let result = await repliesData.deleteReply(
-                req.params.post_id,
-                req.params.reply_id,
+                xss(req.params.post_id),
+                xss(req.params.reply_id),
                 userId
             );
 
@@ -447,11 +506,12 @@ router
                 });
             }
 
-            res.redirect(`/forum/${req.params.subject_id}`);
-        } catch(e) {
-            let errorMessage = e.message || String(e);
-            if (errorMessage.includes("Unauthorized")) {
-                return res.status(403).render("error", {
+
+            res.redirect(`/forum/${xss(req.params.subject_id)}`);
+        } catch (e) {
+            if (e.includes("not authorized")) {
+                res.status(403).render("error", {
+
                     errorTitle: "Unauthorized",
                     errorMessage: errorMessage,
                 });

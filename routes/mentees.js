@@ -6,10 +6,12 @@ import {
     checkArrayOfStrings,
     checkDate,
     checkEmail,
-    checkStringParams
+    checkStringParams,
 } from "../helpers.js";
 import { extractProfileImage } from "../helpers/common.js";
 import { fileUpload } from "../middleware/common.js";
+import moment from "moment";
+import xss from "xss";
 
 const router = express.Router();
 
@@ -42,16 +44,16 @@ router
 
         try {
             let menteeCreate = await menteeData.createMentee(
-                newMentee.first_name,
-                newMentee.last_name,
-                newMentee.dob,
-                newMentee.email,
-                newMentee.pwd_hash,
-                newMentee.parent_email,
-                newMentee.profile_image,
-                newMentee.created_at,
-                newMentee.summary,
-                newMentee.skills
+                xss(newMentee.first_name),
+                xss(newMentee.last_name),
+                xss(newMentee.dob),
+                xss(newMentee.email),
+                xss(newMentee.pwd_hash),
+                xss(newMentee.parent_email),
+                xss(newMentee.profile_image),
+                xss(newMentee.created_at),
+                xss(newMentee.summary),
+                xss(newMentee.skills)
             );
 
             return res.status(200).json(menteeCreate);
@@ -63,7 +65,7 @@ router
 router
     .route("/:menteeId")
     .get(async (req, res) => {
-        let menteeId = req.params.menteeId.trim();
+        let menteeId = xss(req.params.menteeId.trim());
 
         try {
             checkStringParams(menteeId);
@@ -84,8 +86,12 @@ router
 
             mentee.userType = "mentee";
 
-            const { sessionCount, badge } = await badgesData.awardBadgeBasedOnSessions(menteeId,mentee.userType);
-            console.log(badge)
+            const { sessionCount, badge } =
+                await badgesData.awardBadgeBasedOnSessions(
+                    menteeId,
+                    mentee.userType
+                );
+            console.log(badge);
             // set custom flag for isOwner for edit profile tag
             let isOwner = false;
             if (req.session.user) {
@@ -108,7 +114,7 @@ router
         }
     })
     .delete(async (req, res) => {
-        let menteeId = req.params.menteeId.trim();
+        let menteeId = xss(req.params.menteeId.trim());
 
         try {
             checkStringParams(menteeId);
@@ -143,7 +149,7 @@ router
     })
     .put(fileUpload.any(), async (req, res) => {
         try {
-            const menteeId = req.params.menteeId.trim();
+            const menteeId = xss(req.params.menteeId.trim());
             if (!menteeId) throw new Error("Mentee ID is required.");
 
             if (req.session.user.userId !== menteeId) {
@@ -152,7 +158,7 @@ router
                 throw errObj;
             }
 
-            const {
+            let {
                 first_name,
                 last_name,
                 dob,
@@ -162,6 +168,14 @@ router
                 skills,
             } = req.body;
             // const dob = formatDate(req.body.dob);
+
+            first_name = xss(first_name);
+            last_name = xss(last_name);
+            dob = xss(dob);
+            email = xss(email);
+            parent_email = xss(parent_email);
+            summary = xss(summary);
+            skills = xss(skills);
 
             if (!first_name || !last_name || !email) {
                 errorObj = new Error(
@@ -209,7 +223,7 @@ router
     });
 
 router.route("/:menteeId/edit").get(async (req, res) => {
-    let menteeId = req.params.menteeId.trim();
+    let menteeId = xss(req.params.menteeId.trim());
 
     if (req.session.user.userId !== menteeId) {
         res.redirect("/dashboard");

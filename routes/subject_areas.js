@@ -5,6 +5,7 @@ import { subject_areas } from "../config/mongoCollections.js";
 import {checkStringParams } from "../helpers.js";
 
 import { subjectData } from '../data/index.js';
+import xss from 'xss';
 
 const router = express.Router();
 
@@ -20,7 +21,7 @@ router
         return res.status(400).json({error: e});
     }
 
-    let subject_area = await subjectData.createSubjectArea(newSubject.name, newSubject.description);
+    let subject_area = await subjectData.createSubjectArea(xss(newSubject.name), xss(newSubject.description));
     return res.status(200).json(subject_area);
 
 })
@@ -37,7 +38,7 @@ router
 router
 .route('/:subjectId')
 .get(async (req, res) => {
-    let subjectId = req.params.subjectId.trim();
+    let subjectId = xss(req.params.subjectId.trim());
 
     try{
         checkStringParams(subjectId);
@@ -59,7 +60,7 @@ router
     }
 })
 .delete(async (req, res) => {
-    let subjectId = req.params.subjectId.trim();
+    let subjectId = xss(req.params.subjectId.trim());
 
     try{
         checkStringParams(subjectId);
@@ -96,7 +97,7 @@ router
 
 })
 .put(async (req, res) => {
-    let subjectId = req.params.subjectId.trim();
+    let subjectId = xss(req.params.subjectId.trim());
 
     try{
         checkStringParams(subjectId);
@@ -125,6 +126,7 @@ router
 
     let updateSubject = req.body;
 
+
     try{
         checkStringParams(updateSubject.name);
         checkStringParams(updateSubject.description, true);
@@ -132,8 +134,8 @@ router
         return res.status(400).json({error: e});
     }
 
-    updateSubject.name = updateSubject.name.trim();
-    updateSubject.description = updateSubject.description.trim();
+    updateSubject.name = xss(updateSubject.name.trim());
+    updateSubject.description = xss(updateSubject.description.trim());
 
     try{
         let updatedSubject = await subjectData.updateSubjectArea(subjectId, updateSubject.name, updateSubject.description);
@@ -147,7 +149,7 @@ router
 router
 .route('/name/:subjectName')
 .get(async (req, res) => {
-    let name = req.params.subjectName.trim();
+    let name = xss(req.params.subjectName.trim());
 
     try{
         checkStringParams(name);
@@ -167,7 +169,7 @@ router
 router
 .route('/mentors/:subjectId')
 .get(async (req, res) => {
-    let subjectId = req.params.subjectId.trim();
+    let subjectId = xss(req.params.subjectId.trim());
 
     try{
         checkStringParams(subjectId);
