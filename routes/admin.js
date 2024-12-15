@@ -33,12 +33,11 @@ router
 
     .post(fileUpload.any(), async (req, res) => {
         let keys = Object.keys(req.body);
-        for(let i = 0; i < keys.length; i){
+        for (let i = 0; i < keys.length; i) {
             req.body[keys[i]] = xss(req.body[keys[i]]);
         }
         let { first_name, last_name, email, password, dob, summary } = req.body;
         let profile_image = extractProfileImage(req);
-
 
         try {
             let hashedPassword = await bcrypt.hash(
@@ -91,7 +90,7 @@ router
 
     .post(fileUpload.any(), async (req, res) => {
         let keys = Object.keys(req.body);
-        for(let i = 0; i < keys.length; i){
+        for (let i = 0; i < keys.length; i) {
             req.body[keys[i]] = xss(req.body[keys[i]]);
         }
 
@@ -133,11 +132,13 @@ router
             return res.redirect("/admin/login");
         }
 
-        req.session= xss(req.session);
+        req.session = xss(req.session);
         req.session.admin = xss(req.session.admin);
 
         try {
-            let admin = await adminData.getAdminById(xss(req.session.admin._id));
+            let admin = await adminData.getAdminById(
+                xss(req.session.admin._id)
+            );
 
             res.render("admin/dashboard", {
                 pageTitle: "Admin Dashboard",
@@ -161,7 +162,7 @@ router
 
     .post(fileUpload.any(), async (req, res) => {
         let keys = Object.keys(req.body);
-        for(let i = 0; i < keys.length; i){
+        for (let i = 0; i < keys.length; i) {
             req.body[keys[i]] = xss(req.body[keys[i]]);
         }
         let { email, password } = req.body;
@@ -191,53 +192,53 @@ router
         }
     });
 
-router
-    .route("/dashboard/edit")
-    .get(async (req, res) => {
-        if (!req.session || !req.session.admin) {
-            return res.redirect("/admin/login");
+router.route("/dashboard/edit").get(async (req, res) => {
+    if (!req.session || !req.session.admin) {
+        return res.redirect("/admin/login");
+    }
+
+    req.session = xss(req.session);
+    req.session.admin = xss(req.session.admin);
+
+    try {
+        let adminId = xss(req.session.admin._id);
+
+        if (req.query.update === "true") {
+            let { firstName, lastName, summary, email, password } = req.query;
+
+            let updates = {
+                firstName: firstName?.trim(),
+                lastName: lastName?.trim(),
+                summary: summary?.trim(),
+            };
+
+            if (password && password.trim().length > 0) {
+                updates.pwd_hash = await bcrypt.hash(
+                    password.trim(),
+                    parseInt(process.env.SALT_ROUNDS)
+                );
+            }
+
+            if (req.query.profile_image) {
+                updates.profile_image = req.query.profile_image;
+            }
+
+            await adminData.updateAdmin(adminId, updates);
+
+            return res.redirect("/admin/dashboard");
         }
 
+        const admin = await adminData.getAdminById(adminId);
 
-        req.session= xss(req.session);
-        req.session.admin = xss(req.session.admin);
-    
-        try {
-            let adminId = xss(req.session.admin._id);
-    
-            if (req.query.update === "true") {
-                let { firstName, lastName, summary, email, password } = req.query;
-    
-                let updates = {
-                    firstName: firstName?.trim(),
-                    lastName: lastName?.trim(),
-                    summary: summary?.trim(),
-                };
-    
-                if (password && password.trim().length > 0) {
-                    updates.pwd_hash = await bcrypt.hash(password.trim(), parseInt(process.env.SALT_ROUNDS));
-                }
-    
-                if (req.query.profile_image) {
-                    updates.profile_image = req.query.profile_image; 
-                }
-    
-                await adminData.updateAdmin(adminId, updates);
-    
-                return res.redirect("/admin/dashboard");
-            }
-    
-
-            const admin = await adminData.getAdminById(adminId);
-
-            res.render("admin/edit-dashboard", {
-                pageTitle: "Edit Admin Profile",
-                headerOptions: req.headerOptions,
-                profileInfo: admin,
-            });
-        } catch (error) {
-            console.error("Error handling admin edit route:", error);
-
+        res.render("admin/edit-dashboard", {
+            pageTitle: "Edit Admin Profile",
+            headerOptions: req.headerOptions,
+            profileInfo: admin,
+        });
+    } catch (error) {
+        console.error("Error handling admin edit route:", error);
+    }
+});
 
 router
     .route("/applications")
@@ -246,11 +247,12 @@ router
             return res.redirect("/admin/login");
         }
 
-        req.session= xss(req.session);
+        req.session = xss(req.session);
         req.session.admin = xss(req.session.admin);
 
         try {
-            let pendingApplications = await applicationData.getPendingMentorApplications();
+            let pendingApplications =
+                await applicationData.getPendingMentorApplications();
             res.render("admin/applications", {
                 pageTitle: "Pending Mentor Applications",
                 applications: pendingApplications,
@@ -271,8 +273,7 @@ router
             return res.redirect("/admin/login");
         }
 
-
-        req.session= xss(req.session);
+        req.session = xss(req.session);
         req.session.admin = xss(req.session.admin);
 
         try {
@@ -283,16 +284,15 @@ router
             console.error("Error approving mentor:", e);
             res.status(500).render("error", {
                 errorTitle: "Internal Server Error",
-                errorMessage: "Unable to approve application. Please try again later.",
+                errorMessage:
+                    "Unable to approve application. Please try again later.",
             });
         }
-    });
-
+        // });
 
         let { firstName, lastName, password } = req.body;
 
-
-        req.session= xss(req.session);
+        req.session = xss(req.session);
         req.session.admin = xss(req.session.admin);
 
         try {
@@ -303,9 +303,9 @@ router
             console.error("Error rejecting mentor:", e);
             res.status(500).render("error", {
                 errorTitle: "Internal Server Error",
-                errorMessage: "Unable to reject application. Please try again later.",
+                errorMessage:
+                    "Unable to reject application. Please try again later.",
             });
-
         }
 
         await adminData.updateAdmin(adminId, updates);
