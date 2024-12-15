@@ -111,6 +111,7 @@ router
                     _id: admin._id.toString(),
                     email: admin.email,
                     isAdmin: admin.isAdmin,
+                    userType: "admin",
                 };
                 res.redirect("/admin/dashboard");
             } else {
@@ -317,10 +318,11 @@ router.route("/applications").get(async (req, res) => {
     if (!req.session || !req.session.admin) {
         return res.redirect("/admin/login");
     }
-
+    let status = req.body;
     try {
-        let pendingApplications =
-            await applicationData.getPendingMentorApplications();
+        let pendingApplications = await applicationData.getMentorsbyStatus(
+            status
+        );
         res.render("admin/applications", {
             pageTitle: "Pending Mentor Applications",
             headerOptions: req.headerOptions,
@@ -344,7 +346,7 @@ router.route("/applications/:id/approve").post(async (req, res) => {
 
     try {
         let mentorId = req.params.id;
-        await applicationData.updateMentorApproval(mentorId, true);
+        await applicationData.updateMentorApproval(mentorId);
         res.redirect("/admin/applications");
     } catch (e) {
         console.error("Error approving mentor:", e);
@@ -364,7 +366,7 @@ router.route("/applications/:id/reject").post(async (req, res) => {
 
     try {
         let mentorId = req.params.id;
-        await applicationData.updateMentorApproval(mentorId, false);
+        await applicationData.updateMentorRejection(mentorId);
         res.redirect("/admin/applications");
     } catch (e) {
         console.error("Error rejecting mentor:", e);

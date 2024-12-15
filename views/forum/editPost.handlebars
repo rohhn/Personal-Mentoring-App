@@ -1,0 +1,39 @@
+<main class="container my-5">
+    <section id="title">
+        <h1 class="text-center">Edit your post</h1>
+    </section>
+    <section id="edit-post" class="mb-5">
+        
+        <form id="edit-post-form">
+
+            <div class="mb-3">
+                <label for="title" class="form-label">Post Title</label>
+                <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    class="form-control"
+                    placeholder="Enter Post Title"
+                    value="{{post.title}}"
+                    required
+                />
+            </div>
+
+            <div class="mb-3">
+                <label for="content" class="form-label">Content</label>
+                <textarea
+                    id="content"
+                    name="content"
+                    class="form-control"
+                    placeholder="Enter your Post Body"
+                    rows="5"
+                    required
+                >{{post.content}}</textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Edit</button>
+        </form>
+    </section>
+</main>
+
+{{>forum/editPost}}

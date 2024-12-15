@@ -117,12 +117,14 @@ app.use("/dashboard", adminDashboardMiddleware);
 app.use("/login", loginMiddleware);
 app.use("/signup", loginMiddleware);
 
-app.use("/admin/login", adminLoginMiddleware);
-app.use("/admin/signup", adminLoginMiddleware);
+app.use("/admin*", adminLoginMiddleware);
 
-app.use("/sessions/*", privateRouteMiddleware);
+app.use("/sessions*", privateRouteMiddleware);
 app.use("/mentor/availability/*", privateRouteMiddleware);
 app.use("/sessions/booking/*", allowMenteesOnly);
+
+app.use("/forum*", privateRouteMiddleware);
+
 app.engine("handlebars", handlebarsInstance.engine);
 app.set("view engine", "handlebars");
 

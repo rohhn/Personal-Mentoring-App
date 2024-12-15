@@ -2,23 +2,23 @@
     <div class="reply-container">
         <h1>Add a Reply</h1>
         <h2>Replying to Post: {{postTitle}}</h2>
-        <form action="/forum/{{subject_id}}/{{post_id}}/reply" method="POST">
+        <form action="/forum/{{forum_id}}/{{post_id}}/reply" method="POST">
             <label for="replyAuthorName">Your Name:</label>
-            <input 
-                type="text" 
-                id="replyAuthorName" 
-                name="replyAuthorName" 
-                placeholder="Enter your name" 
-                value="{{replyAuthorName}}" 
-                required 
-            >
+            <input
+                type="text"
+                id="replyAuthorName"
+                name="replyAuthorName"
+                placeholder="Enter your name"
+                value="{{replyAuthorName}}"
+                required
+            />
 
             <label for="content">Your Reply:</label>
-            <textarea 
-                id="content" 
-                name="content" 
-                rows="5" 
-                placeholder="Write your reply here..." 
+            <textarea
+                id="content"
+                name="content"
+                rows="5"
+                placeholder="Write your reply here..."
                 required
             ></textarea>
 

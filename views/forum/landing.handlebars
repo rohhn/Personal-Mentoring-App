@@ -1,0 +1,26 @@
+<main class="container my-3">
+
+    <section id="subject-areas-section">
+        <div class="d-flex flex-row justify-content-between mb-2">
+            <h2 class="mb-0">All Forums</h2>
+            <a class="btn btn-primary" href="/forum/post/">Create a Post</a>
+        </div>
+        <div class="row gy-2">
+            <ul class="list-group border-0">
+                {{#each forumsList}}
+                    <li
+                        class="list-group-item d-flex justify-content-between align-items-center text-bg-dark border-0 border-bottom border-secondary-subtle"
+                    >
+                        <a
+                            class="text-decoration-none"
+                            href="/forum/{{this._id}}"
+                        >{{this.title}}</a>
+                        <span
+                            class="badge text-bg-primary rounded-pill"
+                        >{{this.postCount}}</span>
+                    </li>
+                {{/each}}
+            </ul>
+        </div>
+    </section>
+</main>
