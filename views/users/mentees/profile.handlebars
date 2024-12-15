@@ -3,10 +3,9 @@
         {{#if isOwner}}
             <div class="row mb-3">
                 <div class="d-flex justify-content-end">
-                    <a class="btn btn-primary" href="/{{profileInfo.userType}}/{{profileInfo._id}}/edit"><i
-                            class="fa-regular fa-pen-to-square me-2"
-                            style="color: #ffffff;"
-                        ></i>Edit Profile</a>
+                    <a class="btn btn-primary" href="/{{profileInfo.userType}}/{{profileInfo._id}}/edit">
+                        <i class="fa-regular fa-pen-to-square me-2" style="color: #ffffff;"></i>Edit Profile
+                    </a>
                 </div>
             </div>
         {{/if}}
@@ -16,37 +15,19 @@
                     <div class="card-body">
                         <div class="d-flex flex-column align-items-center text-center">
                             {{#if profileInfo.profile_image}}
-                                <img
-                                    src="{{profileInfo.profile_image}}"
-                                    alt="{{profileInfo.first_name}}"
-                                    class="rounded-circle"
-                                    width="128"
-                                    height="128"
-                                />
+                                <img src="{{profileInfo.profile_image}}" alt="{{profileInfo.first_name}} {{profileInfo.last_name}}" class="rounded-circle" width="128" height="128"/>
                             {{else}}
-                                {{! <svg xmlns="http://www.w3.org/2000/svg" width="100" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#003c8a" d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z"/></svg> }}
-                                <i class="fa-solid fa-user" style="color: #003c8a; font-size:75"></i>
+                                <i class="fa-solid fa-user" style="color: #003c8a; font-size:75px;"></i>
                             {{/if}}
                             <div class="mt-3">
                                 <h4>{{profileInfo.first_name}} {{profileInfo.last_name}}</h4>
-
                                 {{#if profileInfo.averageRating}}
-                                        <div
-                                            class="ratings-render"
-                                            data-rating={{profileInfo.averageRating}}
-                                        ></div>
-                                        <p
-                                            class="text-secondary"
-                                        >({{profileInfo.reviews.length}})</p>
-                                    {{else}}
-                                        <p
-                                            class="text-secondary fs-6 fw-lighter fst-italic"
-                                        >0 reviews</p>
-                                    {{/if}}
+                                    <div class="ratings-render" data-rating={{profileInfo.averageRating}}></div>
+                                    <p class="text-secondary">({{profileInfo.reviews.length}} reviews)</p>
+                                {{else}}
+                                    <p class="text-secondary fs-6 fw-lighter fst-italic">0 reviews</p>
+                                {{/if}}
                                 <p class="text-secondary mb-1">{{profileInfo.summary}}</p>
-                                {{! <p class="text-muted font-size-sm">Bay Area, San Francisco, CA</p>
-                      <button class="btn btn-primary">Follow</button>
-                      <button class="btn btn-outline-primary">Message</button> }}
                             </div>
                         </div>
                     </div>
@@ -55,7 +36,6 @@
                     {{#if profileInfo.badges}}
                         <h5>Badges</h5>
                         <div class="d-flex flex-row">
-
                             {{#each profileInfo.badges}}
                                 <div class="p-2">
                                     <img height="64" width="64" src="/public/img/badges/{{icon}}" />
@@ -75,8 +55,7 @@
                                 <h6 class="mb-0">Name</h6>
                             </div>
                             <div class="col-sm-9 text-secondary">
-                                {{profileInfo.first_name}}
-                                {{profileInfo.last_name}}
+                                {{profileInfo.first_name}} {{profileInfo.last_name}}
                             </div>
                         </div>
                         <hr />
@@ -101,7 +80,7 @@
                         {{#if profileInfo.parent_email}}
                             <div class="row">
                                 <div class="col-sm-3">
-                                    <h6 class="mb-0">Guardian&apos;s Email</h6>
+                                    <h6 class="mb-0">Guardian's Email</h6>
                                 </div>
                                 <div class="col-sm-9 text-secondary">
                                     {{profileInfo.parent_email}}
@@ -113,7 +92,6 @@
                             <div class="col-sm-3">
                                 <h6 class="mb-0">Skills</h6>
                             </div>
-
                             <div class="col-sm-9">
                                 <ol class="list-group list-group-horizontal mb-2">
                                     {{#each profileInfo.skills}}
@@ -122,17 +100,13 @@
                                         </li>
                                     {{/each}}
                                 </ol>
-
                             </div>
-
                         </div>
                         <hr />
-
                     </div>
                 </div>
             </div>
         </div>
-
         <div class="row gutters-sm">
             <div class="col-sm-12 mb-3">
                 <div class="card h-100 text-bg-dark">
@@ -140,18 +114,18 @@
                         <h5 class="d-flex align-items-center mb-3">Reviews</h5>
                         {{#each profileInfo.reviews}}
                             <div class="p-2 border-bottom">
+                                <!-- Name first -->
+                                <p class="mb-0 fw-bold">{{author_first_name}} {{author_last_name}}</p>
+                                <!-- Then star ratings -->
                                 <div class="mb-1 ratings-render" data-rating={{rating}}></div>
-                                <p class="mb-0">{{author}}</p>
+                                <!-- Finally, the review text -->
                                 <p class="text-secondary">{{feedback}}</p>
                             </div>
                         {{/each}}
                     </div>
                 </div>
             </div>
-
         </div>
-
     </div>
 </main>
-
 {{> common/ratings_generator}}
