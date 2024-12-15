@@ -1,0 +1,47 @@
+<main class="container my-5">
+    <section id="title">
+        <h1 class="text-center">Make a post</h1>
+    </section>
+    <section id="new-post" class="mb-5">
+        <h2>Create a New Post</h2>
+        <form id="make-post-form">
+            <div class="mb-3">
+                <label for="title" class="form-label">Forum</label>
+                <select class="form-select" name="forum_id" required>
+                    <option value="" selected>Select a forum</option>
+                    {{#each forums}}
+                        <option value="{{this._id}}">{{this.title}}</option>
+                    {{/each}}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="title" class="form-label">Post Title</label>
+                <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    class="form-control"
+                    placeholder="Enter Post Title"
+                    required
+                />
+            </div>
+
+            <div class="mb-3">
+                <label for="content" class="form-label">Content</label>
+                <textarea
+                    id="content"
+                    name="content"
+                    class="form-control"
+                    placeholder="Enter your Post Body"
+                    rows="5"
+                    required
+                ></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create</button>
+        </form>
+    </section>
+</main>
+
+{{>forum/makePost}}

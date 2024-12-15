@@ -8,7 +8,7 @@ export const rootMiddleware = (req, res, next) => {
 
 export const privateRouteMiddleware = (req, res, next) => {
     if (!req.session.user && !req.session.admin) {
-        return res.redirect("/");
+        return res.redirect("/login");
     } else {
         next();
     }

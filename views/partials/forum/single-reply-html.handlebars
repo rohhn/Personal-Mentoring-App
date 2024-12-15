@@ -1,0 +1,32 @@
+<div class="border-top border-bottom border-light-subtle p-2">
+    <div class="d-flex flex-row">
+        <div class="me-4 text-center">
+            <img
+                class="mx-auto d-block"
+                src="{{reply.author.profile_image}}"
+                alt="{{reply.author.name}}"
+                height="50"
+                width="50"
+            />
+            <p class="fw-light">
+                <a
+                    href="/{{reply.userType}}/{{reply.author._id}}"
+                >{{reply.author.name}}</a></p>
+            <p>{{#formatDateTime reply.created_at}}{{/formatDateTime}}</p>
+        </div>
+        <div>
+            <p class="">{{reply.content}}</p>
+        </div>
+    </div>
+    {{#if reply.isOwner}}
+        <div class="d-flex flex-row justify-content-end">
+            <div>
+                <button
+                    class="delete-reply btn btn-sm btn-danger"
+                    data-reply-id="{{reply._id}}"
+                    data-post-id="{{post_id}}"
+                >Delete</button>
+            </div>
+        </div>
+    {{/if}}
+</div>

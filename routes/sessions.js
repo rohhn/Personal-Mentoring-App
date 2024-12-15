@@ -6,11 +6,13 @@ import { checkStringParams, checkTimestamp } from "../helpers.js";
 
 import { mentorData, sessionsData } from "../data/index.js";
 import { addMenteeIdtoReq } from "../middleware/sessions.js";
+import xss from "xss";
 
 const router = express.Router();
 
 router.route("/").post(addMenteeIdtoReq, async (req, res, next) => {
     let newSession = req.body;
+
 
     try {
         checkStringParams(newSession.mentor_id);
@@ -19,11 +21,11 @@ router.route("/").post(addMenteeIdtoReq, async (req, res, next) => {
         checkTimestamp(newSession.start_time);
         checkTimestamp(newSession.end_time);
 
-        newSession.mentor_id = newSession.mentor_id.trim();
-        newSession.mentee_id = newSession.mentee_id.trim();
-        newSession.subject_area = newSession.subject_area.trim();
-        newSession.start_time = newSession.start_time.trim();
-        newSession.end_time = newSession.end_time.trim();
+        newSession.mentor_id = xss(newSession.mentor_id.trim());
+        newSession.mentee_id = xss(newSession.mentee_id.trim());
+        newSession.subject_area = xss(newSession.subject_area.trim());
+        newSession.start_time = xss(newSession.start_time.trim());
+        newSession.end_time = xss(newSession.end_time.trim());
         // console.log(newSession.start_time);
     } catch (e) {
         return res.status(400).json({ error: e });
@@ -45,7 +47,7 @@ router.route("/").post(addMenteeIdtoReq, async (req, res, next) => {
 });
 
 router.route("/mentee/:menteeId").get(async (req, res) => {
-    let menteeId = req.params.menteeId.trim();
+    let menteeId = xss(req.params.menteeId.trim());
 
     try {
         checkStringParams(menteeId);
@@ -71,17 +73,15 @@ router.route("/mentee/:menteeId").get(async (req, res) => {
         if (!mentee) {
             throw `Mentee with the id ${menteeId} does not exist.`;
         }
-    } catch (e) {
-        return res.status(404).json({ error: e });
-    }
+        mentee.userType = "mentee";
 
-    try {
         let sessionsByMentee = await sessionsData.getSessionsByMentee(
             menteeId,
             "all"
         );
         // return res.status(200).json(sessionsByMentee);
         return res.render("users/mentees/sessions", {
+            userData: mentee,
             sessions: sessionsByMentee,
             headerOptions: req.headerOptions,
         });
@@ -92,7 +92,7 @@ router.route("/mentee/:menteeId").get(async (req, res) => {
 });
 
 router.route("/mentor/:mentorId").get(async (req, res) => {
-    let mentorId = req.params.mentorId.trim();
+    let mentorId = xss(req.params.mentorId.trim());
 
     try {
         checkStringParams(mentorId);
@@ -116,17 +116,15 @@ router.route("/mentor/:mentorId").get(async (req, res) => {
         if (!mentor) {
             throw `Mentor with the id ${mentorId} does not exist.`;
         }
-    } catch (e) {
-        return res.status(404).json({ error: e });
-    }
+        mentor.userType = "mentor";
 
-    try {
         let sessionsByMentor = await sessionsData.getSessionsByMentor(
             mentorId,
             "all"
         );
         // return res.status(200).json(sessionsByMentor);
         return res.render("users/mentors/sessions", {
+            userData: mentor,
             sessions: sessionsByMentor,
             headerOptions: req.headerOptions,
         });
@@ -139,7 +137,7 @@ router.route("/mentor/:mentorId").get(async (req, res) => {
 router
     .route("/:sessionId")
     .put(async (req, res) => {
-        let sessionId = req.params.sessionId.trim();
+        let sessionId = xss(req.params.sessionId.trim());
 
         try {
             checkStringParams(sessionId);
@@ -181,17 +179,17 @@ router
         try {
             const session = await sessionsData.rescheduleSession(
                 sessionId,
-                reschedSession.start_time,
-                reschedSession.end_time
+                xss(reschedSession.start_time),
+                xss(reschedSession.end_time)
             );
             return res.status(200).json(session);
         } catch (e) {
-            console.log(e);
+            // console.log(e);
             return res.status(500).json({ error: e });
         }
     })
     .delete(async (req, res) => {
-        let sessionId = req.params.sessionId.trim();
+        let sessionId = xss(req.params.sessionId.trim());
 
         try {
             checkStringParams(sessionId);
@@ -241,7 +239,7 @@ router
         }
     })
     .get(async (req, res) => {
-        let sessionId = req.params.sessionId.trim();
+        let sessionId = xss(req.params.sessionId.trim());
 
         try {
             checkStringParams(sessionId);
@@ -277,7 +275,7 @@ router.route("/booking/list").get(async (req, res) => {
 });
 
 router.route("/booking/book/:mentorId").get(async (req, res) => {
-    let mentorId = req.params.mentorId;
+    let mentorId = xss(req.params.mentorId);
 
     try {
         mentorId = checkStringParams(mentorId);

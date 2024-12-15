@@ -65,6 +65,28 @@ const handlebarsInstance = exphbs.create({
                 return datetime;
             }
         },
+        beforeNow: (date) => {
+            const dateObj = moment(date);
+            if (dateObj.isValid()) {
+                return dateObj.isBefore(moment());
+            }
+            return;
+        },
+        afterNow: (date) => {
+            const dateObj = moment(date);
+            if (dateObj.isValid()) {
+                return dateObj.isAfter(moment());
+            }
+            return;
+        },
+        happeningNow: (start, end) => {
+            start = moment(start);
+            end = moment(end);
+            if (start.isValid() && end.isValid()) {
+                return moment().isBetween(start, end);
+            }
+            return;
+        },
         partialsDir: ["views/partials/"],
     },
 });
@@ -95,12 +117,13 @@ app.use("/dashboard", adminDashboardMiddleware);
 app.use("/login", loginMiddleware);
 app.use("/signup", loginMiddleware);
 
-app.use("/admin/login", adminLoginMiddleware);
-app.use("/admin/signup", adminLoginMiddleware);
+app.use("/admin*", adminLoginMiddleware);
 
-app.use("/sessions/*", privateRouteMiddleware);
+app.use("/sessions*", privateRouteMiddleware);
 app.use("/mentor/availability/*", privateRouteMiddleware);
 app.use("/sessions/booking/*", allowMenteesOnly);
+
+app.use("/forum*", privateRouteMiddleware);
 
 app.engine("handlebars", handlebarsInstance.engine);
 app.set("view engine", "handlebars");
@@ -112,9 +135,3 @@ app.listen(3000, () => {
     console.log("your routes will be running on http://localhost:3000");
 });
 
-// TODO: edit mentor profile
-// TODO: Admin interface
-// TODO: Forums front-end
-// TODO: Front-end for adding review and rating
-// TODO: middleware for checking mentor status
-// TODO: Front-end for adding review and rating

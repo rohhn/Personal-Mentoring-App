@@ -1,0 +1,90 @@
+<div
+    class="modal fade"
+    id="reviewModal"
+    tabindex="-1"
+    aria-labelledby="modal-header-label"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-fullscreen modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header text-bg-dark">
+                <h1 class="modal-title fs-5" id="modal-header-label">Add a
+                    review</h1>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    data-bs-target="#reviewModal"
+                    aria-label="Close"
+                ></button>
+            </div>
+            <div class="modal-body text-bg-dark" id="review-modal-body">
+                <div class="d-flex justify-content-center">
+                    <form
+                        name="add-review"
+                        id="review-form"
+                        method="post"
+                        class="w-75"
+                    >
+
+                        <div class="form-group mb-2 w-50">
+                            <label for="rating-input">Rating</label>
+                            <input
+                                id="rating-input"
+                                class="form-range"
+                                name="rating"
+                                type="range"
+                                min="1"
+                                max="5"
+                                step="1"
+                                list="rating-list"
+                                required
+                            />
+                            <datalist id="rating-list">
+                                <option value="1" />
+                                <option value="2" />
+                                <option value="3" />
+                                <option value="4" />
+                                <option value="5" />
+                            </datalist>
+                        </div>
+                        <div class="form-group mb-2">
+                            <label for="review-input">Review</label>
+                            <textarea
+                                id="review-input"
+                                class="form-control"
+                                name="review"
+                                type="text"
+                                rows="3"
+                                required
+                            ></textarea>
+                        </div>
+                        <input
+                            type="hidden"
+                            name="author"
+                            value="{{userData._id}}"
+                        />
+                        <input
+                            type="hidden"
+                            name="userType"
+                            value="{{userData.userType}}"
+                        />
+
+                        <button
+                            class="btn btn-primary form-control mt-4"
+                            type="submit"
+                        >Submit</button>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer text-bg-dark">
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                    data-bs-target="#reviewModal"
+                >Close</button>
+            </div>
+        </div>
+    </div>
+</div>

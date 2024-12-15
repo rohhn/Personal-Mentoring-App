@@ -1,20 +1,20 @@
 import express from "express";
 import { ObjectId } from "mongodb";
 import { mentors, subject_areas } from "../config/mongoCollections.js";
+import { badgesData, mentorData, subjectData } from "../data/index.js";
 import {
     checkArrayOfStrings,
     checkBoolean,
     checkDate,
     checkEducation,
-    checkExperience,
-    checkStringParams,
     checkEmail,
-    validateAvailability,
+    checkExperience,
+    checkStringParams
 } from "../helpers.js";
-import { mentorData, subjectData } from "../data/index.js";
-import { error } from "console";
-import { constrainedMemory } from "process";
 import { fileUpload } from "../middleware/common.js";
+import { extractProfileImage } from "../helpers/common.js";
+import xss from "xss";
+
 
 const router = express.Router();
 
@@ -31,7 +31,6 @@ router
     })
     .post(async (req, res) => {
         const newMentor = req.body;
-
         try {
             checkStringParams(newMentor.first_name);
             checkStringParams(newMentor.last_name);
@@ -78,7 +77,7 @@ router
     .get(async (req, res) => {
         let queryParams = req.query;
 
-        let mentorId = req.params.mentorId.trim();
+        let mentorId = xss(req.params.mentorId.trim());
 
         try {
             checkStringParams(mentorId);
@@ -98,7 +97,7 @@ router
                 });
 
             mentor.userType = "mentor";
-
+            const { sessionCount, badge } = await badgesData.awardBadgeBasedOnSessions(mentorId,mentor.userType);
             // set custom flag for isOwner for edit profile tag
             let isOwner = false;
             if (req.session.user) {
@@ -112,6 +111,7 @@ router
                     pageTitle: `${mentor.first_name}'s Profile`,
                     headerOptions: req.headerOptions,
                     profileInfo: mentor,
+                    latestBadge: badge,
                     isOwner,
                 });
             }
@@ -134,7 +134,7 @@ router
         }
     })
     .delete(async (req, res) => {
-        let mentorId = req.params.mentorId.trim();
+        let mentorId = xss(req.params.mentorId.trim());
 
         try {
             checkStringParams(mentorId);
@@ -170,7 +170,7 @@ router
         }
     })
     .put(fileUpload.any(), async (req, res) => {
-        let mentorId = req.params.mentorId.trim();
+        let mentorId = xss(req.params.mentorId.trim());
 
         try {
             checkStringParams(mentorId);
@@ -199,41 +199,53 @@ router
 
         const updatedMentor = req.body;
 
+        updatedMentor.first_name = xss(updatedMentor.first_name);
+        updatedMentor.last_name = xss(updatedMentor.last_name);
+        updatedMentor.email = xss(updatedMentor.email);
+        updatedMentor.summary = xss(updatedMentor.summary);
+        updatedMentor.education = xss(updatedMentor.education);
+        updatedMentor.experience = xss(updatedMentor.experience);
+        updatedMentor.subject_areas = xss(updatedMentor.subject_areas);
+        updatedMentor.first_name = xss(updatedMentor.first_name);
+        
+
+        
+
         try {
-            checkStringParams(updatedMentor.first_name);
-            checkStringParams(updatedMentor.last_name);
-            checkDate(updatedMentor.dob);
-            await checkEmail(updatedMentor.email, "mentor");
-            checkStringParams(updatedMentor.pwd_hash);
-            checkStringParams(updatedMentor.profile_image);
-            checkStringParams(updatedMentor.summary);
-            checkBoolean(updatedMentor.approved);
+            checkStringParams(updatedMentor.first_name, "firstname");
+            checkStringParams(updatedMentor.last_name, "lastname");
+            checkEmail(updatedMentor.email, "mentor");
+            // checkStringParams(updatedMentor.profile_image, "profile image");
+            checkStringParams(updatedMentor.summary, "summary");
+            updatedMentor.education = JSON.parse(updatedMentor.education);
             updatedMentor.education = checkEducation(updatedMentor.education);
+            updatedMentor.experience = JSON.parse(updatedMentor.experience);
             updatedMentor.experience = checkExperience(
                 updatedMentor.experience
             );
+            updatedMentor.subject_areas = JSON.parse(updatedMentor.subject_areas);
             updatedMentor.subject_areas = checkArrayOfStrings(
                 updatedMentor.subject_areas
             );
-            // updatedMentor.availability = checkAvailability(updatedMentor.availability);
         } catch (e) {
-            // console.log(e);
+            console.log(e);
             return res.status(400).json({ error: e });
         }
+
+        // console.log(updatedMentor);
+
+        let profileImageBase64 = extractProfileImage(req);
 
         try {
             let mentorCreate = await mentorData.updateMentor(
                 mentorId,
                 updatedMentor.first_name,
                 updatedMentor.last_name,
-                updatedMentor.dob,
-                updatedMentor.pwd_hash,
-                updatedMentor.profile_image,
+                profileImageBase64,
                 updatedMentor.summary,
+                updatedMentor.email,
                 updatedMentor.education,
                 updatedMentor.experience,
-                updatedMentor.availability,
-                updatedMentor.approved,
                 updatedMentor.subject_areas
             );
 
@@ -247,7 +259,7 @@ router
 router
     .route("/availability/:mentorId")
     .get(async (req, res) => {
-        const mentorId = req.params.mentorId;
+        const mentorId = xss(req.params.mentorId);
 
         if (req.session.user.userId != mentorId) {
             return res.redirect("/dashboard");
@@ -272,7 +284,7 @@ router
         });
     })
     .post(async (req, res) => {
-        let mentorId = req.params.mentorId.trim();
+        let mentorId = xss(req.params.mentorId.trim());
 
         try {
             checkStringParams(mentorId);
@@ -299,15 +311,8 @@ router
             return res.status(404).json({ error: e });
         }
 
-        let availability = req.body;
-
-        // try {
-        //     // console.log(availability.av);
-        //     availability = validateAvailability(availability);
-        // } catch (e) {
-        //     console.log(e);
-        //     return res.status(400).json({ error: e });
-        // }
+        let availability = xss(req.body);
+        
         try {
             let avail = await mentorData.toAddAvailability(
                 mentorId,
@@ -321,7 +326,7 @@ router
     });
 
 router.route("/:mentorId/edit").get(async (req, res) => {
-    let mentorId = req.params.mentorId.trim();
+    let mentorId = xss(req.params.mentorId.trim());
 
     if (req.session.user.userId !== mentorId) {
         res.redirect("/dashboard");
@@ -377,7 +382,7 @@ router.route("/:mentorId/edit").get(async (req, res) => {
 router
     .route("/subject/:mentorId")
     .put(async (req, res) => {
-        let mentorId = req.params.mentorId.trim();
+        let mentorId = xss(req.params.mentorId.trim());
 
         try {
             checkStringParams(mentorId);
@@ -406,7 +411,7 @@ router
             return res.status(404).json({ error: e });
         }
 
-        let subjectId = req.body.subjectId.trim();
+        let subjectId = xss(req.body.subjectId.trim());
 
         try {
             checkStringParams(subjectId);
@@ -448,7 +453,7 @@ router
         }
     })
     .delete(async (req, res) => {
-        let mentorId = req.params.mentorId.trim();
+        let mentorId = xss(req.params.mentorId.trim());
 
         try {
             checkStringParams(mentorId);
@@ -475,7 +480,7 @@ router
             return res.status(404).json({ error: e });
         }
 
-        let subjectId = req.body.subjectId.trim();
+        let subjectId = xss(req.body.subjectId.trim());
 
         try {
             checkStringParams(subjectId);
@@ -516,7 +521,7 @@ router
     });
 
 router.route("/rating/search").get(async (req, res) => {
-    let average_rating = req.body.averageRating;
+    let average_rating = xss(req.body.averageRating);
 
     // try{
     //     if(isNaN(average_rating) || average_rating.trim() !== ''){
