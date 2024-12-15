@@ -13,61 +13,61 @@ import xss from "xss";
 
 const router = express.Router();
 
-router
-    .route("/signup")
-    .get((req, res) => {
-        try {
-            res.render("admin/admin-signup", {
-                pageTitle: "Admin Sign-Up",
-                headerOptions: req.headerOptions,
-            });
-        } catch (e) {
-            res.status(500).render("error", {
-                errorTitle: "Internal Server Error",
-                errorMessage:
-                    "Unable to load the admin signup page. Please try again later.",
-                headerOptions: req.headerOptions,
-            });
-        }
-    })
+// router
+//     .route("/signup")
+//     .get((req, res) => {
+//         try {
+//             res.render("admin/admin-signup", {
+//                 pageTitle: "Admin Sign-Up",
+//                 headerOptions: req.headerOptions,
+//             });
+//         } catch (e) {
+//             res.status(500).render("error", {
+//                 errorTitle: "Internal Server Error",
+//                 errorMessage:
+//                     "Unable to load the admin signup page. Please try again later.",
+//                 headerOptions: req.headerOptions,
+//             });
+//         }
+//     })
 
-    .post(fileUpload.any(), async (req, res) => {
-        let keys = Object.keys(req.body);
-        for (let i = 0; i < keys.length; i) {
-            req.body[keys[i]] = xss(req.body[keys[i]]);
-        }
-        let { first_name, last_name, email, password, dob, summary } = req.body;
-        let profile_image = extractProfileImage(req);
+//     .post(fileUpload.any(), async (req, res) => {
+//         let keys = Object.keys(req.body);
+//         for (let i = 0; i < keys.length; i) {
+//             req.body[keys[i]] = xss(req.body[keys[i]]);
+//         }
+//         let { first_name, last_name, email, password, dob, summary } = req.body;
+//         let profile_image = extractProfileImage(req);
 
-        try {
-            let hashedPassword = await bcrypt.hash(
-                password,
-                parseInt(process.env.SALT_ROUNDS)
-            );
+//         try {
+//             let hashedPassword = await bcrypt.hash(
+//                 password,
+//                 parseInt(process.env.SALT_ROUNDS)
+//             );
 
-            let newAdmin = await adminData.createAdmin(
-                first_name,
-                last_name,
-                email,
-                hashedPassword
-            );
+//             let newAdmin = await adminData.createAdmin(
+//                 first_name,
+//                 last_name,
+//                 email,
+//                 hashedPassword
+//             );
 
-            req.session.admin = {
-                email: newAdmin.email,
-                adminId: newAdmin._id,
-            };
+//             req.session.admin = {
+//                 email: newAdmin.email,
+//                 adminId: newAdmin._id,
+//             };
 
-            res.redirect("/admin/dashboard");
-        } catch (e) {
-            console.error("Error during admin sign-up:", e);
-            res.status(400).render("error", {
-                pageTitle: "Admin Sign-Up",
-                headerOptions: req.headerOptions,
-                errorMessage:
-                    e || "Unable to complete sign-up. Please try again.",
-            });
-        }
-    });
+//             res.redirect("/admin/dashboard");
+//         } catch (e) {
+//             console.error("Error during admin sign-up:", e);
+//             res.status(400).render("error", {
+//                 pageTitle: "Admin Sign-Up",
+//                 headerOptions: req.headerOptions,
+//                 errorMessage:
+//                     e || "Unable to complete sign-up. Please try again.",
+//             });
+//         }
+//     });
 
 router
     .route("/login")
