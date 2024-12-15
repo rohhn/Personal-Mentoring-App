@@ -9,12 +9,12 @@ import {
     checkEducation,
     checkEmail,
     checkExperience,
-    checkStringParams
+    checkStringParams,
 } from "../helpers.js";
 import { fileUpload } from "../middleware/common.js";
 import { extractProfileImage } from "../helpers/common.js";
 import xss from "xss";
-
+import moment from "moment";
 
 const router = express.Router();
 
@@ -97,7 +97,11 @@ router
                 });
 
             mentor.userType = "mentor";
-            const { sessionCount, badge } = await badgesData.awardBadgeBasedOnSessions(mentorId,mentor.userType);
+            const { sessionCount, badge } =
+                await badgesData.awardBadgeBasedOnSessions(
+                    mentorId,
+                    mentor.userType
+                );
             // set custom flag for isOwner for edit profile tag
             let isOwner = false;
             if (req.session.user) {
@@ -207,9 +211,6 @@ router
         updatedMentor.experience = xss(updatedMentor.experience);
         updatedMentor.subject_areas = xss(updatedMentor.subject_areas);
         updatedMentor.first_name = xss(updatedMentor.first_name);
-        
-
-        
 
         try {
             checkStringParams(updatedMentor.first_name, "firstname");
@@ -223,7 +224,9 @@ router
             updatedMentor.experience = checkExperience(
                 updatedMentor.experience
             );
-            updatedMentor.subject_areas = JSON.parse(updatedMentor.subject_areas);
+            updatedMentor.subject_areas = JSON.parse(
+                updatedMentor.subject_areas
+            );
             updatedMentor.subject_areas = checkArrayOfStrings(
                 updatedMentor.subject_areas
             );
@@ -312,7 +315,6 @@ router
         }
 
         let availability = req.body;
-        
         try {
             let avail = await mentorData.toAddAvailability(
                 mentorId,

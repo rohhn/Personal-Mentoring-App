@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { mentees, mentors } from "../config/mongoCollections.js";
+import { mentees, mentors, sessions } from "../config/mongoCollections.js";
 import { getSessionsByMentee, getSessionsByMentor } from "./sessions.js";
 
 const badgeMilestones = [
@@ -41,14 +41,21 @@ export const countSessions = async (userId, userType) => {
         throw new Error('Invalid userType, must be "mentor" or "mentee"');
     }
 
-    let sessions = [];
+    const sessionCollection = await sessions();
+
+    let count = 0;
     if (userType === "mentor") {
-        sessions = await getSessionsByMentor(userId, "previous");
+        count = await sessionCollection.count({
+            mentor_id: userId,
+            start_time: { $lt: new Date() },
+        });
     } else if (userType === "mentee") {
-        sessions = await getSessionsByMentee(userId, "previous");
+        count = await sessionCollection.count({
+            mentee_id: userId,
+            start_time: { $lt: new Date() },
+        });
     }
-    const sessionCount = sessions.length;
-    return sessionCount;
+    return count;
 };
 
 export const awardBadgeBasedOnSessions = async (userId, userType) => {
