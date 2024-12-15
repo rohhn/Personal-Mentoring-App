@@ -16,19 +16,22 @@ import xss from "xss";
 const router = express.Router();
 
 router.route("/").get(async (req, res) => {
-    const mentorsList = await mentorData.getAllMentors();
+    const mentorsList = await mentorData.getMentorsAboveRating(1);
     const subjectAreasList = await subjectData.getAllSubjectAreas();
     res.render("landing/landing-page", {
         pageTitle: "Personal Mentoring App",
         headerOptions: req.headerOptions,
         mentors: mentorsList,
-        subject_areas: subjectAreasList,
+        subject_areas: subjectAreasList.slice(0, 6),
     });
 });
 
 router
     .route("/login")
     .get(async (req, res) => {
+        if (req.session && req.session.admin) {
+            return res.redirect("/admin/dashboard");
+        }
         res.render("auth/login-page", {
             pageTitle: "Login",
             headerOptions: req.headerOptions,
@@ -135,6 +138,9 @@ router
 router
     .route("/signup")
     .get(async (req, res) => {
+        if (req.session && req.session.admin) {
+            return res.redirect("/admin/dashboard");
+        }
         res.render("auth/signup-page", {
             pageTitle: "Sign Up",
             headerOptions: req.headerOptions,
@@ -259,7 +265,9 @@ router.route("/logout").get(async (req, res) => {
 router.route("/dashboard").get(async (req, res) => {
     const userType = req.session.user.userType;
     const userId = req.session.user.userId;
-
+    if (req.session && req.session.admin) {
+        return res.redirect("/admin/dashboard");
+    }
     try {
         let userData = {};
         let sessions = {};
@@ -295,14 +303,13 @@ router.route("/dashboard").get(async (req, res) => {
         }
 
         userData.userType = userType;
-        console.log(sessions);
         res.render("users/dashboard", {
             pageTitle: "Dashboard",
             headerOptions: req.headerOptions,
             userData,
             sessions,
         });
-    } catch (error) {}
+    } catch (error) { }
 });
 export { router as rootRoutes };
 
@@ -320,3 +327,4 @@ router.route("/profile/:userType/:userId").get(async (req, res) => {
 router.route("/test").get(async (req, res) => {
     res.render("test");
 });
+

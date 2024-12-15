@@ -1,53 +1,43 @@
 <main class="container my-3">
     <h1 class="text-center mb-5">{{pageTitle}}</h1>
 
-    {{#if applications}}
-        <div class="row gy-2">
-            {{#each applications}}
-                <div class="card">
-                    <div class="card-body d-flex justify-content-between">
-                        <div>
-                            <div class="card-title">
-                                <h5>{{first_name}} {{last_name}}</h5>
-                            </div>
-                            <div class="card-text">
-                                <p>Email: {{email}}</p>
-                                <p>Summary: {{summary}}</p>
-                            </div>
-                        </div>
-
-                        <div>
-                            <a
-                                class="btn btn-primary"
-                                href="/mentor/{{_id}}"
-                            >View Full Profile</a>
-                            <form
-                                action="/admin/applications/{{_id}}/approve"
-                                method="POST"
-                                class="d-inline"
-                            >
-                                <button
-                                    class="btn btn-success"
-                                    type="submit"
-                                >Approve</button>
-                            </form>
-                            <form
-                                action="/admin/applications/{{_id}}/reject"
-                                method="POST"
-                                class="d-inline"
-                            >
-                                <button
-                                    class="btn btn-danger"
-                                    type="submit"
-                                >Reject</button>
-                            </form>
-                        </div>
-                    </div>
-
+    <div class="row gx-2">
+        <div id="pendingApplications" class="col-md-auto">
+            <h4 class="text-center">Pending Applications</h4>
+            {{#if pendingApplications}}
+                <div class="mb-2">
+                    {{#each pendingApplications}}
+                        {{> admin/single-application-html info=this status="pending"}}
+                    {{/each}}
                 </div>
-            {{/each}}
+            {{else}}
+                <p class="text-center">No pending applications.</p>
+            {{/if}}
         </div>
-    {{else}}
-        <p class="text-center">No pending applications.</p>
-    {{/if}}
+        <div id="approvedApplications" class="col-md-auto">
+            <h4 class="text-center">Approved Applications</h4>
+            {{#if approvedApplications}}
+                <div class="mb-2">
+                    {{#each approvedApplications}}
+                        {{> admin/single-application-html info=this status="approved"}}
+                    {{/each}}
+                </div>
+            {{else}}
+                <p class="text-center">No approved applications.</p>
+            {{/if}}
+        </div>
+        <div id="rejectedApplications" class="col-md-auto">
+            <h4 class="text-center">Rejected Applications</h4>
+            {{#if rejectedApplications}}
+                <div class="mb-2">
+                    {{#each rejectedApplications}}
+                        {{> admin/single-application-html info=this status="rejected"}}
+                    {{/each}}
+                </div>
+            {{else}}
+                <p class="text-center">No approved applications.</p>
+            {{/if}}
+        </div>
+    </div>
+
 </main>

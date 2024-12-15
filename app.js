@@ -14,8 +14,10 @@ import { allowMenteesOnly, allowMentorsOnly } from "./middleware/users.js";
 import {
     adminDashboardMiddleware,
     adminLoginMiddleware,
+    allowAdminOnly,
 } from "./middleware/admin.js";
 import moment from "moment";
+import { closeConnection } from "./config/mongoConnection.js";
 
 const rewriteUnsupportedBrowserMethods = (req, res, next) => {
     // If the user posts to the server with a property called _method, rewrite the request's method
@@ -117,7 +119,7 @@ app.use("/dashboard", adminDashboardMiddleware);
 app.use("/login", loginMiddleware);
 app.use("/signup", loginMiddleware);
 
-app.use("/admin*", adminLoginMiddleware);
+app.use("/admin/dashboard", allowAdminOnly);
 
 app.use("/sessions*", privateRouteMiddleware);
 app.use("/mentor/availability/*", privateRouteMiddleware);
@@ -135,3 +137,7 @@ app.listen(3000, () => {
     console.log("your routes will be running on http://localhost:3000");
 });
 
+// process.on("SIGTERM", () => {
+//     console.debug("Shutting Down Database");
+//     closeConnection();
+// });

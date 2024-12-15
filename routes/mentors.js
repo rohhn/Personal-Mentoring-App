@@ -314,8 +314,7 @@ router
             return res.status(404).json({ error: e });
         }
 
-        let availability = xss(req.body);
-
+        let availability = req.body;
         try {
             let avail = await mentorData.toAddAvailability(
                 mentorId,
