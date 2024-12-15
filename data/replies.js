@@ -2,19 +2,20 @@ import { forums } from "../config/mongoCollections.js";
 import { ObjectId, ReturnDocument } from "mongodb";
 import * as helper from "../helpers.js";
 import * as post from "./posts.js";
+import * as adminData from "./admin.js";
+import * as menteeData from "./mentees.js";
+import * as mentorData from "./mentors.js";
 
-
-export const makeReply = async (post_id, sessionUserId, replyAuthorName, content) => {
+export const makeReply = async (post_id, sessionUserId, userType, content) => {
     try {
         helper.postVerify(content);
-        helper.postVerify(replyAuthorName);
 
         let forumCollection = await forums();
 
         let newReply = {
             _id: new ObjectId(),
-            authorId: sessionUserId,
-            replyAuthorName: replyAuthorName.trim(),
+            author: sessionUserId,
+            userType,
             content: content.trim(),
             created_at: new Date(),
         };
@@ -24,7 +25,8 @@ export const makeReply = async (post_id, sessionUserId, replyAuthorName, content
             { $push: { "posts.$.replies": newReply } }
         );
 
-        if (updatedInfo.modifiedCount === 0) throw new Error("Could not add reply.");
+        if (updatedInfo.modifiedCount === 0)
+            throw new Error("Could not add reply.");
 
         return newReply;
     } catch (error) {
@@ -35,12 +37,36 @@ export const makeReply = async (post_id, sessionUserId, replyAuthorName, content
 export const getReply = async (post_id, replyId) => {
     try {
         let forumCollection = await forums();
-        let forum = await forumCollection.findOne({ "posts._id": ObjectId.createFromHexString(post_id) });
+        let forum = await forumCollection.findOne({
+            "posts._id": ObjectId.createFromHexString(post_id),
+        });
         if (!forum) throw new Error("Post not found.");
-        let post = forum.posts.find((p) => p._id.equals(ObjectId.createFromHexString(post_id)));
+
+        let post = forum.posts.find((p) =>
+            p._id.equals(ObjectId.createFromHexString(post_id))
+        );
         if (!post) throw new Error("Post not found.");
-        let reply = post.replies.find((r) => r._id.equals(ObjectId.createFromHexString(replyId)));
+
+        let reply = post.replies.find((r) =>
+            r._id.equals(ObjectId.createFromHexString(replyId))
+        );
         if (!reply) throw new Error("Reply not found.");
+
+        let userData;
+        if (reply.userType === "mentee") {
+            userData = await menteeData.getMenteeById(reply.author);
+        } else if (post.userType === "mentor") {
+            userData = await mentorData.getMentorById(reply.author);
+        } else if (post.userType === "admin") {
+            userData = await adminData.getAdminById(reply.author);
+        } else {
+            throw "Not a valid user type";
+        }
+        reply.author = {
+            _id: userData._id.toString(),
+            name: `${userData.first_name} ${userData.last_name}`,
+            profile_image: userData.profile_image,
+        };
         return reply;
     } catch (error) {
         console.error("Error in getReply:", error.message);
@@ -48,8 +74,12 @@ export const getReply = async (post_id, replyId) => {
     }
 };
 
-
-export const editReply = async (post_id, reply_id, sessionUserId, updatedContent) => {
+export const editReply = async (
+    post_id,
+    reply_id,
+    sessionUserId,
+    updatedContent
+) => {
     try {
         helper.postVerify(updatedContent);
         let forumCollection = await forums();
@@ -87,7 +117,8 @@ export const editReply = async (post_id, reply_id, sessionUserId, updatedContent
             },
             {
                 $set: {
-                    "posts.$.replies.$[replyElem].content": updatedContent.trim(),
+                    "posts.$.replies.$[replyElem].content":
+                        updatedContent.trim(),
                 },
             },
             {
@@ -113,9 +144,6 @@ export const editReply = async (post_id, reply_id, sessionUserId, updatedContent
     }
 };
 
-
-
-
 export const deleteReply = async (post_id, reply_id, sessionUserId) => {
     try {
         let forumCollection = await forums();
@@ -128,30 +156,42 @@ export const deleteReply = async (post_id, reply_id, sessionUserId) => {
             throw new Error("Forum or post not found.");
         }
 
-        let post = forum.posts.find((p) => p._id.equals(ObjectId.createFromHexString(post_id)));
+        let post = forum.posts.find((p) =>
+            p._id.equals(ObjectId.createFromHexString(post_id))
+        );
         if (!post) {
             throw new Error("Post not found.");
         }
 
-        let reply = post.replies.find((r) => r._id.equals(ObjectId.createFromHexString(reply_id)));
+        let reply = post.replies.find((r) =>
+            r._id.equals(ObjectId.createFromHexString(reply_id))
+        );
         if (!reply) {
             throw new Error("Reply not found.");
         }
 
-        if (String(reply.authorId) !== String(sessionUserId)) {
-            throw new Error("Unauthorized action. You cannot delete this reply.");
+        if (String(reply.author) !== String(sessionUserId)) {
+            throw new Error(
+                "Unauthorized action. You cannot delete this reply."
+            );
         }
 
         let deleteResult = await forumCollection.updateOne(
             { "posts._id": ObjectId.createFromHexString(post_id) },
-            { $pull: { "posts.$.replies": { _id: ObjectId.createFromHexString(reply_id) } } }
+            {
+                $pull: {
+                    "posts.$.replies": {
+                        _id: ObjectId.createFromHexString(reply_id),
+                    },
+                },
+            }
         );
 
         if (deleteResult.modifiedCount === 0) {
             throw new Error("Unable to delete the reply.");
         }
 
-        return { message: "Reply deleted successfully." };
+        return { postId: post_id };
     } catch (error) {
         throw error;
     }

@@ -1,27 +1,26 @@
 <main class="container my-3">
 
-    <section id="recent-forums">
-        <div>
-            <h2>Recent Forums</h2>
-        </div>
-    </section>
     <section id="subject-areas-section">
-        <div>
-            <h2>Subject Areas</h2>
+        <div class="d-flex flex-row justify-content-between mb-2">
+            <h2 class="mb-0">All Forums</h2>
+            <a class="btn btn-primary" href="/forum/post/">Create a Post</a>
         </div>
         <div class="row gy-2">
-            {{#each subjectAreas}}
-
-                <div class="card text-bg-dark p-2">
-                    <div class="card-title">
-                        <h5>{{this.name}}</h5>
-                    </div>
-                    <div class="card-link">
-                        <a href="/forum/{{this._id}}">forum</a>
-                    </div>
-                </div>
-
-            {{/each}}
+            <ul class="list-group border-0">
+                {{#each forumsList}}
+                    <li
+                        class="list-group-item d-flex justify-content-between align-items-center text-bg-dark border-0 border-bottom border-secondary-subtle"
+                    >
+                        <a
+                            class="text-decoration-none"
+                            href="/forum/{{this._id}}"
+                        >{{this.title}}</a>
+                        <span
+                            class="badge text-bg-primary rounded-pill"
+                        >{{this.postCount}}</span>
+                    </li>
+                {{/each}}
+            </ul>
         </div>
     </section>
 </main>

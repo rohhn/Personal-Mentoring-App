@@ -16,9 +16,6 @@ import moment from "moment";
 
 const router = express.Router();
 
-router
-.route("/")
-.get()
-
+router.route("/").get();
 
 export { router as forumRoutes };

@@ -3,15 +3,20 @@ import axios from "axios";
 import * as helper from "../helpers.js";
 import { ObjectId, ReturnDocument } from "mongodb";
 import * as replies from "../data/replies.js";
-import { auth } from "googleapis/build/src/apis/abusiveexperiencereport/index.js";
+import * as adminData from "./admin.js";
+import * as menteeData from "./mentees.js";
+import * as mentorData from "./mentors.js";
 
-export const getForums = async (subject_id) => {
+export const getForums = async (forum_id) => {
     let forumCollection = await forums();
     let forum = await forumCollection.findOne({
-        _id: ObjectId.createFromHexString(subject_id),
+        _id: ObjectId.createFromHexString(forum_id),
     });
     if (!forum) {
-        throw "Error, no posts in this forum, sorry";
+        const errorObj = new Error("Page not found!");
+        errorObj.statusCode = 404;
+        throw errorObj;
+        // throw "Error, no posts in this forum, sorry";
     }
     return { title: forum.title, posts: forum.posts || [] };
 };
@@ -33,65 +38,27 @@ export const getAllForums = async () => {
     }
 };
 
-export const makePost = async (
-    subject_id,
-    sessionUserId,
-    authorName,
-    title,
-    content
-) => {
+export const makePost = async (forum_id, userId, userType, title, content) => {
     helper.postVerify(content);
     helper.postVerify(title);
-    helper.postVerify(authorName);
     title = title.trim();
     content = content.trim();
-    authorName = authorName.trim();
 
     let forumCollection = await forums();
-    let menteeCollection = await mentees();
-    let mentorCollection = await mentors();
-    let adminCollection = await admin();
-
-    let authorId = null;
-
-    let mentee = await menteeCollection.findOne({
-        _id: ObjectId.createFromHexString(sessionUserId),
-    });
-    if (mentee) {
-        authorId = mentee._id;
-    } else {
-        let mentor = await mentorCollection.findOne({
-            _id: ObjectId.createFromHexString(sessionUserId),
-        });
-        if (mentor) {
-            authorId = mentor._id;
-        } else {
-            let admin = await adminCollection.findOne({
-                _id: ObjectId.createFromHexString(sessionUserId),
-            });
-            if (admin) {
-                authorId = admin._id;
-            }
-        }
-    }
-
-    if (!authorId) {
-        throw "Error: User not found in mentors, mentees. or admin collections.";
-    }
 
     let newPost = {
         _id: new ObjectId(),
-        subject_id: subject_id,
-        authorId: authorId,
-        authorName: authorName,
-        title: title,
-        content: content,
+        // subject_id: forum_id,
+        author: userId,
+        userType,
+        title,
+        content,
         created_at: new Date(),
         replies: [],
     };
 
     let updatedForum = await forumCollection.findOneAndUpdate(
-        { _id: ObjectId.createFromHexString(subject_id) },
+        { _id: ObjectId.createFromHexString(forum_id) },
         { $push: { posts: newPost } },
         { returnDocument: "after" }
     );
@@ -101,8 +68,7 @@ export const makePost = async (
     }
 
     return {
-        title: updatedForum.title,
-        posts: updatedForum.posts || [],
+        postId: newPost._id,
     };
 };
 
@@ -117,6 +83,26 @@ export const getPost = async (postId) => {
         p._id.equals(ObjectId.createFromHexString(postId))
     );
     if (!post) throw "Post not found2";
+
+    let userData;
+    if (post.userType === "mentee") {
+        userData = await menteeData.getMenteeById(post.author);
+    } else if (post.userType === "mentor") {
+        userData = await mentorData.getMentorById(post.author);
+    } else if (post.userType === "admin") {
+        userData = await adminData.getAdminById(post.author);
+    } else {
+        throw "Not a valid user type";
+    }
+    post.author = {
+        _id: userData._id.toString(),
+        name: `${userData.first_name} ${userData.last_name}`,
+        profile_image: userData.profile_image,
+    };
+    post._id = post._id.toString();
+    post.forum_id = forum._id.toString();
+    post.forum_title = forum.title;
+
     return post;
 };
 
@@ -142,7 +128,7 @@ export const editPost = async (postId, sessionUserId, newContent, newTitle) => {
             throw new Error("Post not found.");
         }
 
-        if (String(post.authorId) !== String(sessionUserId)) {
+        if (String(post.author) !== String(sessionUserId)) {
             throw new Error("Unauthorized action. You cannot edit this post.");
         }
 
@@ -161,22 +147,21 @@ export const editPost = async (postId, sessionUserId, newContent, newTitle) => {
             throw new Error("Unable to update the post.");
         }
 
-        return updatedForum.posts;
+        return true; //updatedForum.posts;
     } catch (error) {
         throw error;
     }
 };
 
-export const deletePost = async (subject_id, post_id, sessionUserId) => {
+export const deletePost = async (post_id, sessionUserId) => {
     try {
-        if (!subject_id || !post_id || !sessionUserId) {
-            throw new Error("Subject ID, Post ID, and User ID are required.");
+        if (!post_id || !sessionUserId) {
+            throw new Error("Post ID, and User ID are required.");
         }
 
         let forumCollection = await forums();
 
         let forum = await forumCollection.findOne({
-            _id: ObjectId.createFromHexString(subject_id),
             "posts._id": ObjectId.createFromHexString(post_id),
         });
 
@@ -191,14 +176,14 @@ export const deletePost = async (subject_id, post_id, sessionUserId) => {
             throw new Error("Post not found.");
         }
 
-        if (String(post.authorId) !== String(sessionUserId)) {
+        if (String(post.author) !== String(sessionUserId)) {
             throw new Error(
                 "Unauthorized action. You cannot delete this post."
             );
         }
 
         let deleteResult = await forumCollection.updateOne(
-            { _id: ObjectId.createFromHexString(subject_id) },
+            { "posts._id": ObjectId.createFromHexString(post_id) },
             { $pull: { posts: { _id: ObjectId.createFromHexString(post_id) } } }
         );
 
@@ -206,9 +191,8 @@ export const deletePost = async (subject_id, post_id, sessionUserId) => {
             throw new Error("Unable to delete the post.");
         }
 
-        return { message: "Post deleted successfully." };
+        return { forumId: forum._id };
     } catch (error) {
-        //console.error("Error in deletePost:", error.message);
         throw error;
     }
 };

@@ -98,6 +98,7 @@ router
                     _id: admin._id.toString(),
                     email: admin.email,
                     isAdmin: admin.isAdmin,
+                    userType: "admin",
                 };
                 res.redirect("/admin/dashboard");
             } else {
@@ -228,10 +229,11 @@ router.route("/applications").get(async (req, res) => {
     if (!req.session || !req.session.admin) {
         return res.redirect("/admin/login");
     }
-    let status=req.body;
+    let status = req.body;
     try {
-        let pendingApplications =
-            await applicationData.getMentorsbyStatus(status);
+        let pendingApplications = await applicationData.getMentorsbyStatus(
+            status
+        );
         res.render("admin/applications", {
             pageTitle: "Pending Mentor Applications",
             headerOptions: req.headerOptions,

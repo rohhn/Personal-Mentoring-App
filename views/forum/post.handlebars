@@ -1,22 +1,9 @@
-<body>
-    <header>
-        <h1>Edit Post</h1>
-    </header>
-    <main>
-        <form action="/forum/{{forum_id}}/{{post_id}}" method="POST">
-            <input type="hidden" name="_method" value="PATCH">
-            <input type="hidden" name="authorID" value="{{author}}">
-            
-            <label for="title">Title:</label>
-            <input type="text" id="title" name="updatedTitle" value="{{title}}">
-            
-            <label for="content">Content:</label>
-            <textarea id="content" name="updatedContent" rows="5">{{content}}</textarea>
-            
-            <button type="submit">Update Post</button>
-        </form>
-    </main>
-    <footer>
-        <p>&copy; {{currentYear}} Forum Application</p>
-    </footer>
-</body>
+<main class="container my-5">
+    <div class="my-4 ">
+        <a class="text-white" href="/forum/{{post.forum_id}}"><i class="fa-solid fa-arrow-left fa-sm" style="color: #ffffff;"></i>  Back to {{post.forum_title}}</a>
+    </div>
+    
+    <div class="text-bg-dark rounded p-2">
+        {{>forum/single-post-html post=post showReplies=true}}
+    </div>
+</main>
