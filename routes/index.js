@@ -1,12 +1,12 @@
+import { adminRoutes } from "./admin.js";
 import { menteeRoutes } from "./mentees.js";
 import { mentorRoutes } from "./mentors.js";
 import { parentEmailRoutes } from "./parent.js";
+import { postRoutes } from "./posts.js";
 import { ratingsRoutes } from "./rating.js";
 import { rootRoutes } from "./root.js";
 import { sessionRoutes } from './sessions.js';
 import { subjectRoutes } from "./subject_areas.js";
-import { postRoutes } from "./posts.js";
-import { adminRoutes } from "./admin.js";
 
 
 

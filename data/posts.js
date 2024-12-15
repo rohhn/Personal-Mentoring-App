@@ -7,6 +7,39 @@ import * as adminData from "./admin.js";
 import * as menteeData from "./mentees.js";
 import * as mentorData from "./mentors.js";
 
+export const createForum = async (subjectId, title) => {
+    helper.checkStringParams(subjectId);
+
+    subjectId = subjectId.trim();
+
+    if (!ObjectId.isValid(subjectId)) {
+        throw "Invalid object ID.";
+    }
+
+    helper.checkStringParams(title);
+
+    let forumCollection = await forums();
+
+    let newForum = {
+        subject_id: subjectId,
+        title: title,
+        created_at: new Date()
+    }
+
+    const result = await forumCollection.insertOne(newForum);
+
+    if (!result.acknowledged || !result.insertedId)
+        throw "Could not create the Forum.";
+
+    const newId = result.insertedId.toString();
+
+    const forum = await getForums(newId);
+
+    forum._id = forum._id.toString();
+
+    return forum;
+}
+
 export const getForums = async (forum_id) => {
     let forumCollection = await forums();
     let forum = await forumCollection.findOne({
@@ -18,7 +51,7 @@ export const getForums = async (forum_id) => {
         throw errorObj;
         // throw "Error, no posts in this forum, sorry";
     }
-    return { title: forum.title, posts: forum.posts || [] };
+    return { _id: forum._id.toString(),title: forum.title, posts: forum.posts || [] };
 };
 
 export const getAllForums = async () => {

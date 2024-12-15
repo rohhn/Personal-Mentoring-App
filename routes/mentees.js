@@ -1,5 +1,6 @@
 import express from "express";
 import { ObjectId } from "mongodb";
+import xss from "xss";
 import { mentees } from "../config/mongoCollections.js";
 import { badgesData, menteeData } from "../data/index.js";
 import {
@@ -10,8 +11,6 @@ import {
 } from "../helpers.js";
 import { extractProfileImage } from "../helpers/common.js";
 import { fileUpload } from "../middleware/common.js";
-import moment from "moment";
-import xss from "xss";
 
 const router = express.Router();
 
@@ -91,7 +90,6 @@ router
                     menteeId,
                     mentee.userType
                 );
-            console.log(badge);
             // set custom flag for isOwner for edit profile tag
             let isOwner = false;
             if (req.session.user) {
