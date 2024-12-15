@@ -23,8 +23,8 @@ export const createForum = async (subjectId, title) => {
     let newForum = {
         subject_id: subjectId,
         title: title,
-        created_at: new Date()
-    }
+        created_at: new Date(),
+    };
 
     const result = await forumCollection.insertOne(newForum);
 
@@ -38,7 +38,7 @@ export const createForum = async (subjectId, title) => {
     forum._id = forum._id.toString();
 
     return forum;
-}
+};
 
 export const getForums = async (forum_id) => {
     let forumCollection = await forums();
@@ -51,14 +51,18 @@ export const getForums = async (forum_id) => {
         throw errorObj;
         // throw "Error, no posts in this forum, sorry";
     }
-    return { _id: forum._id.toString(),title: forum.title, posts: forum.posts || [] };
+    return {
+        _id: forum._id.toString(),
+        title: forum.title,
+        posts: forum.posts || [],
+    };
 };
 
 export const getAllForums = async () => {
     try {
         let forumCollection = await forums();
         let allForums = await forumCollection.find({}).toArray();
-        if (!allForums || allForums.length === 0) {
+        if (!allForums) {
             throw new Error("No forums found in the database.");
         }
         return allForums.map((forum) => ({

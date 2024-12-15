@@ -137,7 +137,7 @@ app.listen(3000, () => {
     console.log("your routes will be running on http://localhost:3000");
 });
 
-process.on("SIGTERM", () => {
-    console.debug("Shutting Down Database");
-    closeConnection();
-});
+// process.on("SIGTERM", () => {
+//     console.debug("Shutting Down Database");
+//     closeConnection();
+// });
