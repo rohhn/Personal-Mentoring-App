@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { subject_areas, mentors } from "../config/mongoCollections.js";
 import { checkStringParams } from "../helpers.js";
+import { postData } from "./index.js";
 
 export const createSubjectArea = async (name, description = "") => {
     checkStringParams(name);
@@ -8,27 +9,26 @@ export const createSubjectArea = async (name, description = "") => {
 
     const subjectAreasCollection = await subject_areas();
 
-    try {
-        const subjectArea = await getSubjectByName(name);
-        return subjectArea;
-    } catch {
-        const newSubjectArea = {
-            name: name.toLowerCase().trim(),
-            description: description.toLowerCase().trim(),
-        };
+    const newSubjectArea = {
+        name: name.trim(),
+        description: description.trim(),
+    };
 
-        const result = await subjectAreasCollection.insertOne(newSubjectArea);
+    const result = await subjectAreasCollection.insertOne(newSubjectArea);
 
-        if (!result.acknowledged || !result.insertedId)
-            throw Error("Could not create the subject area.");
+    if (!result.acknowledged || !result.insertedId)
+        throw Error("Could not create the subject area.");
 
-        const newId = result.insertedId.toString();
+    const newId = result.insertedId.toString();
 
-        const subjectArea = await getSubjectById(newId);
+    const subjectArea = await getSubjectById(newId);
 
-        subjectArea._id = subjectArea._id.toString();
-        return subjectArea;
-    }
+    subjectArea._id = subjectArea._id.toString();
+
+    const newForum = await postData.createForum(subjectArea._id, name);
+    
+    return subjectArea;
+   
 };
 
 export const getAllSubjectAreas = async () => {
@@ -76,12 +76,12 @@ export const getSubjectByName = async (name) => {
 
     const subjectAreasCollection = await subject_areas();
 
-    const subject = await subjectAreasCollection.findOne({
+    let subject = await subjectAreasCollection.findOne({
         name: { $regex: `^${name}$`, $options: 'i' } 
     });
 
     if (!subject) {
-        throw `Subject with the name ${name} does not exist.`;
+        subject = await createSubjectArea(name, `Subject for ${name}.`);
     }
 
     subject._id = subject._id.toString();
