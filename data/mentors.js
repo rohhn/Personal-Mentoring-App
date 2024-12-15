@@ -34,7 +34,7 @@ export const createMentor = async (
 
     dob = new Date(dob.trim());
 
-    let approved = false;
+    let approved = "pending";
 
     let newMentorObj = {
         first_name,
@@ -228,7 +228,7 @@ export const updateMentor = async (
 
     checkStringParams(first_name, "first_name");
     checkStringParams(last_name, "last name");
-    checkEmail(email, "mentor"); 
+    checkEmail(email, "mentor");
     checkStringParams(summary, "summary");
     // education = checkEducation(education);
     experience = checkExperience(experience);
@@ -240,7 +240,7 @@ export const updateMentor = async (
     // profile_image = profile_image.trim();
     summary = summary.trim();
 
-    let subject_areas_arr = []
+    let subject_areas_arr = [];
 
     const mentorCollection = await mentors();
 
@@ -250,12 +250,10 @@ export const updateMentor = async (
 
     let newSubjects = [];
 
-    for( let i = 0; i< subject_areas.length; i++){
+    for (let i = 0; i < subject_areas.length; i++) {
         let subject = await subjectData.getSubjectByName(subject_areas[i]);
         newSubjects.push(subject._id.toString());
     }
-
-   
 
     let mentorUpdate = {
         first_name: first_name,
@@ -264,7 +262,7 @@ export const updateMentor = async (
         summary: summary,
         education: education,
         experience: experience,
-        subject_areas: newSubjects
+        subject_areas: newSubjects,
     };
 
     if (profileImageBase64) {
@@ -403,19 +401,19 @@ export const updateSubjectAreaToMentor = async (id, subjectId) => {
         let updateDoc = {
             subject_areas: subject_areas,
         };
-    
+
         const mentorCollection = await mentors();
-    
+
         const result = await mentorCollection.findOneAndUpdate(
             { _id: new ObjectId(id) },
             { $set: updateDoc },
             { returnDocument: "after" }
         );
-    
+
         if (!result) {
             throw `Could not Update the Mentor.`;
         }
-    
+
         result._id = result._id.toString();
     }
     // return result;
@@ -484,7 +482,6 @@ export const removeSubjectAreaFromMentor = async (id, subjectId) => {
     const mentorCollection = await mentors();
 
     const mentor = await mentorCollection.findOne({ _id: new ObjectId(id) });
-
 
     let subject_areas = mentor.subject_areas;
 

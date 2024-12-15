@@ -14,6 +14,7 @@ import { allowMenteesOnly, allowMentorsOnly } from "./middleware/users.js";
 import {
     adminDashboardMiddleware,
     adminLoginMiddleware,
+    allowAdminOnly,
 } from "./middleware/admin.js";
 import moment from "moment";
 
@@ -117,7 +118,7 @@ app.use("/dashboard", adminDashboardMiddleware);
 app.use("/login", loginMiddleware);
 app.use("/signup", loginMiddleware);
 
-app.use("/admin*", adminLoginMiddleware);
+app.use("/admin/dashboard", allowAdminOnly);
 
 app.use("/sessions*", privateRouteMiddleware);
 app.use("/mentor/availability/*", privateRouteMiddleware);
@@ -130,8 +131,7 @@ app.set("view engine", "handlebars");
 
 constructorMethod(app);
 
-app.listen(3000, () => {
+const server = app.listen(3000, () => {
     console.log("We have now got a server");
     console.log("your routes will be running on http://localhost:3000");
 });
-
