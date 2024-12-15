@@ -34,7 +34,7 @@ export const createMentor = async (
 
     dob = new Date(dob.trim());
 
-    let approved = false;
+    let approved = "pending";
 
     let newMentorObj = {
         first_name,
@@ -90,7 +90,7 @@ export const createMentor = async (
 export const getAllMentors = async () => {
     const mentorCollection = await mentors();
 
-    let allMentors = await mentorCollection.find({}).toArray();
+    let allMentors = await mentorCollection.find({ approved: "approved" }).toArray();
 
     if (!allMentors) {
         return [];
@@ -337,6 +337,7 @@ export const toAddAvailability = async (id, availability) => {
 
     // Process the availability array to update or append
     const updatedAvailability = [...existingAvailability];
+    
 
     for (const newEntry of availability) {
         const existingEntryIndex = updatedAvailability.findIndex(
@@ -602,8 +603,13 @@ export const getMentorsAboveRating = async (averageRating) => {
 
     // Filter mentors based on average rating
     const mentorsAboveRating = await mentorCollection
-        .find({ averageRating: { $gt: averageRating } })
-        .toArray();
+    .find({
+        $and: [
+            { averageRating: { $gt: averageRating } }, // Mentors with averageRating greater than the input
+            { approved: "approved" }                  // Mentors with "approved" status
+        ]
+    })
+    .toArray();
 
     if (mentorsAboveRating.length === 0) {
         return [];
