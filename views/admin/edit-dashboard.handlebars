@@ -1,34 +1,44 @@
-<form id="edit-admin-form" method="GET" action="/admin/dashboard/edit">
+
+<form
+    id="edit-admin-form"
+    method="POST"
+    action="/admin/dashboard/edit"
+    enctype="application/x-www-form-urlencoded"
+>
     <input type="hidden" name="update" value="true" />
 
     <div class="form-group">
         <label for="firstName">First Name</label>
-        <input type="text" id="firstName" name="firstName" value="{{profileInfo.firstName}}" class="form-control" />
+        <input
+            type="text"
+            id="firstName"
+            name="firstName"
+            value="{{profileInfo.firstName}}"
+            class="form-control"
+        />
     </div>
 
     <div class="form-group">
         <label for="lastName">Last Name</label>
-        <input type="text" id="lastName" name="lastName" value="{{profileInfo.lastName}}" class="form-control" />
-    </div>
-
-    <div class="form-group">
-        <label for="summary">Summary</label>
-        <textarea id="summary" name="summary" class="form-control">{{profileInfo.summary}}</textarea>
+        <input
+            type="text"
+            id="lastName"
+            name="lastName"
+            value="{{profileInfo.lastName}}"
+            class="form-control"
+        />
     </div>
 
     <div class="form-group">
         <label for="password">New Password (Optional)</label>
-        <input type="password" id="password" name="password" placeholder="Enter new password" class="form-control" />
+        <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Enter new password"
+            class="form-control"
+        />
     </div>
 
-    <div class="form-group">
-        <label for="profile_image">Profile Image (URL)</label>
-        <input type="file" id="profile_image" name="profile_image" placeholder="Enter profile image URL"
-            class="form-control" />
-        {{#if admin.profile_image}}
-        <small>Current Image: <a href="{{admin.profile_image}}" target="_blank">View</a></small>
-        {{/if}}
-    </div>
-
-    <button type="submit" class="btn btn-primary mt-3">Update Profile</button>
+        <button type="submit" class="btn btn-primary mt-3">Update Profile</button>
 </form>

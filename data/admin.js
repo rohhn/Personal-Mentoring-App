@@ -5,39 +5,34 @@ import { fileUpload } from "../middleware/common.js";
 
 const adminCollection = await admin();
 
-export const createAdmin = async (firstName, lastName, email, passHash, options = {}) => {
-    helper.checkStringParams(firstName);
-    helper.checkStringParams(lastName);
-    helper.checkEmail(email);
-    helper.checkStringParams(passHash);
+export const createAdmin = async (
+    firstName,
+    lastName,
+    email,
+    passHash,
+    options = {}
+) => {
+    firstName = helper.checkStringParams(firstName);
+    lastName = helper.checkStringParams(lastName);
+    email = helper.checkEmail(email);
+    // helper.checkStringParams(passHash);
     //let adminCollection = await admin();
 
-    let adminExists = await adminCollection.findOne({ email: email.trim().toLowerCase() });
+    let adminExists = await adminCollection.findOne({
+        email: email.trim().toLowerCase(),
+    });
     if (adminExists) {
         throw new Error("Admin with this email already exists.");
     }
 
-    let newAdmin =
-    {
-        _id: new ObjectId(),
+    let newAdmin = {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         email: email.trim(),
         passHash,
         isAdmin: true,
-        created_at: new Date()
-    }
-
-
-
-    if (options.profile_image) {
-        newAdmin.profile_image = options.profile_image;
-    }
-
-    if (options.summary) {
-        helper.checkStringParams(options.summary, "Summary");
-        newAdmin.summary = options.summary.trim();
-    }
+        created_at: new Date(),
+    };
 
     let addAdmin = await adminCollection.insertOne(newAdmin);
 
@@ -62,7 +57,9 @@ export const getAllAdmins = async () => {
 
 export const getAdminById = async (id) => {
     //let adminCollection = await admin();
-    let admin = await adminCollection.findOne({ _id: ObjectId.createFromHexString(id) });
+    let admin = await adminCollection.findOne({
+        _id: new ObjectId(id),
+    });
 
     if (!admin) {
         throw new Error(`Admin with the ID ${id} does not exist.`);
@@ -87,7 +84,7 @@ export const getAdminByEmail = async (email) => {
 };
 
 export const updateAdmin = async (id, updates = {}) => {
-    let allowedUpdates = ["firstName", "lastName", "summary", "pwd_hash", "profile_image"];
+    let allowedUpdates = ["firstName", "lastName", "pwd_hash"];
     let updateFields = {};
 
     for (let [key, value] of Object.entries(updates)) {
@@ -103,7 +100,7 @@ export const updateAdmin = async (id, updates = {}) => {
 
     let adminCollection = await admin();
     let updatedInfo = await adminCollection.findOneAndUpdate(
-        { _id: ObjectId.createFromHexString(id) },
+        { _id: new ObjectId(id) },
         { $set: updateFields },
         { returnDocument: "after" }
     );

@@ -3,52 +3,60 @@
 
     <section id="signup-section">
         <div class="d-flex justify-content-center">
-            <form name="admin-signup" id="admin-signup" method="POST" class="w-75" enctype="multipart/form-data"
-                action="/admin/signup">
+            <form
+                name="admin-signup"
+                id="admin-signup"
+                method="POST"
+                class="w-75"
+                enctype="application/x-www-form-urlencoded"
+                action="/admin/signup"
+            >
                 <div class="form-group mb-2">
                     <label for="first_name">First Name</label>
-                    <input id="first_name" name="first_name" class="form-control" type="text"
-                        placeholder="Enter your first name" required />
-                </div>
-
-                <div class="form-group mb-2">
-                    <label for="last_name">Last Name</label>
-                    <input id="last_name" name="last_name" class="form-control" type="text"
-                        placeholder="Enter your last name" required />
-                </div>
-
-                <div class="form-group mb-2">
-                    <label for="email">Email</label>
-                    <input id="email" name="email" class="form-control" type="email" placeholder="admin@example.com"
-                        required />
-                </div>
-
-                <div class="form-group mb-2">
-                    <label for="dob">Date of Birth</label>
-                    <input id="dob" name="dob" class="form-control" type="date" required />
-                </div>
-
-                <div class="form-group mb-2">
-                    <label>Upload a Profile Picture</label>
                     <input
-                        id="profile_image"
+                        id="first_name"
+                        name="first_name"
                         class="form-control"
-                        name="profile_image"
-                        type="file"
-                        accept="image/png, image/jpg, image/jpeg"
+                        type="text"
+                        placeholder="Enter your first name"
+                        required
                     />
                 </div>
 
                 <div class="form-group mb-2">
-                    <label for="summary">Professional Summary</label>
-                    <textarea id="summary" name="summary" class="form-control" rows="4"
-                        placeholder="Provide a brief professional summary" required></textarea>
+                    <label for="last_name">Last Name</label>
+                    <input
+                        id="last_name"
+                        name="last_name"
+                        class="form-control"
+                        type="text"
+                        placeholder="Enter your last name"
+                        required
+                    />
+                </div>
+
+                <div class="form-group mb-2">
+                    <label for="email">Email</label>
+                    <input
+                        id="email"
+                        name="email"
+                        class="form-control"
+                        type="email"
+                        placeholder="admin@example.com"
+                        required
+                    />
                 </div>
 
                 <div class="form-group mb-2">
                     <label for="password">Password</label>
-                    <input id="password" name="password" class="form-control" type="password"
-                        placeholder="Enter a secure password" required />
+                    <input
+                        id="password"
+                        name="password"
+                        class="form-control"
+                        type="password"
+                        placeholder="Enter a secure password"
+                        required
+                    />
                 </div>
 
                 <button type="submit" class="btn btn-primary form-control mt-4">
