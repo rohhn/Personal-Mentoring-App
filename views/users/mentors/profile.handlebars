@@ -94,6 +94,7 @@
                                                 <p
                                                     class="mb-0 me-5 text-secondary fw-lighter"
                                                 ><em>{{years}} years</em></p>
+                                                </div>
                                             <p class="mb-0 text-secondary">{{institution}}</p>
                                         </div>
                                     {{/each}}
@@ -131,7 +132,7 @@
                                 <h6 class="mb-0">Subject Areas</h6>
                             </div>
                             <div class="col-sm-9">
-                                <ol class="list-group list-group-horizontal mb-2">
+                                <ol class="list-group list-group-horizontal mb-2 flex-wrap">
                                     {{#each profileInfo.subject_areas}}
                                         <li class="list-group-item border-0 p-0 me-2 bg-transparent">
                                             <p class="badge rounded-pill text-bg-info m-0">{{name}}</p>
