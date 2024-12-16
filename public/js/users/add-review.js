@@ -67,7 +67,7 @@ $(window).on("load", () => {
                 numericality: {
                     onlyInteger: true,
                     strict: true,
-                    greaterThan: 0,
+                    greaterThan: 1,
                     lessThanOrEqualTo: 5,
                 },
             },
