@@ -1,17 +1,17 @@
 import bcrypt from "bcrypt";
 import express from "express";
+import xss from "xss";
 import {
+    badgesData,
     menteeData,
     mentorData,
     sessionsData,
-    subjectData,
+    subjectData
 } from "../data/index.js";
-import { checkEmail, checkStringParams, formatDate } from "../helpers.js";
+import { checkEmail, checkStringParams } from "../helpers.js";
+import { extractProfileImage } from "../helpers/common.js";
 import { isParentEmailRequired } from "../helpers/mentees.js";
 import { fileUpload } from "../middleware/common.js";
-import { extractProfileImage } from "../helpers/common.js";
-import { error } from "console";
-import xss from "xss";
 
 const router = express.Router();
 
@@ -267,45 +267,32 @@ router.route("/dashboard").get(async (req, res) => {
     const userId = req.session.user.userId;
 
     try {
-        let userData = {};
-        let sessions = {};
+        let userData;
+        let sessions;
+        let badges;
+
         if (userType === "mentee") {
-            console.log("mentee dashboard");
-
-            userData = await menteeData.getMenteeById(userId).catch((error) => {
-                console.log(error);
-                const errorObj = new Error(error);
-                errorObj.name = "ServerError";
-                throw errorObj;
-            });
-
-            sessions = await sessionsData.getSessionsByMentee(
-                userId,
-                "upcoming"
-            );
-        } else if (userType == "mentor") {
-            console.log("mentor dashboard");
-            userData = await mentorData.getMentorById(userId).catch((error) => {
-                console.log(error);
-                const errorObj = new Error(error);
-                errorObj.name = "ServerError";
-                throw errorObj;
-            });
-
-            sessions = await sessionsData.getSessionsByMentor(
-                userId,
-                "upcoming"
-            );
+            userData = await menteeData.getMenteeById(userId);
+            sessions = await sessionsData.getSessionsByMentee(userId, "upcoming");
+            badges = await badgesData.awardBadgeBasedOnSessions(userId, userType);
+        } else if (userType === "mentor") {
+            userData = await mentorData.getMentorById(userId);
+            sessions = await sessionsData.getSessionsByMentor(userId, "upcoming");
+            badges = await badgesData.awardBadgeBasedOnSessions(userId, userType);
         } else {
-            res.status(500).redirect("/");
+            console.error("Invalid userType: ", userType);
+            const errorObj = new Error("Invalid user type");
+            errorObj.statusCode = 400;
+            throw errorObj;
         }
-
         userData.userType = userType;
+
         res.render("users/dashboard", {
             pageTitle: "Dashboard",
             headerOptions: req.headerOptions,
             userData,
             sessions,
+            badges
         });
     } catch (error) {
         const statusCode = error.statusCode || 404;
@@ -316,6 +303,7 @@ router.route("/dashboard").get(async (req, res) => {
         });
     }
 });
+
 export { router as rootRoutes };
 
 router.route("/profile/:userType/:userId").get(async (req, res) => {

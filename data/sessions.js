@@ -109,6 +109,14 @@ export const createSession = async (
         throw "End time cannot be in the past.";
     }
 
+    // Calculate the difference in minutes
+    const durationInMinutes = end_time.diff(start_time, 'minutes');
+
+    // Check if the duration exceeds 60 minutes
+    if (durationInMinutes > 60 || durationInMinutes <= 0) {
+        throw "The session duration must be more than 0 and no more than 1 hour.";
+    }
+
     const sessionCollection = await sessions();
 
     const conflicts = await sessionCollection.find({
@@ -276,6 +284,13 @@ export const rescheduleSession = async (id, start_time, end_time) => {
         throw "End time cannot be in the past.";
     }
 
+    // Calculate the difference in minutes
+    const durationInMinutes = end_time.diff(start_time, 'minutes');
+
+    // Check if the duration exceeds 60 minutes
+    if (durationInMinutes > 60 || durationInMinutes <= 0) {
+        throw "The session duration must be more than 0 and no more than 1 hour.";
+    }
     
 
     let reschedSession = {

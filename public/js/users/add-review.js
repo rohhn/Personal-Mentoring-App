@@ -80,6 +80,7 @@ $(window).on("load", () => {
         if (formValidate) {
             console.error(formValidate[0]);
             alert(formValidate[0]);
+            return;
         }
 
         $.ajax({
