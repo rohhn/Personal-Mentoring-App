@@ -16,6 +16,11 @@ export const makeHeaderOptions = (req, res, next) => {
     } else {
         headerOptions.isAuthenticated = false;
     }
+    if (req.session.admin) {
+        headerOptions.isAdmin = true;
+    } else {
+        headerOptions.isAdmin = false;
+    }
     req.headerOptions = headerOptions;
     next();
 };

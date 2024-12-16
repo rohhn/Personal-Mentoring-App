@@ -18,7 +18,7 @@ const router = express.Router();
 router.route("/").get(async (req, res) => {
     const mentorsList = await mentorData.getMentorsAboveRating(1);
     const subjectAreasList = await subjectData.getAllSubjectAreas();
-    res.render("landing/landing-page", {
+    return res.render("landing/landing-page", {
         pageTitle: "Personal Mentoring App",
         headerOptions: req.headerOptions,
         mentors: mentorsList,
@@ -32,7 +32,7 @@ router
         if (req.session && req.session.admin) {
             return res.redirect("/admin/dashboard");
         }
-        res.render("auth/login-page", {
+        return res.render("auth/login-page", {
             pageTitle: "Login",
             headerOptions: req.headerOptions,
         });
@@ -113,7 +113,7 @@ router
                 throw errorObj;
             }
 
-            res.redirect("/dashboard");
+            return res.redirect("/dashboard");
         } catch (error) {
             let errorMessage = error.message;
             let statusCode = 500;
@@ -127,7 +127,7 @@ router
                 errorMessage = "Unexpected error occurred. Try again.";
             }
 
-            res.status(statusCode).render("auth/login-page", {
+            return res.status(statusCode).render("auth/login-page", {
                 pageTitle: "Login",
                 headerOptions: xss(req.headerOptions),
                 error: errorMessage,
@@ -141,7 +141,7 @@ router
         if (req.session && req.session.admin) {
             return res.redirect("/admin/dashboard");
         }
-        res.render("auth/signup-page", {
+        return res.render("auth/signup-page", {
             pageTitle: "Sign Up",
             headerOptions: req.headerOptions,
         });
@@ -172,7 +172,7 @@ router
                 checkStringParams(last_name);
                 checkEmail(email);
                 checkStringParams(summary);
-                checkStringParams(password); // TODO: replace with password validation
+                checkStringParams(password);
             } catch (error) {
                 const errorObj = new Error(error.message || error);
                 errorObj.statusCode = 400;
@@ -249,7 +249,7 @@ router
                 error.message || "Unexpected error occurred. Try again.";
             let statusCode = error.statusCode || 400;
 
-            res.status(statusCode).render("auth/signup-page", {
+            return res.status(statusCode).render("auth/signup-page", {
                 pageTitle: "Sign Up",
                 headerOptions: req.headerOptions,
                 error: errorMessage,
@@ -259,15 +259,13 @@ router
 
 router.route("/logout").get(async (req, res) => {
     req.session.destroy();
-    res.redirect("/");
+    return res.redirect("/");
 });
 
 router.route("/dashboard").get(async (req, res) => {
     const userType = req.session.user.userType;
     const userId = req.session.user.userId;
-    if (req.session && req.session.admin) {
-        return res.redirect("/admin/dashboard");
-    }
+
     try {
         let userData = {};
         let sessions = {};
@@ -309,7 +307,14 @@ router.route("/dashboard").get(async (req, res) => {
             userData,
             sessions,
         });
-    } catch (error) { }
+    } catch (error) {
+        const statusCode = error.statusCode || 404;
+        return res.status(statusCode).render("error", {
+            pageTitle: "Error",
+            errorMessage: error.message || "An unexpected error ocurred.",
+            headerOptions: req.headerOptions,
+        });
+    }
 });
 export { router as rootRoutes };
 
@@ -327,4 +332,3 @@ router.route("/profile/:userType/:userId").get(async (req, res) => {
 router.route("/test").get(async (req, res) => {
     res.render("test");
 });
-

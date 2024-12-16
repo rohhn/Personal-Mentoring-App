@@ -29,7 +29,6 @@ export const createMentor = async (
     first_name = checkStringParams(first_name);
     last_name = checkStringParams(last_name);
     summary = checkStringParams(summary);
-    // TODO: Implement a proper date check
     checkDate(dob);
 
     dob = new Date(dob.trim());
@@ -90,7 +89,9 @@ export const createMentor = async (
 export const getAllMentors = async () => {
     const mentorCollection = await mentors();
 
-    let allMentors = await mentorCollection.find({ approved: "approved" }).toArray();
+    let allMentors = await mentorCollection
+        .find({ approved: "approved" })
+        .toArray();
 
     if (!allMentors) {
         return [];
@@ -337,7 +338,6 @@ export const toAddAvailability = async (id, availability) => {
 
     // Process the availability array to update or append
     const updatedAvailability = [...existingAvailability];
-    
 
     for (const newEntry of availability) {
         const existingEntryIndex = updatedAvailability.findIndex(
@@ -603,13 +603,13 @@ export const getMentorsAboveRating = async (averageRating) => {
 
     // Filter mentors based on average rating
     const mentorsAboveRating = await mentorCollection
-    .find({
-        $and: [
-            { averageRating: { $gt: averageRating } }, // Mentors with averageRating greater than the input
-            { approved: "approved" }                  // Mentors with "approved" status
-        ]
-    })
-    .toArray();
+        .find({
+            $and: [
+                { averageRating: { $gt: averageRating } }, // Mentors with averageRating greater than the input
+                { approved: "approved" }, // Mentors with "approved" status
+            ],
+        })
+        .toArray();
 
     if (mentorsAboveRating.length === 0) {
         return [];

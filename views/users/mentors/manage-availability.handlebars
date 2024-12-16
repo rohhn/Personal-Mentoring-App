@@ -108,9 +108,9 @@
                     <div class="text-center">
                         <h2>Current Availability</h2>
                     </div>
-                    <div id="curr-avl-div" class="row row-cols-2 gy-2 px-2" data-id="{{userId}}">
+                    <div id="curr-avl-div" class="row gy-2 px-2" data-id="{{userId}}">
                         {{#each availability}}
-                        <div id="avl-{{this.day}}" class="col w-50 mx-auto">
+                        <div id="avl-{{this.day}}" class="col-sm-auto col-md-auto mx-auto">
                             <div class="card text-bg-dark p-2">
                                 <div class="card-title"><h5>{{this.day}}</h5></div>
                                 <div class="card-body">
@@ -121,9 +121,6 @@
                         </div>
                         {{/each}}
                     </div>
-                    
-                        
-                    
                 {{!-- </div> --}}
 
             </div>

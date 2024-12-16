@@ -15,7 +15,9 @@
                 {{#if options.isAuthenticated}}
                     <li class="nav-item me-2">
                         <a class="btn btn-primary" href="/dashboard">Home</a>
-                        <a class="btn btn-primary" href="/forum">Forums</a>
+                        {{#if (isEqual options.isAdmin false)}}
+                            <a class="btn btn-primary" href="/forum">Forums</a>
+                        {{/if}}
                         <a class="btn btn-danger" href="/logout">Logout</a>
                     </li>
                 {{else}}
