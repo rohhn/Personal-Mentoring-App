@@ -6,12 +6,13 @@ import { checkStringParams } from "../helpers.js";
 
 import { subjectData } from "../data/index.js";
 import xss from "xss";
+import { allowMentorsOnly } from "../middleware/users.js";
 
 const router = express.Router();
 
 router
     .route("/")
-    .post(async (req, res) => {
+    .post(allowMentorsOnly, async (req, res) => {
         let newSubject = req.body;
 
         try {
@@ -61,7 +62,7 @@ router
             return res.status(404).json({ error: e });
         }
     })
-    .delete(async (req, res) => {
+    .delete(allowMentorsOnly, async (req, res) => {
         let subjectId = xss(req.params.subjectId.trim());
 
         try {
@@ -99,7 +100,7 @@ router
             return res.status(500).json({ error: e });
         }
     })
-    .put(async (req, res) => {
+    .put(allowMentorsOnly, async (req, res) => {
         let subjectId = xss(req.params.subjectId.trim());
 
         try {

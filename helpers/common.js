@@ -8,7 +8,7 @@ export const extractProfileImage = (req) => {
         if (file.fieldname == "profile_image") {
             profileImageBase64 = `data:${
                 file.mimetype
-            }; base64,${file.buffer.toString("base64")}`;
+            };base64,${file.buffer.toString("base64")}`;
         }
     }
 
