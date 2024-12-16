@@ -231,7 +231,7 @@ export const validateAvailability = (availability) => {
     ];
 
     let keys = Object.keys(availability);
-    for (let i in availability.av) {
+    for (let i in availability) {
         if (
             !Object.keys(availability[i]).includes("day") ||
             !Object.keys(availability[i]).includes("start_time") ||
@@ -243,16 +243,20 @@ export const validateAvailability = (availability) => {
         let start_time = availability[i].start_time;
         let end_time = availability[i].end_time;
 
+        const [startHour, startMinute] = start_time.split(":").map(Number);
+        const [endHour, endMinute] = end_time.split(":").map(Number);
+    
+        if (endHour < startHour || (endHour === startHour && endMinute <= startMinute)) {
+            throw `End time cannot be before or equal to start time for availability at index ${i}.`;
+        }
+
         checkStringParams(day, "day");
-        checkDate(start_time);
-        checkDate(end_time);
 
         availability[i].day = xss(day.trim());
-        availability[i].start_time = new Date(xss(start_time.trim()));
-        availability[i].end_time = new Date(xss(end_time.trim()));
+        availability[i].start_time = xss(start_time.trim())
+        availability[i].end_time = xss(end_time.trim())
 
-        avail.start_time = xss(avail.start_time.trim());
-        avail.end_time = xss(avail.end_time.trim());
+
     }
     return availability;
 };
