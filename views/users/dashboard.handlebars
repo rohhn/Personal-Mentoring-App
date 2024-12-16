@@ -323,21 +323,16 @@
                     </div>
                 </div>
                 <div class="card mt-3 text-bg-dark p-2">
-                    {{#if profileInfo.badges}}
-                        <h5>Badges</h5>
-                        <div class="d-flex flex-row">
-
-                            {{#each profileInfo.badges}}
-                                <div class="p-2">
-                                    <img height="75" width="75" src="/public/img/badges/{{icon}}" />
-                                </div>
-                            {{/each}}
-                        </div>
-                    {{else}}
-                        <p class="text-secondary text-center p-4 mb-0"><em>No
-                                badges to display</em></p>
-                    {{/if}}
-                </div>
+    {{#if badges.badge}}
+    <h5>Badges</h5>
+    <div class="d-flex flex-row">
+        <div class="p-2">
+            <img height="75" width="75" src="/public/img/badges/{{badges.badge.icon}}" alt="{{badges.badge.name}}">
+        </div>
+    </div>
+{{else}}
+    <p class="text-secondary text-center p-4 mb-0"><em>No badges to display</em></p>
+{{/if}}
             </div>
         </div>
 
