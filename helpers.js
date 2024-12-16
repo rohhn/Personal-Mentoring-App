@@ -245,18 +245,19 @@ export const validateAvailability = (availability) => {
 
         const [startHour, startMinute] = start_time.split(":").map(Number);
         const [endHour, endMinute] = end_time.split(":").map(Number);
-    
-        if (endHour < startHour || (endHour === startHour && endMinute <= startMinute)) {
+
+        if (
+            endHour < startHour ||
+            (endHour === startHour && endMinute <= startMinute)
+        ) {
             throw `End time cannot be before or equal to start time for availability at index ${i}.`;
         }
 
         checkStringParams(day, "day");
 
         availability[i].day = xss(day.trim());
-        availability[i].start_time = xss(start_time.trim())
-        availability[i].end_time = xss(end_time.trim())
-
-
+        availability[i].start_time = xss(start_time.trim());
+        availability[i].end_time = xss(end_time.trim());
     }
     return availability;
 };

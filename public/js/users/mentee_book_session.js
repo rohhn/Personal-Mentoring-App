@@ -281,7 +281,9 @@
             month,
             hour: startHour,
             minute: startMin,
-        }).toISOString({ keepOffset: true });
+        })
+            .add(1, "seconds")
+            .toISOString({ keepOffset: true });
 
         const [endHour, endMin] = $.map(
             formValues.end_time.split(":"),
@@ -295,7 +297,9 @@
             month,
             hour: endHour,
             minute: endMin,
-        }).toISOString({ keepOffset: true });
+        })
+            .subtract(1, "seconds")
+            .toISOString({ keepOffset: true });
 
         bookSession(formValues);
     }

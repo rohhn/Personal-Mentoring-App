@@ -1,12 +1,9 @@
-export const profileMiddleware = (req, res, next) => {
-    const userType = req.params.userType;
-    const userId = req.params.userId;
-
-    next();
-};
-
 export const allowMenteesOnly = (req, res, next) => {
-    if (req.session.user.userType !== "mentee") {
+    if (
+        req.session &&
+        req.session.user &&
+        req.session.user.userType !== "mentee"
+    ) {
         return res.redirect("/dashboard");
     }
 
@@ -14,7 +11,11 @@ export const allowMenteesOnly = (req, res, next) => {
 };
 
 export const allowMentorsOnly = (req, res, next) => {
-    if (req.session.user.userType !== "mentor") {
+    if (
+        req.session &&
+        req.session.user &&
+        req.session.user.userType !== "mentor"
+    ) {
         return res.redirect("/dashboard");
     }
 
