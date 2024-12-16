@@ -129,8 +129,7 @@ app.use("/sessions*", privateRouteMiddleware);
 app.use("/mentor/availability/*", allowMentorsOnly);
 app.use("/sessions/booking/*", allowMenteesOnly);
 
-app.use("/forum*", allowMenteesOnly);
-app.use("/forum*", allowMentorsOnly);
+app.use("/forum*", privateRouteMiddleware);
 
 app.engine("handlebars", handlebarsInstance.engine);
 app.set("view engine", "handlebars");
