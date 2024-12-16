@@ -176,7 +176,7 @@ export const getMentorById = async (id) => {
 export const getMentorByEmail = async (email) => {
     checkStringParams(email, "email");
 
-    email = email.trim();
+    email = email.trim().toLowerCase();
 
     const mentorCollection = await mentors();
 
