@@ -8,9 +8,9 @@
                 <div class="card text-bg-dark">
                     <div class="card-body" id="session-card-{{this._id}}">
                         <div class="d-flex justify-content-between">
-                            <div id="info">
+                            <div>
                                 <div class="card-text"><strong>Mentee Name:</strong>
-                                    {{this.mentee_name}}</div>
+                                    {{this.mentee_name}}&nbsp;<a class="btn btn-info" style="--bs-btn-padding-y: .1rem; --bs-btn-padding-x: .2rem; --bs-btn-font-size: .75rem;" href="/mentee/{{this.mentee_id}}">View Profile</a></div>
                                 <div class="card-text"><strong>Subject Area:</strong>
                                     {{this.subject_area}}</div>
                                 <div class="card-text"><strong>From:</strong>
@@ -26,7 +26,7 @@
                                     </strong>
                                     <a href="{{this.meeting_link}}">Zoom Call</a></div>
                             </div>
-                            <div id="btns" class="">
+                            <div>
 
                                 {{#if
                                     (happeningNow this.start_time this.end_time)

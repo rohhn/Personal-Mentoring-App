@@ -1,6 +1,6 @@
 <main class="container my-3">
     <div class="row d-flex text-center">
-        <h2>Book a sessions</h2>
+        <h2>Mentors for {{subject_area.name}}</h2>
     </div>
     <div class="row pt-4 gy-2">
         {{#if mentors}}
@@ -10,10 +10,10 @@
                         <div class="d-flex justify-content-between">
                             <div class="d-flex flex-row">
                                 <div class="mx-1">
-                                    {{#if this.profile_image}}
+                                    {{#if profile_image}}
                                         <img
-                                            src="{{this.profile_image}}"
-                                            alt="{{this.name}}"
+                                            src="{{profile_image}}"
+                                            alt="{{this.first_name}}"
                                             class="rounded-circle"
                                             width="64"
                                             height="64"
@@ -32,7 +32,8 @@
                                                 href="/mentor/{{this._id}}"
                                                 data-bs-toggle="tooltip"
                                                 data-bs-title="Click to view full profile"
-                                            >{{this.name}}</a></h5>
+                                            >{{this.first_name}}
+                                                {{this.last_name}}</a></h5>
 
                                     </div>
 
@@ -70,5 +71,6 @@
                 class="mt-5 text-center fw-lighter fst-italic fs-6 text-secondary"
             >No mentors found.</p>
         {{/if}}
+
     </div>
 </main>

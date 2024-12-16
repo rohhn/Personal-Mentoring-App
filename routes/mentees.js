@@ -1,5 +1,6 @@
 import express from "express";
 import { ObjectId } from "mongodb";
+import xss from "xss";
 import { mentees } from "../config/mongoCollections.js";
 import { badgesData, menteeData } from "../data/index.js";
 import {
@@ -10,14 +11,13 @@ import {
 } from "../helpers.js";
 import { extractProfileImage } from "../helpers/common.js";
 import { fileUpload } from "../middleware/common.js";
-import moment from "moment";
-import xss from "xss";
+import { privateRouteMiddleware } from "../middleware/root.js";
 
 const router = express.Router();
 
 router
     .route("/")
-    .get(async (req, res) => {
+    .get(privateRouteMiddleware, async (req, res) => {
         try {
             let mentees = await menteeData.getAllMentees();
             return res.status(200).json(mentees);
@@ -91,7 +91,6 @@ router
                     menteeId,
                     mentee.userType
                 );
-            console.log(badge);
             // set custom flag for isOwner for edit profile tag
             let isOwner = false;
             if (req.session.user) {
@@ -113,7 +112,7 @@ router
             res.status(statusCode).redirect("/dashboard");
         }
     })
-    .delete(async (req, res) => {
+    .delete(privateRouteMiddleware, async (req, res) => {
         let menteeId = xss(req.params.menteeId.trim());
 
         try {
@@ -147,7 +146,7 @@ router
             return res.status(404).json({ error: e });
         }
     })
-    .put(fileUpload.any(), async (req, res) => {
+    .put(privateRouteMiddleware, fileUpload.any(), async (req, res) => {
         try {
             const menteeId = xss(req.params.menteeId.trim());
             if (!menteeId) throw new Error("Mentee ID is required.");
@@ -222,56 +221,60 @@ router
         }
     });
 
-router.route("/:menteeId/edit").get(async (req, res) => {
-    let menteeId = xss(req.params.menteeId.trim());
+router
+    .route("/:menteeId/edit")
+    .get(privateRouteMiddleware, async (req, res) => {
+        let menteeId = xss(req.params.menteeId.trim());
 
-    if (req.session.user.userId !== menteeId) {
-        res.redirect("/dashboard");
-    }
-
-    try {
-        checkStringParams(menteeId);
-        if (!ObjectId.isValid(menteeId)) {
-            const errorObj = new Error("Invalid ID.");
-            errorObj.name = "InvalidID";
-            throw errorObj;
+        if (req.session.user.userId !== menteeId) {
+            res.redirect("/dashboard");
         }
 
-        let mentee = await menteeData.getMenteeById(menteeId).catch((error) => {
-            console.log(error);
-            const errorObj = new Error("User not found!");
-            errorObj.name = "NotFound";
-            throw errorObj;
-        });
+        try {
+            checkStringParams(menteeId);
+            if (!ObjectId.isValid(menteeId)) {
+                const errorObj = new Error("Invalid ID.");
+                errorObj.name = "InvalidID";
+                throw errorObj;
+            }
 
-        mentee.userType = "mentee";
-        // mentee.dob = moment(mentee.dob).format();
+            let mentee = await menteeData
+                .getMenteeById(menteeId)
+                .catch((error) => {
+                    console.log(error);
+                    const errorObj = new Error("User not found!");
+                    errorObj.name = "NotFound";
+                    throw errorObj;
+                });
 
-        // set custom flag for isOwner for edit profile tag
-        let isOwner = false;
-        if (req.session.user) {
-            isOwner = req.session.user.userId === mentee._id;
+            mentee.userType = "mentee";
+            // mentee.dob = moment(mentee.dob).format();
+
+            // set custom flag for isOwner for edit profile tag
+            let isOwner = false;
+            if (req.session.user) {
+                isOwner = req.session.user.userId === mentee._id;
+            }
+
+            res.render("users/mentees/edit-profile", {
+                pageTitle: `${mentee.first_name}'s Profile`,
+                headerOptions: req.headerOptions,
+                profileInfo: mentee,
+                isOwner,
+            });
+        } catch (error) {
+            let statusCode = 400;
+            let errorMessage = error.message;
+
+            if (error.name === "NotFound") {
+                statusCode = 404;
+            } else {
+                console.log(error);
+                errorMessage = "User not found!";
+            }
+
+            res.redirect("/dashboard");
         }
-
-        res.render("users/mentees/edit-profile", {
-            pageTitle: `${mentee.first_name}'s Profile`,
-            headerOptions: req.headerOptions,
-            profileInfo: mentee,
-            isOwner,
-        });
-    } catch (error) {
-        let statusCode = 400;
-        let errorMessage = error.message;
-
-        if (error.name === "NotFound") {
-            statusCode = 404;
-        } else {
-            console.log(error);
-            errorMessage = "User not found!";
-        }
-
-        res.redirect("/dashboard");
-    }
-});
+    });
 
 export { router as menteeRoutes };

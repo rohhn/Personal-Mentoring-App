@@ -7,7 +7,7 @@ $(window).on("load", () => {
 
         avlArray.forEach((element) => {
             const { day, start_time, end_time } = element;
-            const divElement = `<div id="avl-${day}" class="row px-5 w-50 mx-auto">
+            const divElement = `<div id="avl-${day}" class="col-sm-auto col-md-auto mx-auto">
                             <div class="card text-bg-dark pt-2">
                                 <div class="card-title"><h5>${day}</h5></div>
                                 <div class="card-body">

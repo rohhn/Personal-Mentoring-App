@@ -1,8 +1,9 @@
 import express from "express";
 import { parentsSessionData } from "../data/parent.js";
+import { privateRouteMiddleware } from "../middleware/root.js";
 
 const router = express.Router();
-router.post("/Session", async (req, res) => {
+router.post("/Session", privateRouteMiddleware, async (req, res) => {
     const { mentorId, menteeId, subjectArea, time, duration, meetingLink } =
         req.body;
     if (

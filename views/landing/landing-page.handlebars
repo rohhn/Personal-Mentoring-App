@@ -15,17 +15,41 @@
         <div class="row justify-content-center">
             {{#each mentors}}
 
-                <div class="card col-md-3 col-sm-4 m-2 text-bg-dark text-light">
+                <div
+                    class="card col-md-3 col-sm-4 m-2 text-bg-dark text-light p-2"
+                >
                     <a
                         class="text-decoration-none text-light"
                         href="/profile/mentor/{{_id}}"
                     >
-                        <img class="card-top-img" href="" />
-                        <div class="card-body">
-                            <h5 class="card-title">{{name}}</h5>
-                            <p class="card-text text-light">
-                                subject areas?</p>
+                        <div class="d-flex flex-row justify-content-between">
+                            <div class="mx-1">
+                                {{#if profile_image}}
+                                    <img
+                                        src="{{profile_image}}"
+                                        alt="{{name}}"
+                                        class="rounded-circle"
+                                        width="64"
+                                        height="64"
+                                    >
+                                {{else}}
+                                    <i
+                                        class="fa-solid fa-user"
+                                        style="color: #003c8a; font-size:64"
+                                    ></i>
+                                {{/if}}
+                            </div>
+                            <div class="mx-1">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{name}}</h5>
+                                    <div class="text-break text-wrap">
+                                        <p
+                                            class="text-secondary mb-0"
+                                        >{{summary}}</p>
+                                    </div>
 
+                                </div>
+                            </div>
                         </div>
                     </a>
                 </div>
@@ -41,10 +65,13 @@
             <div class="row justify-content-center">
                 {{#each subject_areas}}
                     <div class="card col-md-3 col-sm-4 m-2 text-bg-dark">
-                        <img class="card-top-img" href="" />
                         <div class="card-body text-light">
-                            <h5 class="card-title">{{name}}</h5>
+                            <h5 class="card-title text-start">{{name}}</h5>
                             <p class="card-text"> {{description}}</p>
+                            <a
+                                class="btn btn-sm btn-info"
+                                href="/subjects/mentors/{{_id}}"
+                            >Show Mentors</a>
                         </div>
                     </div>
                 {{/each}}

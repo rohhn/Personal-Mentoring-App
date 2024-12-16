@@ -6,47 +6,51 @@ import { checkStringParams, checkTimestamp } from "../helpers.js";
 
 import { mentorData, sessionsData } from "../data/index.js";
 import { addMenteeIdtoReq } from "../middleware/sessions.js";
+import { privateRouteMiddleware } from "../middleware/root.js";
+import { allowMenteesOnly, allowMentorsOnly } from "../middleware/users.js";
 import xss from "xss";
 
 const router = express.Router();
 
-router.route("/").post(addMenteeIdtoReq, async (req, res, next) => {
-    let newSession = req.body;
+router
+    .route("/")
+    .post(privateRouteMiddleware, addMenteeIdtoReq, async (req, res, next) => {
+        let newSession = req.body;
 
+        try {
+            checkStringParams(newSession.mentor_id);
+            checkStringParams(newSession.mentee_id);
+            checkStringParams(newSession.subject_area);
+            checkTimestamp(newSession.start_time);
+            checkTimestamp(newSession.end_time);
 
-    try {
-        checkStringParams(newSession.mentor_id);
-        checkStringParams(newSession.mentee_id);
-        checkStringParams(newSession.subject_area);
-        checkTimestamp(newSession.start_time);
-        checkTimestamp(newSession.end_time);
+            newSession.mentor_id = xss(newSession.mentor_id.trim());
+            newSession.mentee_id = xss(newSession.mentee_id.trim());
+            newSession.subject_area = xss(newSession.subject_area.trim());
+            newSession.start_time = xss(newSession.start_time.trim());
+            newSession.end_time = xss(newSession.end_time.trim());
+            // console.log(newSession.start_time);
+        } catch (e) {
+            console.log(e);
+            return res.status(400).json({ error: e });
+        }
 
-        newSession.mentor_id = xss(newSession.mentor_id.trim());
-        newSession.mentee_id = xss(newSession.mentee_id.trim());
-        newSession.subject_area = xss(newSession.subject_area.trim());
-        newSession.start_time = xss(newSession.start_time.trim());
-        newSession.end_time = xss(newSession.end_time.trim());
-        // console.log(newSession.start_time);
-    } catch (e) {
-        return res.status(400).json({ error: e });
-    }
+        try {
+            let session = await sessionsData.createSession(
+                newSession.mentor_id,
+                newSession.mentee_id,
+                newSession.subject_area,
+                newSession.start_time,
+                newSession.end_time
+            );
+            return res.status(200).json(session);
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({ error: e });
+        }
+    });
 
-    try {
-        let session = await sessionsData.createSession(
-            newSession.mentor_id,
-            newSession.mentee_id,
-            newSession.subject_area,
-            newSession.start_time,
-            newSession.end_time
-        );
-        return res.status(200).json(session);
-    } catch (e) {
-        // console.log(e);
-        return res.status(500).json({ error: e });
-    }
-});
-
-router.route("/mentee/:menteeId").get(async (req, res) => {
+router.route("/mentee/:menteeId").get(allowMenteesOnly, async (req, res) => {
     let menteeId = xss(req.params.menteeId.trim());
 
     try {
@@ -91,7 +95,7 @@ router.route("/mentee/:menteeId").get(async (req, res) => {
     }
 });
 
-router.route("/mentor/:mentorId").get(async (req, res) => {
+router.route("/mentor/:mentorId").get(allowMentorsOnly, async (req, res) => {
     let mentorId = xss(req.params.mentorId.trim());
 
     try {
@@ -136,7 +140,7 @@ router.route("/mentor/:mentorId").get(async (req, res) => {
 
 router
     .route("/:sessionId")
-    .put(async (req, res) => {
+    .put(allowMenteesOnly, async (req, res) => {
         let sessionId = xss(req.params.sessionId.trim());
 
         try {
@@ -188,7 +192,7 @@ router
             return res.status(500).json({ error: e });
         }
     })
-    .delete(async (req, res) => {
+    .delete(privateRouteMiddleware, async (req, res) => {
         let sessionId = xss(req.params.sessionId.trim());
 
         try {
@@ -238,7 +242,7 @@ router
             return res.status(404).json({ error: e });
         }
     })
-    .get(async (req, res) => {
+    .get(privateRouteMiddleware, async (req, res) => {
         let sessionId = xss(req.params.sessionId.trim());
 
         try {
@@ -264,7 +268,7 @@ router
         }
     });
 
-router.route("/booking/list").get(async (req, res) => {
+router.route("/booking/list").get(allowMenteesOnly, async (req, res) => {
     // show mentors list
 
     const mentors = await mentorData.getAllMentors();
@@ -274,26 +278,28 @@ router.route("/booking/list").get(async (req, res) => {
     });
 });
 
-router.route("/booking/book/:mentorId").get(async (req, res) => {
-    let mentorId = xss(req.params.mentorId);
+router
+    .route("/booking/book/:mentorId")
+    .get(allowMenteesOnly, async (req, res) => {
+        let mentorId = xss(req.params.mentorId);
 
-    try {
-        mentorId = checkStringParams(mentorId);
+        try {
+            mentorId = checkStringParams(mentorId);
 
-        if (!ObjectId.isValid(mentorId)) {
-            throw "Invalid object ID.";
+            if (!ObjectId.isValid(mentorId)) {
+                throw "Invalid object ID.";
+            }
+        } catch (e) {
+            // console.log(e);
+            return res.status(400).json({ error: e });
         }
-    } catch (e) {
-        // console.log(e);
-        return res.status(400).json({ error: e });
-    }
 
-    const mentorInfo = await mentorData.getMentorById(mentorId);
+        const mentorInfo = await mentorData.getMentorById(mentorId);
 
-    res.render("users/mentees/book-session", {
-        headerOptions: req.headerOptions,
-        mentorInfo,
+        res.render("users/mentees/book-session", {
+            headerOptions: req.headerOptions,
+            mentorInfo,
+        });
     });
-});
 
 export { router as sessionRoutes };

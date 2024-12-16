@@ -14,8 +14,10 @@ import { allowMenteesOnly, allowMentorsOnly } from "./middleware/users.js";
 import {
     adminDashboardMiddleware,
     adminLoginMiddleware,
+    allowAdminOnly,
 } from "./middleware/admin.js";
 import moment from "moment";
+import { format } from "date-fns";
 
 const rewriteUnsupportedBrowserMethods = (req, res, next) => {
     // If the user posts to the server with a property called _method, rewrite the request's method
@@ -52,7 +54,8 @@ const handlebarsInstance = exphbs.create({
         formatDateTime: (datetime) => {
             const dateTimeObj = moment(datetime);
             if (dateTimeObj.isValid()) {
-                return dateTimeObj.format("MM-DD-YYYY hh:mm");
+                // return dateTimeObj.format("MM-DD-YYYY hh:mm");
+                return format(datetime, "MM-dd-yyyy HH:mm");
             } else {
                 return datetime;
             }
@@ -60,7 +63,8 @@ const handlebarsInstance = exphbs.create({
         formatDate: (date) => {
             const dateObj = moment(date);
             if (dateObj.isValid()) {
-                return dateObj.format("MM-DD-YYYY");
+                // return dateObj.format("MM-DD-YYYY");
+                return format(datetime, "MM-dd-yyyy");
             } else {
                 return datetime;
             }
@@ -117,10 +121,12 @@ app.use("/dashboard", adminDashboardMiddleware);
 app.use("/login", loginMiddleware);
 app.use("/signup", loginMiddleware);
 
-app.use("/admin*", adminLoginMiddleware);
+// app.use("/admin/dashboard", allowAdminOnly);
+app.use(/\/admin\/((?!login).)*/, allowAdminOnly);
+app.use("/admin/login", adminLoginMiddleware);
 
 app.use("/sessions*", privateRouteMiddleware);
-app.use("/mentor/availability/*", privateRouteMiddleware);
+app.use("/mentor/availability/*", allowMentorsOnly);
 app.use("/sessions/booking/*", allowMenteesOnly);
 
 app.use("/forum*", privateRouteMiddleware);
@@ -134,4 +140,3 @@ app.listen(3000, () => {
     console.log("We have now got a server");
     console.log("your routes will be running on http://localhost:3000");
 });
-

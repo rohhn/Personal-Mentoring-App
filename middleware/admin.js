@@ -1,7 +1,7 @@
 export const adminLoginMiddleware = (req, res, next) => {
-    if (req.session.user) {
+    if (req.session && req.session.user) {
         return res.redirect("/dashboard");
-    } else if (req.session.admin) {
+    } else if (req.session && req.session.admin) {
         return res.redirect("/admin/dashboard");
     } else {
         next();
@@ -9,8 +9,16 @@ export const adminLoginMiddleware = (req, res, next) => {
 };
 
 export const adminDashboardMiddleware = (req, res, next) => {
-    if (req.session.admin) {
+    if (req.session && req.session.admin) {
         return res.redirect("/admin/dashboard");
+    } else {
+        next();
+    }
+};
+
+export const allowAdminOnly = (req, res, next) => {
+    if (req.session && !req.session.admin) {
+        return res.redirect("/admin/login");
     } else {
         next();
     }

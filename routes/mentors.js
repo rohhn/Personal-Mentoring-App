@@ -9,12 +9,13 @@ import {
     checkEducation,
     checkEmail,
     checkExperience,
-    checkStringParams
+    checkStringParams,
 } from "../helpers.js";
 import { fileUpload } from "../middleware/common.js";
 import { extractProfileImage } from "../helpers/common.js";
 import xss from "xss";
-
+import { privateRouteMiddleware } from "../middleware/root.js";
+import { allowMentorsOnly } from "../middleware/users.js";
 
 const router = express.Router();
 
@@ -97,7 +98,11 @@ router
                 });
 
             mentor.userType = "mentor";
-            const { sessionCount, badge } = await badgesData.awardBadgeBasedOnSessions(mentorId,mentor.userType);
+            const { sessionCount, badge } =
+                await badgesData.awardBadgeBasedOnSessions(
+                    mentorId,
+                    mentor.userType
+                );
             // set custom flag for isOwner for edit profile tag
             let isOwner = false;
             if (req.session.user) {
@@ -133,7 +138,7 @@ router
             }
         }
     })
-    .delete(async (req, res) => {
+    .delete(privateRouteMiddleware, async (req, res) => {
         let mentorId = xss(req.params.mentorId.trim());
 
         try {
@@ -169,7 +174,7 @@ router
             return res.status(404).json({ error: e });
         }
     })
-    .put(fileUpload.any(), async (req, res) => {
+    .put(privateRouteMiddleware, fileUpload.any(), async (req, res) => {
         let mentorId = xss(req.params.mentorId.trim());
 
         try {
@@ -207,9 +212,6 @@ router
         updatedMentor.experience = xss(updatedMentor.experience);
         updatedMentor.subject_areas = xss(updatedMentor.subject_areas);
         updatedMentor.first_name = xss(updatedMentor.first_name);
-        
-
-        
 
         try {
             checkStringParams(updatedMentor.first_name, "firstname");
@@ -223,7 +225,9 @@ router
             updatedMentor.experience = checkExperience(
                 updatedMentor.experience
             );
-            updatedMentor.subject_areas = JSON.parse(updatedMentor.subject_areas);
+            updatedMentor.subject_areas = JSON.parse(
+                updatedMentor.subject_areas
+            );
             updatedMentor.subject_areas = checkArrayOfStrings(
                 updatedMentor.subject_areas
             );
@@ -258,7 +262,7 @@ router
 
 router
     .route("/availability/:mentorId")
-    .get(async (req, res) => {
+    .get(allowMentorsOnly, async (req, res) => {
         const mentorId = xss(req.params.mentorId);
 
         if (req.session.user.userId != mentorId) {
@@ -283,7 +287,7 @@ router
             availability: mentorInfo.availability || [],
         });
     })
-    .post(async (req, res) => {
+    .post(allowMentorsOnly, async (req, res) => {
         let mentorId = xss(req.params.mentorId.trim());
 
         try {
@@ -311,8 +315,7 @@ router
             return res.status(404).json({ error: e });
         }
 
-        let availability = xss(req.body);
-        
+        let availability = req.body;
         try {
             let avail = await mentorData.toAddAvailability(
                 mentorId,
@@ -325,7 +328,7 @@ router
         }
     });
 
-router.route("/:mentorId/edit").get(async (req, res) => {
+router.route("/:mentorId/edit").get(allowMentorsOnly, async (req, res) => {
     let mentorId = xss(req.params.mentorId.trim());
 
     if (req.session.user.userId !== mentorId) {
@@ -381,7 +384,7 @@ router.route("/:mentorId/edit").get(async (req, res) => {
 
 router
     .route("/subject/:mentorId")
-    .put(async (req, res) => {
+    .put(allowMentorsOnly, async (req, res) => {
         let mentorId = xss(req.params.mentorId.trim());
 
         try {
@@ -452,7 +455,7 @@ router
             return res.status(500).json({ error: e });
         }
     })
-    .delete(async (req, res) => {
+    .delete(allowMentorsOnly, async (req, res) => {
         let mentorId = xss(req.params.mentorId.trim());
 
         try {

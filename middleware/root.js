@@ -1,5 +1,5 @@
 export const rootMiddleware = (req, res, next) => {
-    if (req.session.user) {
+    if (req.session && req.session.user) {
         return res.redirect("/dashboard");
     } else {
         next();
@@ -7,7 +7,7 @@ export const rootMiddleware = (req, res, next) => {
 };
 
 export const privateRouteMiddleware = (req, res, next) => {
-    if (!req.session.user && !req.session.admin) {
+    if (req.session && !req.session.user && !req.session.admin) {
         return res.redirect("/login");
     } else {
         next();

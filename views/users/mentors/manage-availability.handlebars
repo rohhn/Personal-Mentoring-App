@@ -34,11 +34,28 @@
                                 </div>
                                 <div class="col-sm-9 text-secondary">
                                     <input
-                                        class="form-control"
+                                        class="form-control time-input"
                                         name="start_time"
                                         id="start_time"
                                         type="time"
+                                        list="start-time-list"
                                     />
+                                    <datalist id="start-time-list">
+                                    <option value="08:00"></option>
+                                    <option value="09:00"></option>
+                                    <option value="10:00"></option>
+                                    <option value="11:00"></option>
+                                    <option value="12:00"></option>
+                                    <option value="13:00"></option>
+                                    <option value="14:00"></option>
+                                    <option value="15:00"></option>
+                                    <option value="16:00"></option>
+                                    <option value="17:00"></option>
+                                    <option value="18:00"></option>
+                                    <option value="19:00"></option>
+                                    <option value="20:00"></option>
+                                    <option value="21:00"></option>
+                                </datalist>
                                 </div>
                             </div>
                             <div class="row form-group mb-4">
@@ -47,11 +64,28 @@
                                 </div>
                                 <div class="col-sm-9 text-secondary">
                                     <input
-                                        class="form-control"
+                                        class="form-control time-input"
                                         name="end_time"
                                         id="end_time"
                                         type="time"
+                                        list="end-time-list"
                                     />
+                                    <datalist id="end-time-list">
+                                    <option value="08:00"></option>
+                                    <option value="09:00"></option>
+                                    <option value="10:00"></option>
+                                    <option value="11:00"></option>
+                                    <option value="12:00"></option>
+                                    <option value="13:00"></option>
+                                    <option value="14:00"></option>
+                                    <option value="15:00"></option>
+                                    <option value="16:00"></option>
+                                    <option value="17:00"></option>
+                                    <option value="18:00"></option>
+                                    <option value="19:00"></option>
+                                    <option value="20:00"></option>
+                                    <option value="21:00"></option>
+                                </datalist>
                                 </div>
                             </div>
 
@@ -74,9 +108,9 @@
                     <div class="text-center">
                         <h2>Current Availability</h2>
                     </div>
-                    <div id="curr-avl-div" class="row row-cols-2 gy-2 px-2" data-id="{{userId}}">
+                    <div id="curr-avl-div" class="row gy-2 px-2" data-id="{{userId}}">
                         {{#each availability}}
-                        <div id="avl-{{this.day}}" class="col w-50 mx-auto">
+                        <div id="avl-{{this.day}}" class="col-sm-auto col-md-auto mx-auto">
                             <div class="card text-bg-dark p-2">
                                 <div class="card-title"><h5>{{this.day}}</h5></div>
                                 <div class="card-body">
@@ -87,9 +121,6 @@
                         </div>
                         {{/each}}
                     </div>
-                    
-                        
-                    
                 {{!-- </div> --}}
 
             </div>

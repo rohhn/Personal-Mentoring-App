@@ -109,6 +109,47 @@ export const createSession = async (
         throw "End time cannot be in the past.";
     }
 
+    // Calculate the difference in minutes
+    const durationInMinutes = end_time.diff(start_time, 'minutes');
+
+    // Check if the duration exceeds 60 minutes
+    if (durationInMinutes > 60 || durationInMinutes <= 0) {
+        throw "The session duration must be more than 0 and no more than 1 hour.";
+    }
+
+    const sessionCollection = await sessions();
+
+    const conflicts = await sessionCollection.find({
+        mentee_id: mentee_id,
+        $or: [
+            // Case 1: New session's start_time is between an existing session's time range
+            {
+                $and: [
+                    { start_time: { $lte: new Date(start_time) } },
+                    { end_time: { $gte: new Date(start_time) } }
+                ]
+            },
+            // Case 2: New session's end_time is between an existing session's time range
+            {
+                $and: [
+                    { start_time: { $lte: new Date(end_time) } },
+                    { end_time: { $gte: new Date(end_time) } }
+                ]
+            },
+            // Case 3: New session completely overlaps an existing session
+            {
+                $and: [
+                    { start_time: { $gte: new Date(start_time) } },
+                    { end_time: { $lte: new Date(end_time) } }
+                ]
+            }
+        ]
+    }).toArray();
+
+    if (conflicts.length > 0) {
+        throw('Conflicting sessions found.');
+    }
+
     if (!ObjectId.isValid(mentor_id)) {
         throw `${mentor_id} is not a valid ObjectID.`;
     }
@@ -187,8 +228,6 @@ export const createSession = async (
         created_at: new Date().toISOString(),
     };
 
-    const sessionCollection = await sessions();
-
     const result = await sessionCollection.insertOne(newSession);
 
     if (!result.acknowledged || !result.insertedId)
@@ -245,6 +284,15 @@ export const rescheduleSession = async (id, start_time, end_time) => {
         throw "End time cannot be in the past.";
     }
 
+    // Calculate the difference in minutes
+    const durationInMinutes = end_time.diff(start_time, 'minutes');
+
+    // Check if the duration exceeds 60 minutes
+    if (durationInMinutes > 60 || durationInMinutes <= 0) {
+        throw "The session duration must be more than 0 and no more than 1 hour.";
+    }
+    
+
     let reschedSession = {
         start_time: start_time.toDate(),
         end_time: end_time.toDate(),
@@ -259,6 +307,38 @@ export const rescheduleSession = async (id, start_time, end_time) => {
     let mentor = await mentorData.getMentorById(session.mentor_id);
 
     let mentee = await menteeData.getMenteeById(session.mentee_id);
+
+    const conflicts = await sessionCollection.find({
+        mentee_id: mentee._id,
+        _id: { $ne: id ? new ObjectId(id) : null },
+        $or: [
+            // Case 1: New session's start_time is between an existing session's time range
+            {
+                $and: [
+                    { start_time: { $lte: new Date(start_time) } },
+                    { end_time: { $gte: new Date(start_time) } }
+                ]
+            },
+            // Case 2: New session's end_time is between an existing session's time range
+            {
+                $and: [
+                    { start_time: { $lte: new Date(end_time) } },
+                    { end_time: { $gte: new Date(end_time) } }
+                ]
+            },
+            // Case 3: New session completely overlaps an existing session
+            {
+                $and: [
+                    { start_time: { $gte: new Date(start_time) } },
+                    { end_time: { $lte: new Date(end_time) } }
+                ]
+            }
+        ]
+    }).toArray();
+
+    if (conflicts.length > 0) {
+        throw('Conflicting sessions found.');
+    }
 
     let calendarId = mentor.calendarId;
 

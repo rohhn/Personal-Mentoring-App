@@ -8,9 +8,9 @@
                 <div class="card text-bg-dark">
                     <div class="card-body" id="session-card-{{this._id}}">
                         <div class="d-flex justify-content-between">
-                            <div id="info">
+                            <div>
                                 <div class="card-text"><strong>Mentor Name:</strong>
-                                    {{this.mentor_name}}</div>
+                                    {{this.mentor_name}}&nbsp;<a class="btn btn-info" style="--bs-btn-padding-y: .1rem; --bs-btn-padding-x: .2rem; --bs-btn-font-size: .75rem;" href="/mentor/{{this.mentor_id}}">View Profile</a></div>
                                 <div class="card-text"><strong>Subject Area:</strong>
                                     {{this.subject_area}}</div>
                                 <div class="card-text"><strong>From:</strong>
@@ -26,7 +26,7 @@
                                     </strong>
                                     <a href="{{this.meeting_link}}">Zoom Call</a></div>
                             </div>
-                            <div id="btns" class="">
+                            <div>
 
                                 {{#if
                                     (happeningNow this.start_time this.end_time)
@@ -79,7 +79,7 @@
         class="modal fade"
         id="rescheduleModal"
         tabindex="-1"
-        aria-labelledby="modal-header-label"
+        aria-labelledby="modal-header-label-resch"
         aria-hidden="true"
     >
         <div class="modal-dialog modal-fullscreen modal-dialog-scrollable">
@@ -87,7 +87,7 @@
                 <div class="modal-header text-bg-dark">
                     <h1
                         class="modal-title fs-5"
-                        id="modal-header-label"
+                        id="modal-header-label-resch"
                     >Reschedule your session!</h1>
                     <button
                         type="button"
@@ -139,7 +139,8 @@
                                     <table
                                         id="days-table"
                                         class="text-center my-1 w-100"
-                                    >
+                                    ><tbody>
+                                            <tr>
                                         <td class="day">Sun</td>
                                         <td class="day">Mon</td>
                                         <td class="day">Tue</td>
@@ -147,6 +148,8 @@
                                         <td class="day">Thu</td>
                                         <td class="day">Fri</td>
                                         <td class="day">Sat</td>
+                                            </tr>
+                                        </tbody>
                                     </table>
                                     <div class="frame">
                                         <table class="text-center my-1 w-100">

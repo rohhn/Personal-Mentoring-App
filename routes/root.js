@@ -1,35 +1,38 @@
 import bcrypt from "bcrypt";
 import express from "express";
+import xss from "xss";
 import {
+    badgesData,
     menteeData,
     mentorData,
     sessionsData,
-    subjectData,
+    subjectData
 } from "../data/index.js";
-import { checkEmail, checkStringParams, formatDate } from "../helpers.js";
+import { checkEmail, checkStringParams } from "../helpers.js";
+import { extractProfileImage } from "../helpers/common.js";
 import { isParentEmailRequired } from "../helpers/mentees.js";
 import { fileUpload } from "../middleware/common.js";
-import { extractProfileImage } from "../helpers/common.js";
-import { error } from "console";
-import xss from "xss";
 
 const router = express.Router();
 
 router.route("/").get(async (req, res) => {
-    const mentorsList = await mentorData.getAllMentors();
+    const mentorsList = await mentorData.getMentorsAboveRating(1);
     const subjectAreasList = await subjectData.getAllSubjectAreas();
-    res.render("landing/landing-page", {
+    return res.render("landing/landing-page", {
         pageTitle: "Personal Mentoring App",
         headerOptions: req.headerOptions,
         mentors: mentorsList,
-        subject_areas: subjectAreasList,
+        subject_areas: subjectAreasList.slice(0, 6),
     });
 });
 
 router
     .route("/login")
     .get(async (req, res) => {
-        res.render("auth/login-page", {
+        if (req.session && req.session.admin) {
+            return res.redirect("/admin/dashboard");
+        }
+        return res.render("auth/login-page", {
             pageTitle: "Login",
             headerOptions: req.headerOptions,
         });
@@ -110,7 +113,7 @@ router
                 throw errorObj;
             }
 
-            res.redirect("/dashboard");
+            return res.redirect("/dashboard");
         } catch (error) {
             let errorMessage = error.message;
             let statusCode = 500;
@@ -124,7 +127,7 @@ router
                 errorMessage = "Unexpected error occurred. Try again.";
             }
 
-            res.status(statusCode).render("auth/login-page", {
+            return res.status(statusCode).render("auth/login-page", {
                 pageTitle: "Login",
                 headerOptions: xss(req.headerOptions),
                 error: errorMessage,
@@ -135,7 +138,10 @@ router
 router
     .route("/signup")
     .get(async (req, res) => {
-        res.render("auth/signup-page", {
+        if (req.session && req.session.admin) {
+            return res.redirect("/admin/dashboard");
+        }
+        return res.render("auth/signup-page", {
             pageTitle: "Sign Up",
             headerOptions: req.headerOptions,
         });
@@ -166,7 +172,7 @@ router
                 checkStringParams(last_name);
                 checkEmail(email);
                 checkStringParams(summary);
-                checkStringParams(password); // TODO: replace with password validation
+                checkStringParams(password);
             } catch (error) {
                 const errorObj = new Error(error.message || error);
                 errorObj.statusCode = 400;
@@ -243,7 +249,7 @@ router
                 error.message || "Unexpected error occurred. Try again.";
             let statusCode = error.statusCode || 400;
 
-            res.status(statusCode).render("auth/signup-page", {
+            return res.status(statusCode).render("auth/signup-page", {
                 pageTitle: "Sign Up",
                 headerOptions: req.headerOptions,
                 error: errorMessage,
@@ -253,7 +259,7 @@ router
 
 router.route("/logout").get(async (req, res) => {
     req.session.destroy();
-    res.redirect("/");
+    return res.redirect("/");
 });
 
 router.route("/dashboard").get(async (req, res) => {
@@ -261,49 +267,43 @@ router.route("/dashboard").get(async (req, res) => {
     const userId = req.session.user.userId;
 
     try {
-        let userData = {};
-        let sessions = {};
+        let userData;
+        let sessions;
+        let badges;
+
         if (userType === "mentee") {
-            console.log("mentee dashboard");
-
-            userData = await menteeData.getMenteeById(userId).catch((error) => {
-                console.log(error);
-                const errorObj = new Error(error);
-                errorObj.name = "ServerError";
-                throw errorObj;
-            });
-
-            sessions = await sessionsData.getSessionsByMentee(
-                userId,
-                "upcoming"
-            );
-        } else if (userType == "mentor") {
-            console.log("mentor dashboard");
-            userData = await mentorData.getMentorById(userId).catch((error) => {
-                console.log(error);
-                const errorObj = new Error(error);
-                errorObj.name = "ServerError";
-                throw errorObj;
-            });
-
-            sessions = await sessionsData.getSessionsByMentor(
-                userId,
-                "upcoming"
-            );
+            userData = await menteeData.getMenteeById(userId);
+            sessions = await sessionsData.getSessionsByMentee(userId, "upcoming");
+            badges = await badgesData.awardBadgeBasedOnSessions(userId, userType);
+        } else if (userType === "mentor") {
+            userData = await mentorData.getMentorById(userId);
+            sessions = await sessionsData.getSessionsByMentor(userId, "upcoming");
+            badges = await badgesData.awardBadgeBasedOnSessions(userId, userType);
         } else {
-            res.status(500).redirect("/");
+            console.error("Invalid userType: ", userType);
+            const errorObj = new Error("Invalid user type");
+            errorObj.statusCode = 400;
+            throw errorObj;
         }
-
         userData.userType = userType;
-        console.log(sessions);
+
         res.render("users/dashboard", {
             pageTitle: "Dashboard",
             headerOptions: req.headerOptions,
             userData,
             sessions,
+            badges
         });
-    } catch (error) {}
+    } catch (error) {
+        const statusCode = error.statusCode || 404;
+        return res.status(statusCode).render("error", {
+            pageTitle: "Error",
+            errorMessage: error.message || "An unexpected error ocurred.",
+            headerOptions: req.headerOptions,
+        });
+    }
 });
+
 export { router as rootRoutes };
 
 router.route("/profile/:userType/:userId").get(async (req, res) => {

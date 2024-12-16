@@ -67,7 +67,7 @@ $(window).on("load", () => {
                 numericality: {
                     onlyInteger: true,
                     strict: true,
-                    greaterThan: 0,
+                    greaterThan: 1,
                     lessThanOrEqualTo: 5,
                 },
             },
@@ -80,6 +80,7 @@ $(window).on("load", () => {
         if (formValidate) {
             console.error(formValidate[0]);
             alert(formValidate[0]);
+            return;
         }
 
         $.ajax({

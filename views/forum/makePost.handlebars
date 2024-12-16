@@ -6,8 +6,8 @@
         <h2>Create a New Post</h2>
         <form id="make-post-form">
             <div class="mb-3">
-                <label for="title" class="form-label">Forum</label>
-                <select class="form-select" name="forum_id" required>
+                <label for="forum-input" class="form-label">Forum</label>
+                <select id="forum-input" class="form-select" name="forum_id" required>
                     <option value="" selected>Select a forum</option>
                     {{#each forums}}
                         <option value="{{this._id}}">{{this.title}}</option>
@@ -16,10 +16,10 @@
             </div>
 
             <div class="mb-3">
-                <label for="title" class="form-label">Post Title</label>
+                <label for="post-title" class="form-label">Post Title</label>
                 <input
                     type="text"
-                    id="title"
+                    id="post-title"
                     name="title"
                     class="form-control"
                     placeholder="Enter Post Title"

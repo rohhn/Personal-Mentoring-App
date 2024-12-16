@@ -55,9 +55,9 @@ export const getReply = async (post_id, replyId) => {
         let userData;
         if (reply.userType === "mentee") {
             userData = await menteeData.getMenteeById(reply.author);
-        } else if (post.userType === "mentor") {
+        } else if (reply.userType === "mentor") {
             userData = await mentorData.getMentorById(reply.author);
-        } else if (post.userType === "admin") {
+        } else if (reply.userType === "admin") {
             userData = await adminData.getAdminById(reply.author);
         } else {
             throw "Not a valid user type";

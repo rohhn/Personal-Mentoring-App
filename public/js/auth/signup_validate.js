@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             type: "string",
             length: {
-                minimum: 15,
+                minimum: 25,
                 maximum: 200,
             },
         },
