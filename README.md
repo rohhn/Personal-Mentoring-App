@@ -1,6 +1,7 @@
 # CS546_TeamProject
 Final project code for CS 546, Stevens Institute of Technology
 
+GitHub Repository: [link](https://github.com/rohhn/Personal-Mentoring-App.git)
 
 ## Personal Mentoring Web App
 
@@ -14,7 +15,27 @@ Final project code for CS 546, Stevens Institute of Technology
 - Subject Specific Forums
 - Digital Acheivement Badges
 
-## GitHub
+## Run Instructions
+
+The database is hosted on MongoDB Atlas, it's pre-seeded.
+
+All required environment secrets for third-party integrations are provided in the `.env` file.
+
+To run:
+
+- Install all required packages
+```bash
+npm i
+```
+
+- Run the app using
+```
+npm start
+```
+
+## Development
+
+### GitHub
 
 - `main` is a protected branch. No pushes are allowed on this branch.
 - `dev` will be our main development branch. All merges from `feature` branches should merge to `dev` before going to `main`.
@@ -26,7 +47,7 @@ Final project code for CS 546, Stevens Institute of Technology
     - Push all your changes to your `feature` branch and create a pull request to the `dev` branch.
 
 
-## Front-end
+### Front-end setup
 
 - Setup the required environment variables.
   - Create a copy of the `env_template` file and rename it to `.env`
